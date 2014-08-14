@@ -88,6 +88,7 @@
                 <data>
                     <field name="user_id" position="after">
                         <field name="section_id" completion="1" groups="base.group_multi_salesteams"/>
+			<field name="client_in_service"/>
                     </field>
                     <xpath expr="//div[@name='buttons']" position="inside">
                         <button class="oe_inline oe_stat_button" type="action"
@@ -111,6 +112,43 @@
                         </button>
                     </xpath>
                 </data>
+            </field>
+        </record>
+
+	<!-- changed by Alex -->
+	<!-- need to clean up all unnecessery tags and keep only search related tags -->
+       <record id="view_res_partner_filter_crm1" model="ir.ui.view">
+            <field name="name">view.res.partner.select.crm.inherited1</field>
+            <field name="model">res.partner</field>
+	    <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="arch" type="xml">
+<!--		<data>
+                <search string="Search Partner">	   
+                   <field name="name" 
+                   filter_domain="['|','|',('display_name','ilike',self),('ref','=',self),('email','ilike',self)]"/>
+
+                   <filter help="My Partners" icon="terp-personal+" domain="[('user_id','=',uid)]"/>
+                   <separator/>
+                   <filter string="Persons" name="type_person" domain="[('is_company','=',0)]"/>
+                   <filter string="Companies" name="type_company" domain="[('is_company','=',1)]"/>
+                   <separator/>
+                   <filter string="Customers" name="customer" domain="[('customer','=',1)]" help="Customer Partners"/>
+                   <filter string="Suppliers" name="supplier" domain="[('supplier','=',1)]" help="Supplier Partners"/>
+                   <separator/>
+-->
+		   <!-- changed by Alex -->
+		   <field name="category_id" position="replace">
+                   	 <field name="category_id" string="Tag" filter_domain="['|', ('category_id', 'ilike', self), ('client_in_service', '=','In Service')]"/>
+		   </field>
+                   <!--<field name="user_id"/>
+                   <field name="parent_id" domain="[('is_company','=',1)]" operator="child_of"/>
+                   <group expand="0" string="Group By...">
+                       <filter string="Salesperson" icon="terp-personal" domain="[]" context="{'group_by' : 'user_id'}" />
+                       <filter string="Company" context="{'group_by': 'parent_id'}"/>
+                       <filter string="Country" context="{'group_by': 'country_id'}"/>
+                   </group>
+               </search>
+	       </data>-->
             </field>
         </record>
 
