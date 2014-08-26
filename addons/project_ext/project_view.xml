@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!-- Task -->
+
+        <record id="view_task_form2" model="ir.ui.view">
+            <field name="name">project.task.form.inherited1</field>
+            <field name="model">project.task</field>
+            <field eval="2" name="priority"/>
+			<field name="inherit_id" ref="project.view_task_form2"/>
+            <field name="arch" type="xml">
+                        <field name="name" placeholder="Task summary..." class="oe_inline" position="after">
+                            <button name="button_url" class="button_url" id="button_url" icon="gtk-paste-v" string="Show task URL"/>
+						</field>
+            </field>
+        </record>
+
+    </data>
+</openerp>
