@@ -963,6 +963,9 @@ class crm_lead(format_address, osv.osv):
             pass
         return recipients
 
+	def get_AVAILABLE_PRIORITIES(self):
+       return crm.AVAILABLE_PRIORITIES 	
+		
     def message_new(self, cr, uid, msg, custom_values=None, context=None):
         """ Overrides mail_thread message_new that is called by the mailgateway
             through message_process.
