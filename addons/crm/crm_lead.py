@@ -961,10 +961,7 @@ class crm_lead(format_address, osv.osv):
                     self._message_add_suggested_recipient(cr, uid, recipients, lead, email=lead.email_from, reason=_('Customer Email'))
         except (osv.except_osv, orm.except_orm):  # no read access rights -> just ignore suggested recipients because this imply modifying followers
             pass
-        return recipients
-
-	def get_AVAILABLE_PRIORITIES(self):
-       return crm.AVAILABLE_PRIORITIES 	
+        return recipients	
 		
     def message_new(self, cr, uid, msg, custom_values=None, context=None):
         """ Overrides mail_thread message_new that is called by the mailgateway

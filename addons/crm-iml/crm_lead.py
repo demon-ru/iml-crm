@@ -18,6 +18,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'crm'))
+import crm
 import json
 from datetime import datetime
 from operator import itemgetter
@@ -90,7 +93,7 @@ class crm_lead(format_address, osv.osv):
         }
         if msg.get('author_id'):
             defaults.update(self.on_change_partner_id(cr, uid, None, msg.get('author_id'), context=context)['value'])
-        if msg.get('priority') in dict(self.get_AVAILABLE_PRIORITIES()):
+        if msg.get('priority') in dict(crm.AVAILABLE_PRIORITIES):
             defaults['priority'] = msg.get('priority')
         defaults.update(custom_values)
         return super(crm_lead, self).message_new(cr, uid, msg, custom_values=defaults, context=context)
