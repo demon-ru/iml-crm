@@ -18,23 +18,23 @@ msgstr ""
 #. module: crm-iml
 #: view:res.partner:crm-iml.view_partners_form_iml_crm1
 msgid "Category"
-msgstr "Категория"
+msgstr ""
 
 #. module: crm-iml
 #: model:ir.model,name:crm-iml.model_crm_clientcategory
 #: model:ir.ui.menu,name:crm-iml.menu_crm_category
 msgid "Category of client"
-msgstr "Категория клиента"
+msgstr ""
 
 #. module: crm-iml
 #: model:ir.actions.act_window,name:crm-iml.crm_case_category_client_all
 msgid "CategoryOfClient"
-msgstr "Категория клиента"
+msgstr ""
 
 #. module: crm-iml
 #: field:crm.clientcategory,create_uid:0
 msgid "Created by"
-msgstr "Создано"
+msgstr ""
 
 #. module: crm-iml
 #: field:crm.clientcategory,create_date:0
