@@ -39,58 +39,58 @@ msgstr "Создано"
 #. module: crm-iml
 #: field:crm.clientcategory,create_date:0
 msgid "Created on"
-msgstr ""
+msgstr "Создано"
 
 #. module: crm-iml
 #: view:crm.clientcategory:crm-iml.crm_clientcategory_view
 #: field:crm.clientcategory,description:0
 msgid "Description"
-msgstr ""
+msgstr "Описание"
 
 #. module: crm-iml
 #: field:crm.clientcategory,id:0
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: crm-iml
 #: field:crm.clientcategory,write_uid:0
 msgid "Last Updated by"
-msgstr ""
+msgstr "Последнее обновление"
 
 #. module: crm-iml
 #: field:crm.clientcategory,write_date:0
 msgid "Last Updated on"
-msgstr ""
+msgstr "Обновлено"
 
 #. module: crm-iml
 #: model:ir.model,name:crm-iml.model_crm_lead
 msgid "Lead/Opportunity"
-msgstr ""
+msgstr "Лид/Возможность"
 
 #. module: crm-iml
 #: view:crm.clientcategory:crm-iml.crm_clientcategory_view
 #: field:crm.clientcategory,name:0
 msgid "Name"
-msgstr ""
+msgstr "Имя"
 
 #. module: crm-iml
 #: code:addons/crm-iml/crm_lead.py:86
 #, python-format
 msgid "No Subject"
-msgstr ""
+msgstr "Без темы"
 
 #. module: crm-iml
 #: model:ir.model,name:crm-iml.model_res_partner
 msgid "Partner"
-msgstr ""
+msgstr "Партнер"
 
 #. module: crm-iml
 #: help:crm.clientcategory,name:0
 msgid "The name of the segmentation."
-msgstr ""
+msgstr "Имя сегментации"
 
 #. module: crm-iml
 #: field:res.partner,categoryClient_id:0
 msgid "name"
-msgstr ""
+msgstr "Имя"
 
