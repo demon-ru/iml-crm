@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    OpernERP module for Customer Relationship Management for Logistic company
@@ -40,6 +40,13 @@
         'crm_clientcategory_menu.xml',
 
 	'res_partner_view.xml',
+	
+	
+	'crm_iml_opportunities_type_data.xml',
+	'crm_iml_opportunities_type_view.xml',
+	'crm_iml_opportunities_type_menu.xml',
+
+	'crm_lead_view.xml',
     ],
     
     'installable': True,

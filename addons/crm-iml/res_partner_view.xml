@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <openerp>
     <data>
         <record id="view_partners_form_iml_crm1" model="ir.ui.view">

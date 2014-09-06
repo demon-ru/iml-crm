@@ -1,0 +1,18 @@
+﻿<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="view_form_iml_crm_oppor1" model="ir.ui.view">
+            <field name="name">view.form.iml.crm.oppor.inherited1</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
+            <field eval="21" name="priority"/>
+            <field name="arch" type="xml">
+                <data>
+		    <field name="priority" position="before">
+		        <field string="Type" name="type_of_opport_id"/>
+		    </field>
+                </data>
+            </field>
+        </record>
+    </data>
+</openerp>
