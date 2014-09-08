@@ -39,6 +39,10 @@ class crm_lead(format_address, osv.osv):
     _inherit = 'crm.lead'
     _name = "crm.lead"
 
+    _columns = {
+	'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'name'),
+    }
+
     def parse_json(self,description):
         stringText = {}
         stringText = description.split('\n')
@@ -70,25 +74,24 @@ class crm_lead(format_address, osv.osv):
             through message_process.
             This override updates the document according to the email.
         """
-		aMailBody = html2plaintext(msg.get('body')) if msg.get('body') else ''
-		aObj = self.parse_json(aMailBody)
-		if custom_values is None:
-			custom_values = {}
-		vPhone = aObj['phone'] or ""
-		vEmail = aObj['email']
-		vName = aObj['name']
-		vals_obj = {'name': vName,
+	aMailBody = html2plaintext(msg.get('body')) if msg.get('body') else ''
+	aObj = self.parse_json(aMailBody)
+	if custom_values is None:
+		custom_values = {}
+	vPhone = aObj['phone'] or ""
+	vEmail = aObj['email']
+	vName = aObj['name']
+	vals_obj = {'name': vName,
                 'phone': vPhone,
                 'email': vEmail}	 
-		partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
-		vType = aObj['type'] or ''
-		vTypeID = 0
-		if (vType <> ""):
-			vals_obj = {'name': vType}
-			vTypeObj = self.findOrCreateObject(cr, uid, context, 'crm.iml.opportunities.type', 'name', vType, vals_obj)	
-			vTypeID = vTypeObj.id
-
-		defaults = {
+	partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
+	vType = aObj['type'] or ''
+	vTypeID = 0
+	if (vType <> ""):
+		vals_obj = {'name': vType}
+		vTypeObj = self.findOrCreateObject(cr, uid, context, 'crm.iml.opportunities.type', 'name', vType, vals_obj)	
+		vTypeID = vTypeObj.id
+	defaults = {
             'name':  msg.get('subject') or _("No Subject"),
             'email_from': vEmail,
             'email_cc': msg.get('cc'),
@@ -96,7 +99,7 @@ class crm_lead(format_address, osv.osv):
             'phone': vPhone or "",
             'type': 'opportunity',
             'user_id': False,
-			'type_of_opport_id': vTypeID, 
+	    'type_of_opport_id': vTypeID, 
         }
         if msg.get('author_id'):
             defaults.update(self.on_change_partner_id(cr, uid, None, msg.get('author_id'), context=context)['value'])
