@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    OpernERP module for Customer Relationship Management for Logistic company
@@ -39,6 +39,10 @@ class crm_lead(format_address, osv.osv):
     _inherit = 'crm.lead'
     _name = "crm.lead"
 
+    _columns = {
+	'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'name'),
+    }
+
     def parse_json(self,description):
         stringText = {}
         stringText = description.split('\n')
@@ -55,34 +59,39 @@ class crm_lead(format_address, osv.osv):
         aObj = json.loads(description)
         return aObj
     
-    def findOrCreatePartner(self, cr, uid, context, name, phone, email):
-        res_partner_obj = self.pool.get('res.partner')
-        res_partner_id = res_partner_obj.search(cr, uid, [('name', 'in', [name])], context=context)
-        partnerID = 0
-        if len(res_partner_id) > 0:
-            partner =  res_partner_obj.browse(cr, uid, res_partner_id[0])
-        else:
-             partner = self.pool.get('res.partner')
-             vals =  {'name': name,
-                'phone': phone,
-                'email': email}
-             partner = res_partner_obj.browse(cr, uid, partner.create(cr, uid, vals, context=context))
-        return partner
+    def findOrCreateObject(self, cr, uid, context, classObj, searchField, searchVal, vals):
+	res_obj = self.pool.get(classObj)
+	res_id = res_obj.search(cr, uid, [(searchField, 'in', [searchVal])], context=context)
+	if len(res_id) > 0:
+		cur_obj = res_obj.browse(cr, uid, res_id[0])
+	else:
+		cur_obj = self.pool.get(classObj)
+		cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=context))
+	return cur_obj
 
     def message_new(self, cr, uid, msg, custom_values=None, context=None):
         """ Overrides mail_thread message_new that is called by the mailgateway
             through message_process.
             This override updates the document according to the email.
         """
-        aMailBody = html2plaintext(msg.get('body')) if msg.get('body') else ''
-        aObj = self.parse_json(aMailBody)
-        if custom_values is None:
-            custom_values = {}
-        vPhone = aObj['phone']
-        vEmail = aObj['email']
-        partner = self.findOrCreatePartner(cr, uid, context, aObj['name'], vPhone, vEmail); 
-        res_partner_obj = self.pool.get('res.partner')
-        defaults = {
+	aMailBody = html2plaintext(msg.get('body')) if msg.get('body') else ''
+	aObj = self.parse_json(aMailBody)
+	if custom_values is None:
+		custom_values = {}
+	vPhone = aObj['phone'] or ""
+	vEmail = aObj['email']
+	vName = aObj['name']
+	vals_obj = {'name': vName,
+                'phone': vPhone,
+                'email': vEmail}	 
+	partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
+	vType = aObj['type'] or ''
+	vTypeID = 0
+	if (vType <> ""):
+		vals_obj = {'name': vType}
+		vTypeObj = self.findOrCreateObject(cr, uid, context, 'crm.iml.opportunities.type', 'name', vType, vals_obj)	
+		vTypeID = vTypeObj.id
+	defaults = {
             'name':  msg.get('subject') or _("No Subject"),
             'email_from': vEmail,
             'email_cc': msg.get('cc'),
@@ -90,6 +99,7 @@ class crm_lead(format_address, osv.osv):
             'phone': vPhone or "",
             'type': 'opportunity',
             'user_id': False,
+	    'type_of_opport_id': vTypeID, 
         }
         if msg.get('author_id'):
             defaults.update(self.on_change_partner_id(cr, uid, None, msg.get('author_id'), context=context)['value'])

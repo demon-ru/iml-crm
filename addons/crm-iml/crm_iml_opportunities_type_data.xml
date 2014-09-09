@@ -1,0 +1,51 @@
+﻿<?xml version="1.0"?>
+<openerp>
+    <data noupdate="1">
+
+        <!-- Crm category of client -->
+        <record model="crm.iml.opportunities.type" id="type1">
+            <field name="name">callback</field>
+            <field name="description">Заказ звонка</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type2">
+            <field name="name">new_customer</field>
+            <field name="description">Новый клиент</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type3">
+            <field name="name">contract_big_company</field>
+            <field name="description">Договор с крупной компанией</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type4">
+            <field name="name">contract_small_company</field>
+            <field name="description">Договор с малым предприятием</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type5">
+            <field name="name">tariff_99</field>
+            <field name="description">Тариф 99</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type6">
+            <field name="name">tariff_c2c</field>
+            <field name="description">Тариф с2с</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type7">
+            <field name="name">delivery_document</field>
+            <field name="description">Доставка документов</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type8">
+            <field name="name">delivery_tires</field>
+            <field name="description">Доставка шин</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type9">
+            <field name="name">contacts</field>
+            <field name="description">Контакты</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type10">
+            <field name="name">jobs</field>
+            <field name="description">Резюме</field>
+        </record>
+        <record model="crm.iml.opportunities.type" id="type11">
+            <field name="name">pressa</field>
+            <field name="description">pressa</field>
+        </record>
+    </data>
+</openerp>

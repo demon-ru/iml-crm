@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    OpernERP module for Customer Relationship Management for Logistic company
