@@ -1,0 +1,116 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* crm_iml
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0rc1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-09-09 11:59+0000\n"
+"PO-Revision-Date: 2014-09-09 11:59+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Category"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_clientcategory
+#: model:ir.ui.menu,name:crm_iml.menu_crm_category
+msgid "Category of client"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_case_category_client_all
+msgid "CategoryOfClient"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.clientcategory,create_uid:0
+#: field:crm.iml.opportunities.type,create_uid:0
+msgid "Created by"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.clientcategory,create_date:0
+#: field:crm.iml.opportunities.type,create_date:0
+msgid "Created on"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.clientcategory:crm_iml.crm_clientcategory_view
+#: field:crm.clientcategory,description:0
+#: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
+#: field:crm.iml.opportunities.type,description:0
+msgid "Description"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.clientcategory,id:0
+#: field:crm.iml.opportunities.type,id:0
+msgid "ID"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.clientcategory,write_uid:0
+#: field:crm.iml.opportunities.type,write_uid:0
+msgid "Last Updated by"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.clientcategory,write_date:0
+#: field:crm.iml.opportunities.type,write_date:0
+msgid "Last Updated on"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_lead
+msgid "Lead/Opportunity"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.clientcategory:crm_iml.crm_clientcategory_view
+#: field:crm.clientcategory,name:0
+#: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
+#: field:crm.iml.opportunities.type,name:0
+msgid "Name"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_res_partner
+msgid "Partner"
+msgstr ""
+
+#. module: crm_iml
+#: help:crm.clientcategory,name:0
+msgid "The name of the segmentation."
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
+msgid "Type"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_iml_opportunities_type
+#: model:ir.ui.menu,name:crm_iml.menu_crm_iml_type_opportunities
+msgid "Type of opportunities"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_iml_case_type_opportunities_all
+msgid "TypeOfOpportunities"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.lead,type_of_opport_id:0
+#: field:res.partner,categoryClient_id:0
+msgid "name"
+msgstr ""
+

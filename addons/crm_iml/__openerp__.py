@@ -47,6 +47,8 @@
 	'crm_iml_opportunities_type_menu.xml',
 
 	'crm_lead_view.xml',
+
+	'security/ir.model.access.csv',
     ],
     
     'installable': True,
