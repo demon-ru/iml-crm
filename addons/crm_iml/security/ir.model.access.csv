@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+iml_type_manager,iml.type.manager,model_crm_iml_opportunities_type,base.group_sale_manager,1,1,1,1
+iml_type_user,iml.type.user,model_crm_iml_opportunities_type,base.group_sale_salesman,1,0,0,0
+iml_categ_manager,iml.categ.manager,model_crm_clientcategory,base.group_sale_manager,1,1,1,1
+iml_categ_user,iml.categ.user,model_crm_clientcategory,base.group_sale_salesman,1,0,0,0
+iml_crm_lead_user,iml.crm.lead.user,model_crm_lead,base.group_sale_salesman,1,1,1,1
+iml_res_partner,iml.crm.res.partner,base.model_res_partner,base.group_sale_salesman,1,1,1,1
