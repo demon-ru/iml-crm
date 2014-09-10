@@ -22,6 +22,7 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'crm'))
 import crm
 import json
+from crm_iml_html import html2plaintextWithoutLinks  
 from datetime import datetime
 from operator import itemgetter
 
@@ -44,19 +45,15 @@ class crm_lead(format_address, osv.osv):
     }
 
     def parse_json(self,description):
-        stringText = {}
-        stringText = description.split('\n')
-        aCount = len(stringText)
-        i = 0
-        description = ''
-        isFind = False
-        while not(isFind):
-            if ('{' in stringText[i]) and ('}' in stringText[i]):
-               description = stringText[i]
-               isFind = True
-            i = i + 1
-            isFind = isFind or i == aCount
-        aObj = json.loads(description)
+        stringText = ''
+        stringText = description.replace('\n', ' ')
+	indexBeginJSON = stringText.find('{')
+	indexEndJSON = stringText.find('}')
+	strJSON = ''
+	if (indexBeginJSON > -1 and indexEndJSON > -1):         
+		strJSON = stringText[indexBeginJSON : indexEndJSON + 1]
+	if strJSON <> '':
+   	     aObj = json.loads(strJSON)
         return aObj
     
     def findOrCreateObject(self, cr, uid, context, classObj, searchField, searchVal, vals):
@@ -74,18 +71,25 @@ class crm_lead(format_address, osv.osv):
             through message_process.
             This override updates the document according to the email.
         """
-	aMailBody = html2plaintext(msg.get('body')) if msg.get('body') else ''
+	aMailBody = html2plaintextWithoutLinks(msg.get('body')) if msg.get('body') else ''
 	aObj = self.parse_json(aMailBody)
 	if custom_values is None:
 		custom_values = {}
-	vPhone = aObj['phone'] or ""
-	vEmail = aObj['email']
+	vPhone = ''
+	if 'phone' in aObj:  
+		vPhone = aObj['phone']
+	vEmail = ''
+	if 'email' in aObj: 
+		vEmail = aObj['email']
 	vName = aObj['name']
 	vals_obj = {'name': vName,
                 'phone': vPhone,
-                'email': vEmail}	 
-	partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
-	vType = aObj['type'] or ''
+                'email': vEmail}
+	if vName <> '':	 
+		partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
+	vType = ""
+	if 'type' in aObj:
+		vType = aObj['type']
 	vTypeID = 0
 	if (vType <> ""):
 		vals_obj = {'name': vType}
