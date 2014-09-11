@@ -47,6 +47,7 @@ class crm_lead(format_address, osv.osv):
     def parse_json(self,description):
         stringText = ''
 	stringText = description.replace('\r\n', '\n')
+	stringText = description.replace('\r', '\n')
 	stringText = stringText.replace('\n', ' ')
 	stringText = stringText.replace('" ', '"')
 	stringText = stringText.replace(' "', '"')
@@ -71,7 +72,7 @@ class crm_lead(format_address, osv.osv):
 
     def replaceBadQuotes(self, text):
 	""" 
-		Replace quotes in differen coding on &quot
+		Replace quotes in different coding on &quot
 	"""
 	text = text.replace('&#8216', '&#8221')
 	text = text.replace('&#8217', '&#8221')
