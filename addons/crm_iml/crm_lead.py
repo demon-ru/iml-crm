@@ -22,6 +22,7 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'crm'))
 import crm
 import json
+from crm_iml_html import html2plaintextWithoutLinks  
 from datetime import datetime
 from operator import itemgetter
 
@@ -44,19 +45,19 @@ class crm_lead(format_address, osv.osv):
     }
 
     def parse_json(self,description):
-        stringText = {}
-        stringText = description.split('\n')
-        aCount = len(stringText)
-        i = 0
-        description = ''
-        isFind = False
-        while not(isFind):
-            if ('{' in stringText[i]) and ('}' in stringText[i]):
-               description = stringText[i]
-               isFind = True
-            i = i + 1
-            isFind = isFind or i == aCount
-        aObj = json.loads(description)
+        stringText = ''
+	stringText = description.replace('\r\n', '\n')
+	stringText = description.replace('\r', '\n')
+	stringText = stringText.replace('\n', ' ')
+	stringText = stringText.replace('" ', '"')
+	stringText = stringText.replace(' "', '"')
+	indexBeginJSON = stringText.rfind('{')
+	indexEndJSON = stringText.rfind('}')
+	strJSON = ''
+	if (indexBeginJSON > -1 and indexEndJSON > -1):         
+		strJSON = stringText[indexBeginJSON : indexEndJSON + 1]
+	if strJSON <> '':
+   	     aObj = json.loads(strJSON)
         return aObj
     
     def findOrCreateObject(self, cr, uid, context, classObj, searchField, searchVal, vals):
@@ -69,23 +70,46 @@ class crm_lead(format_address, osv.osv):
 		cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=context))
 	return cur_obj
 
+    def replaceBadQuotes(self, text):
+	""" 
+		Replace quotes in different coding on &quot
+	"""
+	text = text.replace('&#8216', '&#8221')
+	text = text.replace('&#8217', '&#8221')
+	text = text.replace('&#8220', '&#8221')
+	text = text.replace('&#8220', '&#8221')
+	text = text.replace('&#8222', '&#8221')
+	text = text.replace('&#171', '&#8221')
+	text = text.replace('&#187', '&#8221')
+	text = text.replace('&laquo', '&#8221')
+	text = text.replace('&raquo', '&#8221')
+	text = text.replace('&#8221', '&quot')
+	return text
+
     def message_new(self, cr, uid, msg, custom_values=None, context=None):
         """ Overrides mail_thread message_new that is called by the mailgateway
             through message_process.
             This override updates the document according to the email.
         """
-	aMailBody = html2plaintext(msg.get('body')) if msg.get('body') else ''
+	aMailBody = html2plaintextWithoutLinks(self.replaceBadQuotes(msg.get('body'))) if msg.get('body') else ''
 	aObj = self.parse_json(aMailBody)
 	if custom_values is None:
 		custom_values = {}
-	vPhone = aObj['phone'] or ""
-	vEmail = aObj['email']
+	vPhone = ''
+	if 'phone' in aObj:  
+		vPhone = aObj['phone']
+	vEmail = ''
+	if 'email' in aObj: 
+		vEmail = aObj['email'].replace(" ", "")
 	vName = aObj['name']
 	vals_obj = {'name': vName,
                 'phone': vPhone,
-                'email': vEmail}	 
-	partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
-	vType = aObj['type'] or ''
+                'email': vEmail}
+	if vName <> '':	 
+		partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
+	vType = ""
+	if 'type' in aObj:
+		vType = aObj['type']
 	vTypeID = 0
 	if (vType <> ""):
 		vals_obj = {'name': vType}
@@ -99,7 +123,7 @@ class crm_lead(format_address, osv.osv):
             'phone': vPhone or "",
             'type': 'opportunity',
             'user_id': False,
-	    'type_of_opport_id': vTypeID, 
+            'type_of_opport_id': vTypeID, 
         }
         if msg.get('author_id'):
             defaults.update(self.on_change_partner_id(cr, uid, None, msg.get('author_id'), context=context)['value'])

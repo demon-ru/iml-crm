@@ -22,3 +22,4 @@ import res_partner
 import crm_clientcategory
 import crm_lead
 import crm_iml_opportunities_type
+import crm_iml_html
