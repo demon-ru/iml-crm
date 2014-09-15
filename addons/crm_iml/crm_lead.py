@@ -118,16 +118,14 @@ class crm_lead(format_address, osv.osv):
 	defaults = {
             'name':  msg.get('subject') or _("No Subject"),
             'email_from': vEmail,
-            'email_cc': msg.get('cc'),
+            'email_cc': vEmail,
             'partner_id': partner.id,
             'phone': vPhone or "",
             'type': 'opportunity',
             'user_id': False,
             'type_of_opport_id': vTypeID, 
-        }
-        if msg.get('author_id'):
-            defaults.update(self.on_change_partner_id(cr, uid, None, msg.get('author_id'), context=context)['value'])
-        if msg.get('priority') in dict(crm.AVAILABLE_PRIORITIES):
+        }     
+	if msg.get('priority') in dict(crm.AVAILABLE_PRIORITIES):
             defaults['priority'] = msg.get('priority')
         defaults.update(custom_values)
         return super(crm_lead, self).message_new(cr, uid, msg, custom_values=defaults, context=context)
