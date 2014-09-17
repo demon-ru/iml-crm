@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-09 11:59+0000\n"
-"PO-Revision-Date: 2014-09-09 11:59+0000\n"
+"POT-Creation-Date: 2014-09-17 10:13+0000\n"
+"PO-Revision-Date: 2014-09-17 10:13+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -34,13 +34,25 @@ msgstr ""
 #. module: crm_iml
 #: field:crm.clientcategory,create_uid:0
 #: field:crm.iml.opportunities.type,create_uid:0
+#: field:crm.iml.sqlserver,create_uid:0
 msgid "Created by"
 msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,create_date:0
 #: field:crm.iml.opportunities.type,create_date:0
+#: field:crm.iml.sqlserver,create_date:0
 msgid "Created on"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Database name"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,lastTestDate:0
+msgid "Date last successful test connect"
 msgstr ""
 
 #. module: crm_iml
@@ -52,21 +64,59 @@ msgid "Description"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Export custromer id"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.ui.menu,name:crm_iml.menu_crm_iml_sqlserver
+msgid "Export my sql database"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.action_config_settings_crm_iml_server
+msgid "Export/Import SQL server"
+msgstr ""
+
+#. module: crm_iml
+#: view:base.config.settings:crm_iml.view_server_config_settings
+msgid "Export/Import my sql server"
+msgstr ""
+
+#. module: crm_iml
 #: field:crm.clientcategory,id:0
 #: field:crm.iml.opportunities.type,id:0
+#: field:crm.iml.sqlserver,id:0
 msgid "ID"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "ID column name"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Import/Export from NAV"
 msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,write_uid:0
 #: field:crm.iml.opportunities.type,write_uid:0
+#: field:crm.iml.sqlserver,write_uid:0
 msgid "Last Updated by"
 msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,write_date:0
 #: field:crm.iml.opportunities.type,write_date:0
+#: field:crm.iml.sqlserver,write_date:0
 msgid "Last Updated on"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Last export date"
 msgstr ""
 
 #. module: crm_iml
@@ -79,6 +129,7 @@ msgstr ""
 #: field:crm.clientcategory,name:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
 #: field:crm.iml.opportunities.type,name:0
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "Name"
 msgstr ""
 
@@ -88,8 +139,78 @@ msgid "Partner"
 msgstr ""
 
 #. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Password"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "SQL server"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,password:0
+msgid "SQLPass"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,server:0
+msgid "SQLServer"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,user:0
+msgid "SQLUser"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Server Information"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_iml_sqlserver_all
+msgid "Sql server"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_iml_sqlserver
+msgid "Sql server for export/import data from OpenErp to my sql database"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,dbname:0
+msgid "SqlDbName"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,IdColumnName:0
+msgid "SqlIdColumn"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,tableName:0
+msgid "SqlTableName"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Table name"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Test connect to database"
+msgstr ""
+
+#. module: crm_iml
 #: help:crm.clientcategory,name:0
 msgid "The name of the segmentation."
+msgstr ""
+
+#. module: crm_iml
+#: help:crm.iml.sqlserver,server:0
+msgid "The sql server."
 msgstr ""
 
 #. module: crm_iml
@@ -109,6 +230,32 @@ msgid "TypeOfOpportunities"
 msgstr ""
 
 #. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "User"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,exportDateToNAV:0
+msgid "crm.iml.export.date.res.partner"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,NavUIN:0
+msgid "crm.iml.nav.uin"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "customer UIN in NAV"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,name:0
+msgid "mysqlservername"
+msgstr ""
+
+#. module: crm_iml
+#: field:base.config.settings,export_sql_server:0
 #: field:crm.lead,type_of_opport_id:0
 #: field:res.partner,categoryClient_id:0
 msgid "name"

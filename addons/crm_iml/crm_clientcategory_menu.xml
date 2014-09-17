@@ -23,7 +23,7 @@
         <field name="act_window_id" ref="crm_case_category_client_all"/>
     </record>	
 
-    <menuitem name="Category of client" id="menu_crm_category" parent="base.menu_sales" sequence="5"
+    <menuitem name="Category of client" id="menu_crm_category" parent="base.menu_base_config" sequence="9"
             action="crm_case_category_client_all"/>
 
 </data>

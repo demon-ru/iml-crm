@@ -18,12 +18,32 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import time
+import crm_iml_sqlserver
+
 from openerp.osv import fields,osv
+from openerp import tools, api
+from openerp.tools.translate import _
 
 class res_partner(osv.osv):
     """ Inherits partner and adds CRM information in the partner form """
     _inherit = 'res.partner'
 
     _columns = {
-        'categoryClient_id': fields.many2one('crm.clientcategory', 'name'),
+	'categoryClient_id': fields.many2one('crm.clientcategory', 'name'),
+	'exportDateToNAV': fields.datetime('crm.iml.export.date.res.partner' , readonly=True),
+	'NavUIN': fields.char('crm.iml.nav.uin' , size=512, readonly=True),
     }
+    def iml_crm_export_id(self,cr, uid, ids, context=None):
+	for partn in self.browse(cr, uid, ids, context=context):
+		params = self.pool.get('ir.config_parameter')
+		serv = int(params.get_param(cr, uid, 'crm_iml_export_server_id',default='0' ,context=context))
+		res_obj = self.pool.get('crm.iml.sqlserver')
+		server = res_obj.browse(cr, uid, serv)
+		if not(server):
+			raise osv.except_osv(('Warning!'), ("Export SQL Server is not specified. Set Export/Import SQL server in General settings!"))
+	 	result = server.insert_record(server, partn.id)
+		if (result):
+			partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
+	return True
+

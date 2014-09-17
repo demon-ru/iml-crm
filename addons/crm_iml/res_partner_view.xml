@@ -12,6 +12,16 @@
 		        <field string="Category" name="categoryClient_id"/>
 		    </field>
                 </data>
+		<notebook>
+		        <page name='crm_iml_import_expot_from_nav' string="Import/Export from NAV" attrs="{'invisible':[('is_company','=',False)]}">
+		            <group>
+				<field string="Last export date" name="exportDateToNAV"/>
+				<field string="customer UIN in NAV" name="NavUIN"/>
+				<button name="iml_crm_export_id" string="Export custromer id" type="object"/>	
+				<field name="is_company" invisible="1"/>
+		            </group>
+		        </page>
+            	</notebook>
             </field>
         </record>
     </data>

@@ -18,8 +18,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import res_config
 import res_partner
 import crm_clientcategory
 import crm_lead
 import crm_iml_opportunities_type
 import crm_iml_html
+import crm_iml_sqlserver
