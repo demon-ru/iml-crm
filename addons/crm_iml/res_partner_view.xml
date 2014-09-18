@@ -1,6 +1,21 @@
 ﻿<?xml version="1.0"?>
 <openerp>
     <data>
+    
+	<!-- changed by Alex -->
+	<!-- need to clean up all unnecessery tags and keep only search related tags -->
+       <record id="view_res_partner_filter_iml_crm1" model="ir.ui.view">
+            <field name="name">view.res.partner.select.iml.crm.inherited1</field>
+            <field name="model">res.partner</field>
+	    <field name="inherit_id" ref="base.view_res_partner_filter"/>
+            <field name="arch" type="xml">
+			   <!-- changed by Alex -->
+			   <field name="category_id" position="replace">
+		               	 <field name="category_id" string="Tag" filter_domain="['|', ('category_id', 'ilike', self), ('client_in_service', '=','In Service')]"/>
+			   </field>
+            </field>
+        </record>
+        
         <record id="view_partners_form_iml_crm1" model="ir.ui.view">
             <field name="name">view.res.partner.form.iml.crm.inherited1</field>
             <field name="model">res.partner</field>
@@ -8,11 +23,76 @@
             <field eval="18" name="priority"/>
             <field name="arch" type="xml">
                 <data>
-		    <field name="website" position="after">
-		        <field string="Category" name="categoryClient_id"/>
-		    </field>
+					<field name="website" position="after" >
+						<field  name="short_name"/>
+						<field  name="unk"/>
+						<field  name="categoryClient_id"/>
+						<field string="Состояние обслуживания клиента" name="client_in_service"/>
+					</field>
+					<page name='internal_notes' position="before">
+						<page name='base_info' string= 'Основное'>
+							<group>
+								<field  name="internet_shop_name" />
+								<field  name="category_of_goods" />
+								<field  name="storage_of_shipping" />
+								<field  name="region_of_delivery"/>
+								
+								<field  name="fio_authorized person_nominative_case" string="ФИО уполномоченного лица, именительный падеж"/>
+								<field  name="fio_authorized person_genitive_case" string="ФИО уполномоченного лица, родительный падеж"/>
+								
+								<field  name="authorized_person_position_nominative_case"/>
+								<field  name="authorized_person_position_genetive_case"/>
+							</group>
+						</page>
+					</page>
+					<page name='internal_notes' position="before">
+						<page name='address_info' string= 'Адреса'>
+							<group name="juridical_address" String="Юридический адрес">
+								<field  name="juridical_address_index" />
+								<field  name="juridical_address_city_name"/>
+								<field  name="juridical_address_street_name"/>
+								<field  name="juridical_address_dom"/>
+								<field  name="juridical_address_building"/>
+								<field  name="juridical_address_office"/>
+							</group>
+							<group name="actual_address" String="Фактический адрес">
+								<field  name="actual_address_index" />
+								<field  name="actual_address_city_name"/>
+								<field  name="actual_address_street_name"/>
+								<field  name="actual_address_dom"/>
+								<field  name="actual_address_building"/>
+								<field  name="actual_address_office"/>
+							</group>
+						</page>
+					</page>
+					<page name='internal_notes' position="before">
+						<page name='bank_info' string= 'Банк'>
+							<group>
+								<field  name="account_number" />
+								<field  name="BIN"/>
+								<field  name="bank_name"/>
+								<field  name="correspondent_account_number"/>
+							</group>
+						</page>
+					</page>
+					<page name='internal_notes' position='before'>
+						<page name="codes" string= "Коды">
+							<group>
+								<field  name="type_of_counterparty" />
+								<field  name="inn"/>
+								<field  name="registration_reason_code"/>
+								<field  name="date_of_accounting"/>
+								<field  name="OGRN_OGRNIP" />
+								<field  name="registration_date"/>
+								<field  name="OKVED"/>
+								<field  name="OKPO"/>
+								<field  name="OKATO"/>
+							</group>
+						</page>
+					</page>
                 </data>
             </field>
         </record>
     </data>
 </openerp>
+

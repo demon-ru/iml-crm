@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-09 11:59+0000\n"
-"PO-Revision-Date: 2014-09-09 11:59+0000\n"
+"POT-Creation-Date: 2014-09-18 09:58+0000\n"
+"PO-Revision-Date: 2014-09-18 09:58+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,7 +17,79 @@ msgstr ""
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,account_number:0
+msgid "Account number"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Actual address"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Address Info"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Authorized person position, nominative case"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Authorized person postition, genitive case"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,BIN:0
+msgid "BIN"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Bank Info"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,bank_name:0
+msgid "Bank name"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Base Info"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,actual_address_building:0
+#: field:res.partner,juridical_address_building:0
+msgid "Building"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_clientcategory
+#: model:ir.ui.menu,name:crm_iml.menu_config_catalog
+msgid "Catalogs"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_goodscategory
+#: field:res.partner,category_of_goods:0
+msgid "Categories of goods"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "Category"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Category of Goods"
 msgstr ""
 
 #. module: crm_iml
@@ -27,45 +99,161 @@ msgid "Category of client"
 msgstr ""
 
 #. module: crm_iml
+#: model:ir.ui.menu,name:crm_iml.menu_crm_goodscategory
+msgid "Category of goods"
+msgstr ""
+
+#. module: crm_iml
 #: model:ir.actions.act_window,name:crm_iml.crm_case_category_client_all
 msgid "CategoryOfClient"
 msgstr ""
 
 #. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_case_category_goods_all
+msgid "CategoryOfGoods"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,actual_address_city_name:0
+#: field:res.partner,juridical_address_city_name:0
+msgid "City"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,unk:0
+msgid "Client ID"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Client service status"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Codes"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,correspondent_account_number:0
+msgid "Correspondent account number"
+msgstr ""
+
+#. module: crm_iml
 #: field:crm.clientcategory,create_uid:0
+#: field:crm.goodscategory,create_uid:0
 #: field:crm.iml.opportunities.type,create_uid:0
+#: field:crm.shipping_storage,create_uid:0
 msgid "Created by"
 msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,create_date:0
+#: field:crm.goodscategory,create_date:0
 #: field:crm.iml.opportunities.type,create_date:0
+#: field:crm.shipping_storage,create_date:0
 msgid "Created on"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,date_of_accounting:0
+msgid "Date of Accounting"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,region_of_delivery:0
+msgid "Delivery region"
 msgstr ""
 
 #. module: crm_iml
 #: view:crm.clientcategory:crm_iml.crm_clientcategory_view
 #: field:crm.clientcategory,description:0
+#: view:crm.goodscategory:crm_iml.crm_goodscategory_view
+#: field:crm.goodscategory,description:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
 #: field:crm.iml.opportunities.type,description:0
+#: view:crm.shipping_storage:crm_iml.crm_shippingstorages_view
+#: field:crm.shipping_storage,description:0
 msgid "Description"
 msgstr ""
 
 #. module: crm_iml
+#: field:res.partner,FIO_authorized person_genitive_case:0
+msgid "Full name of authorized person in genitive case"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,FIO_authorized person_nominative_case:0
+msgid "Full name of authorized person in nominative case"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Full name of authorized person, genitive case"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Full name of authorized person, nominative case"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,actual_address_dom:0
+#: field:res.partner,juridical_address_dom:0
+msgid "House number"
+msgstr ""
+
+#. module: crm_iml
 #: field:crm.clientcategory,id:0
+#: field:crm.goodscategory,id:0
 #: field:crm.iml.opportunities.type,id:0
+#: field:crm.shipping_storage,id:0
 msgid "ID"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,inn:0
+msgid "INN"
+msgstr ""
+
+#. module: crm_iml
+#: selection:res.partner,type_of_counterparty:0
+msgid "Individual"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Internet Shop name"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,internet_shop_name:0
+msgid "Internet shop name"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Juridical address"
+msgstr ""
+
+#. module: crm_iml
 #: field:crm.clientcategory,write_uid:0
+#: field:crm.goodscategory,write_uid:0
 #: field:crm.iml.opportunities.type,write_uid:0
+#: field:crm.shipping_storage,write_uid:0
 msgid "Last Updated by"
 msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,write_date:0
+#: field:crm.goodscategory,write_date:0
 #: field:crm.iml.opportunities.type,write_date:0
+#: field:crm.shipping_storage,write_date:0
 msgid "Last Updated on"
 msgstr ""
 
@@ -75,11 +263,60 @@ msgid "Lead/Opportunity"
 msgstr ""
 
 #. module: crm_iml
+#: selection:res.partner,type_of_counterparty:0
+msgid "Legal Entity"
+msgstr ""
+
+#. module: crm_iml
+#: selection:res.partner,region_of_delivery:0
+msgid "Moscow"
+msgstr ""
+
+#. module: crm_iml
 #: view:crm.clientcategory:crm_iml.crm_clientcategory_view
 #: field:crm.clientcategory,name:0
+#: view:crm.goodscategory:crm_iml.crm_goodscategory_view
+#: field:crm.goodscategory,name:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
 #: field:crm.iml.opportunities.type,name:0
+#: view:crm.shipping_storage:crm_iml.crm_shippingstorages_view
+#: field:crm.shipping_storage,name:0
 msgid "Name"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,OGRN_OGRNIP:0
+msgid "OGRN / OGRNIP"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,OKATO:0
+msgid "OKATO"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,OKPO:0
+msgid "OKPO"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,OKVED:0
+msgid "OKVED"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Office"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,actual_address_office:0
+#: field:res.partner,juridical_address_office:0
+msgid "Office number"
 msgstr ""
 
 #. module: crm_iml
@@ -88,13 +325,103 @@ msgid "Partner"
 msgstr ""
 
 #. module: crm_iml
+#: field:res.partner,authorized person_position_genetive_case:0
+msgid "Position of authorized person in genetive case"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,authorized person_position_nominative_case:0
+msgid "Position of authorized person in nominative case"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,actual_address_index:0
+#: field:res.partner,juridical_address_index:0
+msgid "Post index"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Region of delivery"
+msgstr ""
+
+#. module: crm_iml
+#: selection:res.partner,region_of_delivery:0
+msgid "Regions except Moscow"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,registration_date:0
+msgid "Registation Date"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,registration_reason_code:0
+msgid "Registration Reason Code"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Shipping Storage"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_shipping_storage
+#: model:ir.ui.menu,name:crm_iml.menu_crm_shippingstorages_view
+msgid "Shipping storages"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_case_shipping_storages_all
+msgid "ShippingStorages"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,short_name:0
+msgid "Short name"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,storage_of_shipping:0
+msgid "Storage of shipping"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,actual_address_street_name:0
+#: field:res.partner,juridical_address_street_name:0
+msgid "Street"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_res_partner_filter_iml_crm1
+msgid "Tag"
+msgstr ""
+
+#. module: crm_iml
 #: help:crm.clientcategory,name:0
+#: help:crm.goodscategory,name:0
 msgid "The name of the segmentation."
+msgstr ""
+
+#. module: crm_iml
+#: help:crm.shipping_storage,name:0
+msgid "The name of the storage."
 msgstr ""
 
 #. module: crm_iml
 #: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
 msgid "Type"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,type_of_counterparty:0
+msgid "Type of Counterparty"
 msgstr ""
 
 #. module: crm_iml
@@ -106,6 +433,11 @@ msgstr ""
 #. module: crm_iml
 #: model:ir.actions.act_window,name:crm_iml.crm_iml_case_type_opportunities_all
 msgid "TypeOfOpportunities"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "UNK"
 msgstr ""
 
 #. module: crm_iml

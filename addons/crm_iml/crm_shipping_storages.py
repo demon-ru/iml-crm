@@ -18,46 +18,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-{
-    'name': 'CRM_IML',
-    'version': '1.0',
-    'category': 'Customer Relationship Management',
-    'sequence': 2,
-    'summary': 'Leads, Opportunities, Phone Calls, Client Category',
-    'description': """
-	The description will be later
-""",
-    'author': 'OrientExpress',
-    'website': 'http://www.iml.oe-it.ru',
-    # I think depends our module is like as crm module
-    'depends': [
-	'crm'
-    ],
-    'data': [
 
-        'crm_clientcategory_data.xml',
-        'crm_clientcategory_view.xml',
-        'crm_clientcategory_menu.xml',
-        
-        'crm_goodscategory_view.xml',
-        'crm_goodscategory_menu.xml',
-        
-        'crm_shipping_storages_view.xml',
-        'crm_shipping_storages_menu.xml',
+from openerp.osv import fields,osv,orm
 
-	'res_partner_view.xml',
-	
-	
-	'crm_iml_opportunities_type_data.xml',
-	'crm_iml_opportunities_type_view.xml',
-	'crm_iml_opportunities_type_menu.xml',
+class crm_shipping_storages(osv.osv):
 
-	'crm_lead_view.xml',
+    _name = "crm.shipping_storage"
+    _description = "Shipping storages"
 
-	'security/ir.model.access.csv',
-    ],
-    
-    'installable': True,
-    'application': True,
-    'auto_install': False,
-}
+    _columns = {
+        'name': fields.char('Name', size=255, required=True, help='The name of the storage.'),
+        'description': fields.text('Description'),
+    }
+crm_shipping_storages()
