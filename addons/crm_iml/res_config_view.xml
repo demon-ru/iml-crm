@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+         <record id="view_server_config_settings" model="ir.ui.view">
+            <field name="name">crm_iml_config_settings_grgrgrgt</field>
+            <field name="model">base.config.settings</field>
+            <field name="inherit_id" ref="base_setup.view_general_configuration"/>
+            <field name="arch" type="xml">
+                 <div> 
+                     <label for="export_sql_server" string='Export/Import my sql server'/>
+                     <field name="export_sql_server" class="oe_inline"/> 
+		 </div>
+            </field>
+        </record>
+
+        <record id="action_config_settings_crm_iml_server" model="ir.actions.act_window">
+            <field name="name">Export/Import SQL server</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">base.config.settings</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+        </record>
+
+    </data>
+</openerp>

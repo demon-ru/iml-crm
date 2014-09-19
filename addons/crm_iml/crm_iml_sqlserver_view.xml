@@ -1,0 +1,23 @@
+﻿<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="crm_iml_slqserver_view" model="ir.ui.view">
+            <field name="name">SqlServer</field>
+            <field name="model">crm.iml.sqlserver</field>
+	    <field name="type">form</field>
+            <field name="arch" type="xml">
+		  <group col="2" string="Server Information">
+			  <field string="Name" name="name"/>
+			  <field name="lastTestDate"/>
+			  <field string="SQL server" name="server"/>
+			  <field string="User" name="user"/>
+			  <field string="Password" name="password"/>
+			  <field string="Database name" name="dbname"/>	
+			  <field string="Table name" name="tableName"/>	
+			  <field string="ID column name" name="IdColumnName"/>	
+			  <button name="test_iml_crm_sql_server" string="Test connect to database" type="object"/>
+		  </group>
+            </field>
+        </record>
+   </data>
+</openerp>
