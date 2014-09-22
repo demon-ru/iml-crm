@@ -23,7 +23,7 @@
         <field name="act_window_id" ref="crm_iml_sqlserver_all"/>
     </record>	
 
-    <menuitem name="Export my sql database" id="menu_crm_iml_sqlserver" parent="base.menu_config" sequence="6"
+    <menuitem name="Export my sql database" id="menu_crm_iml_sqlserver" parent="menu_config_catalog" sequence="6"
             action="crm_iml_sqlserver_all"/>
 
 </data>
