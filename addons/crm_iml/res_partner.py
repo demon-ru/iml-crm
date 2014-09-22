@@ -193,7 +193,7 @@ class res_partner(osv.osv):
 			server = res_obj.browse(cr, uid, serv)
 			if not(server):
 				raise osv.except_osv(('Warning!'), ("Export SQL Server is not specified. Set Export/Import SQL server in General settings!"))
-		 	result = server.insert_record(server, partn.id)
+		 	result = server.insert_record(partn.id)
 			if (result):
 				partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 		return True
