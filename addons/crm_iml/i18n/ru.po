@@ -247,7 +247,7 @@ msgstr "ИНН"
 #. module: crm_iml
 #: selection:res.partner,type_of_counterparty:0
 msgid "Individual"
-msgstr "Физ. лицо"
+msgstr "Физическое лицо"
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
@@ -295,7 +295,7 @@ msgstr "Кандидат/Предложение"
 #. module: crm_iml
 #: selection:res.partner,type_of_counterparty:0
 msgid "Legal Entity"
-msgstr "Юр. лицо"
+msgstr "Юридическое лицо"
 
 #. module: crm_iml
 #: selection:res.partner,region_of_delivery:0
@@ -383,7 +383,7 @@ msgstr "Регион доставки"
 #. module: crm_iml
 #: selection:res.partner,region_of_delivery:0
 msgid "Regions except Moscow"
-msgstr "регионы"
+msgstr "Регионы"
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
