@@ -6,52 +6,29 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-18 09:58+0000\n"
-"PO-Revision-Date: 2014-09-18 09:58+0000\n"
+"POT-Creation-Date: 2014-09-23 10:23+0000\n"
+"PO-Revision-Date: 2014-09-23 10:23+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
-"MIME-Version: 1.0\n"
+"MIME-Version: 1.0\n"cate
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,account_number:0
 msgid "Account number"
 msgstr "Расчетный счет"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Actual address"
-msgstr "Фактический адрес"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Address Info"
-msgstr "Адреса"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,BIN:0
 msgid "BIN"
 msgstr "БИН"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Bank Info"
-msgstr "Банк"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,bank_name:0
 msgid "Bank name"
 msgstr "Наименование банка"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Base Info"
-msgstr "Основное"
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
@@ -61,25 +38,13 @@ msgid "Building"
 msgstr "Корпус/Строение"
 
 #. module: crm_iml
-#: model:ir.model,name:crm_iml.model_crm_clientcategory
-#: model:ir.ui.menu,name:crm_iml.menu_config_catalog
-msgid "Catalogs"
-msgstr "Справочники"
-
-#. module: crm_iml
 #: model:ir.model,name:crm_iml.model_crm_goodscategory
-#: field:res.partner,category_of_goods:0
 msgid "Categories of goods"
 msgstr "Категория товара"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Category"
-msgstr "Категория"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Category of Goods"
+#: field:res.partner,category_of_goods:0
+msgid "Category of Good"
 msgstr "Категория товара"
 
 #. module: crm_iml
@@ -111,46 +76,71 @@ msgid "City"
 msgstr "Город"
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "City.."
+msgstr "City.."
+
+#. module: crm_iml
 #: field:res.partner,unk:0
 msgid "Client ID"
 msgstr "УНК"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,client_in_service:0
 msgid "Client service status"
 msgstr "Состояние обслуживания клиента"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Codes"
-msgstr "Коды"
+#: model:ir.actions.act_window,name:crm_iml.crm_case_company_org_type_all
+msgid "Company org type"
+msgstr "Организационная форма компании"
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Contacts"
+msgstr "Контакты"
+
+#. module: crm_iml
 #: field:res.partner,correspondent_account_number:0
 msgid "Correspondent account number"
 msgstr "№ корр. счета"
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Country"
+msgstr "Страна"
+
+#. module: crm_iml
 #: field:crm.clientcategory,create_uid:0
+#: field:crm.company_org_type,create_uid:0
 #: field:crm.goodscategory,create_uid:0
 #: field:crm.iml.opportunities.type,create_uid:0
-#: field:crm.shipping_storage,create_uid:0
 #: field:crm.iml.sqlserver,create_uid:0
+#: field:crm.shipping_storage,create_uid:0
 msgid "Created by"
 msgstr "Создан(а)"
 
 #. module: crm_iml
 #: field:crm.clientcategory,create_date:0
+#: field:crm.company_org_type,create_date:0
 #: field:crm.goodscategory,create_date:0
 #: field:crm.iml.opportunities.type,create_date:0
-#: field:crm.shipping_storage,create_date:0
 #: field:crm.iml.sqlserver,create_date:0
+#: field:crm.shipping_storage,create_date:0
 msgid "Created on"
 msgstr "Создан(а)"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Database name"
+msgstr "Database name"
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,lastTestDate:0
+msgid "Date last successful test connect"
+msgstr "Дата последнего успешного тестового подключения"
+
+#. module: crm_iml
 #: field:res.partner,date_of_accounting:0
 msgid "Date of Accounting"
 msgstr "Дата постановки на учет"
@@ -161,18 +151,9 @@ msgid "Delivery region"
 msgstr "Регион доставки"
 
 #. module: crm_iml
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
-msgid "Database name"
-msgstr "Наименование базы данных"
-
-#. module: crm_iml
-#: field:crm.iml.sqlserver,lastTestDate:0
-msgid "Date last successful test connect"
-msgstr "Дата последнего успешного тестового подключения"
-
-#. module: crm_iml
 #: view:crm.clientcategory:crm_iml.crm_clientcategory_view
 #: field:crm.clientcategory,description:0
+#: field:crm.company_org_type,description:0
 #: view:crm.goodscategory:crm_iml.crm_goodscategory_view
 #: field:crm.goodscategory,description:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
@@ -181,6 +162,26 @@ msgstr "Дата последнего успешного тестового по
 #: field:crm.shipping_storage,description:0
 msgid "Description"
 msgstr "Описание"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Export custromer id"
+msgstr "Export custromer id"
+
+#. module: crm_iml
+#: model:ir.ui.menu,name:crm_iml.menu_crm_iml_sqlserver
+msgid "Export my sql database"
+msgstr "База данных для экспорта"
+
+#. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.action_config_settings_crm_iml_server
+msgid "Export/Import SQL server"
+msgstr "Экспорт/Импорт SQL сервер"
+
+#. module: crm_iml
+#: view:base.config.settings:crm_iml.view_server_config_settings
+msgid "Export/Import my sql server"
+msgstr "Экспорт/Импорт MySQL сервер"
 
 #. module: crm_iml
 #: field:res.partner,fio_authorized person_genitive_case:0
@@ -200,59 +201,39 @@ msgid "House number"
 msgstr "Дом"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Export custromer id"
-msgstr "Экспортируемый id клиента"
-
-#. module: crm_iml
-#: model:ir.ui.menu,name:crm_iml.menu_crm_iml_sqlserver
-msgid "Export my sql database"
-msgstr "База данных для экспорта"
-
-#. module: crm_iml
-#: model:ir.actions.act_window,name:crm_iml.action_config_settings_crm_iml_server
-msgid "Export/Import SQL server"
-msgstr "Экспорт/Импорт SQL сервер"
-
-#. module: crm_iml
-#: view:base.config.settings:crm_iml.view_server_config_settings
-msgid "Export/Import my sql server"
-msgstr "Экспорт/Импорт SQL сервер"
-
-#. module: crm_iml
 #: field:crm.clientcategory,id:0
+#: field:crm.company_org_type,id:0
 #: field:crm.goodscategory,id:0
 #: field:crm.iml.opportunities.type,id:0
-#: field:crm.shipping_storage,id:0
 #: field:crm.iml.sqlserver,id:0
+#: field:crm.shipping_storage,id:0
 msgid "ID"
 msgstr "ID"
 
 #. module: crm_iml
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "ID column name"
-msgstr "Имя колонки с ID"
+msgstr "ID column name"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Import/Export from NAV"
-msgstr "Экспорт/Импорт из NAV"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,inn:0
 msgid "INN"
 msgstr "ИНН"
 
 #. module: crm_iml
-#: selection:res.partner,type_of_counterparty:0
-msgid "Individual"
-msgstr "Физ. лицо"
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Import/Export from NAV"
+msgstr "Import/Export from NAV"
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Internet Shop name"
-msgstr "Наименование интернет магазина"
+msgid "Index.."
+msgstr "Index.."
+
+#. module: crm_iml
+#: selection:res.partner,type_of_counterparty:0
+msgid "Individual"
+msgstr "Физическое лицо"
 
 #. module: crm_iml
 #: field:res.partner,internet_shop_name:0
@@ -260,32 +241,34 @@ msgid "Internet shop name"
 msgstr "Наименование интернет магазина"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Juridical address"
-msgstr "Юридический адрес"
+#: field:res.partner,juridical_name:0
+msgid "Jurudical company name"
+msgstr "Юридическое название организации"
 
 #. module: crm_iml
 #: field:crm.clientcategory,write_uid:0
+#: field:crm.company_org_type,write_uid:0
 #: field:crm.goodscategory,write_uid:0
 #: field:crm.iml.opportunities.type,write_uid:0
-#: field:crm.shipping_storage,write_uid:0
 #: field:crm.iml.sqlserver,write_uid:0
+#: field:crm.shipping_storage,write_uid:0
 msgid "Last Updated by"
 msgstr "Обновлен(а)"
 
 #. module: crm_iml
 #: field:crm.clientcategory,write_date:0
+#: field:crm.company_org_type,write_date:0
 #: field:crm.goodscategory,write_date:0
 #: field:crm.iml.opportunities.type,write_date:0
-#: field:crm.shipping_storage,write_date:0
 #: field:crm.iml.sqlserver,write_date:0
+#: field:crm.shipping_storage,write_date:0
 msgid "Last Updated on"
 msgstr "Обновлен(а)"
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "Last export date"
-msgstr "Дата последнего экспорта"
+msgstr "Last export date"
 
 #. module: crm_iml
 #: model:ir.model,name:crm_iml.model_crm_lead
@@ -295,7 +278,7 @@ msgstr "Кандидат/Предложение"
 #. module: crm_iml
 #: selection:res.partner,type_of_counterparty:0
 msgid "Legal Entity"
-msgstr "Юр. лицо"
+msgstr "Юридическое лицо"
 
 #. module: crm_iml
 #: selection:res.partner,region_of_delivery:0
@@ -305,39 +288,38 @@ msgstr "Москва"
 #. module: crm_iml
 #: view:crm.clientcategory:crm_iml.crm_clientcategory_view
 #: field:crm.clientcategory,name:0
-msgid "Name"
-msgstr "Наименование"
-
+#: field:crm.company_org_type,name:0
 #: view:crm.goodscategory:crm_iml.crm_goodscategory_view
 #: field:crm.goodscategory,name:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
 #: field:crm.iml.opportunities.type,name:0
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 #: view:crm.shipping_storage:crm_iml.crm_shippingstorages_view
 #: field:crm.shipping_storage,name:0
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "Name"
 msgstr "Наименование"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,number_of_powerOfattorney:0
+msgid "Number of The Power of Attorney"
+msgstr "Номер доверенности"
+
+#. module: crm_iml
 #: field:res.partner,OGRN_OGRNIP:0
 msgid "OGRN / OGRNIP"
 msgstr "ОГРН/ОГРНИП"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,OKATO:0
 msgid "OKATO"
 msgstr "ОКАТО"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,OKPO:0
 msgid "OKPO"
 msgstr "ОКПО"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,OKVED:0
 msgid "OKVED"
 msgstr "ОКВЕД"
@@ -354,9 +336,24 @@ msgid "Office number"
 msgstr "Офис"
 
 #. module: crm_iml
+#: model:ir.ui.menu,name:crm_iml.menu_crm_company_org_type
+msgid "Org form of company"
+msgstr "Организационная форма компании"
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_company_org_type
+msgid "Organisation form of company"
+msgstr "Организационная форма компании "
+
+#. module: crm_iml
 #: model:ir.model,name:crm_iml.model_res_partner
 msgid "Partner"
 msgstr "Партнер"
+
+#. module: crm_iml
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Password"
+msgstr "Password"
 
 #. module: crm_iml
 #: field:res.partner,authorized_person_position_genetive_case:0
@@ -369,82 +366,30 @@ msgid "Position of authorized person in nominative case"
 msgstr "Должность уполномоченного лица, именительный падеж"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,actual_address_index:0
 #: field:res.partner,juridical_address_index:0
 msgid "Post index"
 msgstr "Индекс"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Region of delivery"
-msgstr "Регион доставки"
-
-#. module: crm_iml
 #: selection:res.partner,region_of_delivery:0
 msgid "Regions except Moscow"
-msgstr "регионы"
+msgstr "Регионы"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,registration_date:0
 msgid "Registation Date"
 msgstr "Дата регистрации"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,registration_reason_code:0
 msgid "Registration Reason Code"
 msgstr "КПП"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Shipping Storage"
-msgstr "Склад отправления"
-
-#. module: crm_iml
-#: model:ir.model,name:crm_iml.model_crm_shipping_storage
-#: model:ir.ui.menu,name:crm_iml.menu_crm_shippingstorages_view
-msgid "Shipping storages"
-msgstr "Склад отправления"
-
-#. module: crm_iml
-#: model:ir.actions.act_window,name:crm_iml.crm_case_shipping_storages_all
-msgid "ShippingStorages"
-msgstr "Склад отправления"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-#: field:res.partner,short_name:0
-msgid "Short name"
-msgstr "Краткое наименование"
-
-#. module: crm_iml
-#: field:res.partner,storage_of_shipping:0
-msgid "Storage of shipping"
-msgstr "Склад отправления"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-#: field:res.partner,actual_address_street_name:0
-#: field:res.partner,juridical_address_street_name:0
-msgid "Street"
-msgstr "Улица"
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_res_partner_filter_iml_crm1
-msgid "Tag"
-msgstr ""
-
-#. module: crm_iml
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
-msgid "Password"
-msgstr "Пароль"
-
-#. module: crm_iml
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "SQL server"
-msgstr "SQL сервер"
+msgstr "SQL server"
 
 #. module: crm_iml
 #: field:crm.iml.sqlserver,password:0
@@ -464,7 +409,23 @@ msgstr "SQLUser"
 #. module: crm_iml
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "Server Information"
-msgstr "Информация о сервере"
+msgstr "Server Information"
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_shipping_storage
+#: model:ir.ui.menu,name:crm_iml.menu_crm_shippingstorages_view
+msgid "Shipping storages"
+msgstr "Склад отправления"
+
+#. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_case_shipping_storages_all
+msgid "ShippingStorages"
+msgstr "Склад отправления"
+
+#. module: crm_iml
+#: field:res.partner,short_name:0
+msgid "Short name"
+msgstr "Краткое наименование"
 
 #. module: crm_iml
 #: model:ir.actions.act_window,name:crm_iml.crm_iml_sqlserver_all
@@ -492,14 +453,46 @@ msgid "SqlTableName"
 msgstr "SqlTableName"
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "State"
+msgstr "Область"
+
+#. module: crm_iml
+#: field:res.partner,storage_of_shipping:0
+msgid "Storage of shipping"
+msgstr "Склад отправления"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,actual_address_street_name:0
+#: field:res.partner,juridical_address_street_name:0
+msgid "Street"
+msgstr "Улица"
+
+#. module: crm_iml
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "Table name"
-msgstr "Наименование таблицы"
+msgstr "Table name"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_res_partner_filter_iml_crm1
+msgid "Tag"
+msgstr "Тег"
 
 #. module: crm_iml
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "Test connect to database"
-msgstr "Тестовое подключение к базе данных"
+msgstr "Test connect to database"
+
+#. module: crm_iml
+#: field:res.partner,date_of_powerOfattorney:0
+msgid "The date of The Power of Attorney"
+msgstr "Дата доверенности"
+
+#. module: crm_iml
+#: help:crm.company_org_type,name:0
+msgid "The name of the organisation form."
+msgstr "Название организационной формы компании."
 
 #. module: crm_iml
 #: help:crm.clientcategory,name:0
@@ -520,10 +513,9 @@ msgstr "SQL сервер."
 #. module: crm_iml
 #: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
 msgid "Type"
-msgstr "Тип"
+msgstr "Type"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,type_of_counterparty:0
 msgid "Type of Counterparty"
 msgstr "Тип контрагента"
@@ -540,14 +532,14 @@ msgid "TypeOfOpportunities"
 msgstr "Тип заявки"
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "UNK"
-msgstr "УНК"
-
-#. module: crm_iml
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "User"
-msgstr "Пользователь"
+msgstr "User"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "ZIP"
+msgstr "ZIP"
 
 #. module: crm_iml
 #: field:res.partner,exportDateToNAV:0
@@ -562,7 +554,7 @@ msgstr "crm.iml.nav.uin"
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "customer UIN in NAV"
-msgstr "УНК клиента из NAV"
+msgstr "customer UIN in NAV"
 
 #. module: crm_iml
 #: field:crm.iml.sqlserver,name:0
@@ -573,6 +565,47 @@ msgstr "mysqlservername"
 #: field:base.config.settings,export_sql_server:0
 #: field:crm.lead,type_of_opport_id:0
 #: field:res.partner,categoryClient_id:0
+#: field:res.partner,company_org_type:0
 msgid "name"
 msgstr "Категория клиента"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Адреса"
+msgstr "Адреса"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Основное"
+msgstr "Основное"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Состояние обслуживания клиента"
+msgstr "Состояние обслуживания клиента"
+
+#. module: crm_iml
+#: model:ir.ui.menu,name:crm_iml.menu_config_catalog
+msgid "Справочники"
+msgstr "Справочники"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Строение"
+msgstr "Строение"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Улица..."
+msgstr "Улица..."
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "ФИО уполномоченного лица, именительный падеж"
+msgstr "ФИО уполномоченного лица, именительный падеж"
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "ФИО уполномоченного лица, родительный падеж"
+msgstr "ФИО уполномоченного лица, родительный падеж"
 

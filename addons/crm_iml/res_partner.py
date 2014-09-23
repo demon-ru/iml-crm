@@ -137,48 +137,54 @@ class res_partner(osv.osv):
         # 
         # вычислимое поле, отображает состояние клиента по обслуживанию
         'client_in_service': fields.function(_client_service_status, string="Client service status", type="char", fnct_search=_client_service_status_search),
-        'short_name' : fields.char('Short name', size = 255, required = True),
+        'short_name' : fields.char('Short name', size = 255, required = False),
         'unk' : fields.char('Client ID', size = 255, requred = True),
+        'company_org_type' : fields.many2one('crm.company_org_type', 'name'),
+        'juridical_name' : fields.char('Jurudical company name', size = 255, required = False),
 #        'client_service_status' : 
         # Страница "Основное"
-        'internet_shop_name' : fields.char('Internet shop name', size = 255, required = True),
-        'category_of_goods' : fields.many2one('crm.goodscategory', 'Categories of goods'),
+        'internet_shop_name' : fields.char('Internet shop name', size = 255),
+        #'category_of_goods' : fields.many2one('crm.goodscategory', 'Categories of goods'),
+        'category_of_goods' : fields.char('Category of Good', size = 255),
         'storage_of_shipping' : fields.many2one('crm.shipping_storage', 'Storage of shipping') ,
         'region_of_delivery' : fields.selection([('moscow', 'Moscow'), ('regions', 'Regions except Moscow')], 'Delivery region'),
-        'fio_authorized person_nominative_case' : fields.char('Full name of authorized person in nominative case', size = 255, required = True),
-        'fio_authorized person_genitive_case' : fields.char('Full name of authorized person in genitive case', size = 255, required = True),
-        'authorized_person_position_nominative_case' : fields.char('Position of authorized person in nominative case', size = 255, required = True), 
-        'authorized_person_position_genetive_case' : fields.char('Position of authorized person in genetive case', size = 255, required = True),
+        'fio_authorized person_nominative_case' : fields.char('Full name of authorized person in nominative case', size = 255),
+        'fio_authorized person_genitive_case' : fields.char('Full name of authorized person in genitive case', size = 255),
+        'authorized_person_position_nominative_case' : fields.char('Position of authorized person in nominative case', size = 255), 
+        'authorized_person_position_genetive_case' : fields.char('Position of authorized person in genetive case', size = 255),
+        # это банальная доверенность
+        'number_of_powerOfattorney' : fields.char('Number of The Power of Attorney', size = 255),
+        'date_of_powerOfattorney' : fields.date('The date of The Power of Attorney'),
         # Страница "Адреса"
         # группа "Юридический адрес"
-        'juridical_address_index' : fields.char('Post index', size = 255, required = True),
-        'juridical_address_city_name' : fields.char('City', size = 255, required = True),
-        'juridical_address_street_name' : fields.char('Street', size = 255, required = True),
-        'juridical_address_dom' : fields.char('House number', size = 255, required = True),
-        'juridical_address_building' : fields.char('Building', size = 255, required = True),
-        'juridical_address_office' : fields.char('Office number', size = 255, required = True),
+        'juridical_address_index' : fields.char('Post index', size = 255),
+        'juridical_address_city_name' : fields.char('City', size = 255),
+        'juridical_address_street_name' : fields.char('Street', size = 255),
+        'juridical_address_dom' : fields.char('House number', size = 255),
+        'juridical_address_building' : fields.char('Building', size = 255),
+        'juridical_address_office' : fields.char('Office number', size = 255),
         # группа "Фактический адрес"
-        'actual_address_index' : fields.char('Post index', size = 255, required = True),
-        'actual_address_city_name' : fields.char('City', size = 255, required = True),
-        'actual_address_street_name' : fields.char('Street', size = 255, required = True),
-        'actual_address_dom' : fields.char('House number', size = 255, required = True),
-        'actual_address_building' : fields.char('Building', size = 255, required = True),
-        'actual_address_office' : fields.char('Office number', size = 255, required = True),
+        'actual_address_index' : fields.char('Post index', size = 255),
+        'actual_address_city_name' : fields.char('City', size = 255),
+        'actual_address_street_name' : fields.char('Street', size = 255),
+        'actual_address_dom' : fields.char('House number', size = 255),
+        'actual_address_building' : fields.char('Building', size = 255),
+        'actual_address_office' : fields.char('Office number', size = 255),
         # Страница "Банк"
-        'account_number' : fields.char('Account number', size = 255, required = True), 
-        'BIN' : fields.char('BIN', size = 255, required = True),
-        'bank_name' : fields.char('Bank name', size = 255, required = True),
-        'correspondent_account_number' : fields.char('Correspondent account number', size = 255, required = True),
+        'account_number' : fields.char('Account number', size = 255), 
+        'BIN' : fields.char('BIN', size = 255),
+        'bank_name' : fields.char('Bank name', size = 255),
+        'correspondent_account_number' : fields.char('Correspondent account number', size = 255),
         # Страница "Коды"
         'type_of_counterparty' : fields.selection([('individual', 'Individual'), ('legal_entity', 'Legal Entity')], 'Type of Counterparty'),
-        'inn' : fields.char('INN', size = 255, required = True),
-        'registration_reason_code' : fields.char('Registration Reason Code', size = 255, required = True),
-        'date_of_accounting' : fields.char('Date of Accounting', size = 255, required = True),
-        'OGRN_OGRNIP' : fields.char('OGRN / OGRNIP', size = 255, required = True),
-        'registration_date' : fields.char('Registation Date', size = 255, required = True),
-        'OKVED' : fields.char('OKVED', size = 255, required = True),
-        'OKPO' : fields.char('OKPO', size = 255, required = True),
-        'OKATO' : fields.char('OKATO', size = 255, required = True),
+        'inn' : fields.char('INN', size = 255),
+        'registration_reason_code' : fields.char('Registration Reason Code', size = 255),
+        'date_of_accounting' : fields.date('Date of Accounting'),
+        'OGRN_OGRNIP' : fields.char('OGRN / OGRNIP', size = 255),
+        'registration_date' : fields.date('Registation Date'),
+        'OKVED' : fields.char('OKVED', size = 255),
+        'OKPO' : fields.char('OKPO', size = 255),
+        'OKATO' : fields.char('OKATO', size = 255),
         
 		# работа с NAV
 		'exportDateToNAV': fields.datetime('crm.iml.export.date.res.partner' , readonly=True),
@@ -197,4 +203,5 @@ class res_partner(osv.osv):
 			if (result):
 				partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 		return True
+
 

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="crm_company_org_type_view" model="ir.ui.view">
+            <field name="name">company_org_type</field>
+            <field name="model">crm.company_org_type</field>
+	    <field name="type">form</field>
+            <field name="arch" type="xml">
+		<group col="2" colspan="2">
+                     <field name="name"/>
+                     <field name="description"/>
+		</group>
+            </field>
+        </record>
+   </data>
+</openerp>

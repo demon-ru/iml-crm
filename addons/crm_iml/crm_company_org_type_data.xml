@@ -1,0 +1,16 @@
+﻿<?xml version="1.0"?>
+<openerp>
+    <data noupdate="1">
+
+        <!-- Crm category of client -->
+        <record model="crm.company_org_type" id="org_type1">
+            <field name="name">ИП</field>
+        </record>
+        <record model="crm.company_org_type" id="org_type2">
+            <field name="name">ООО</field>
+        </record>
+        <record model="crm.company_org_type" id="org_type3">
+            <field name="name">ОАО</field>
+        </record>
+    </data>
+</openerp>

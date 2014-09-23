@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-19 13:48+0000\n"
-"PO-Revision-Date: 2014-09-19 13:48+0000\n"
+"POT-Creation-Date: 2014-09-23 09:21+0000\n"
+"PO-Revision-Date: 2014-09-23 09:21+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -31,6 +31,7 @@ msgid "Bank name"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,actual_address_building:0
 #: field:res.partner,juridical_address_building:0
 msgid "Building"
@@ -38,8 +39,12 @@ msgstr ""
 
 #. module: crm_iml
 #: model:ir.model,name:crm_iml.model_crm_goodscategory
-#: field:res.partner,category_of_goods:0
 msgid "Categories of goods"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,category_of_goods:0
+msgid "Category of Good"
 msgstr ""
 
 #. module: crm_iml
@@ -64,9 +69,15 @@ msgid "CategoryOfGoods"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,actual_address_city_name:0
 #: field:res.partner,juridical_address_city_name:0
 msgid "City"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "City.."
 msgstr ""
 
 #. module: crm_iml
@@ -80,12 +91,28 @@ msgid "Client service status"
 msgstr ""
 
 #. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_case_company_org_type_all
+msgid "Company org type"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Contacts"
+msgstr ""
+
+#. module: crm_iml
 #: field:res.partner,correspondent_account_number:0
 msgid "Correspondent account number"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Country"
+msgstr ""
+
+#. module: crm_iml
 #: field:crm.clientcategory,create_uid:0
+#: field:crm.company_org_type,create_uid:0
 #: field:crm.goodscategory,create_uid:0
 #: field:crm.iml.opportunities.type,create_uid:0
 #: field:crm.iml.sqlserver,create_uid:0
@@ -95,6 +122,7 @@ msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,create_date:0
+#: field:crm.company_org_type,create_date:0
 #: field:crm.goodscategory,create_date:0
 #: field:crm.iml.opportunities.type,create_date:0
 #: field:crm.iml.sqlserver,create_date:0
@@ -125,6 +153,7 @@ msgstr ""
 #. module: crm_iml
 #: view:crm.clientcategory:crm_iml.crm_clientcategory_view
 #: field:crm.clientcategory,description:0
+#: field:crm.company_org_type,description:0
 #: view:crm.goodscategory:crm_iml.crm_goodscategory_view
 #: field:crm.goodscategory,description:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
@@ -165,6 +194,7 @@ msgid "Full name of authorized person in nominative case"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,actual_address_dom:0
 #: field:res.partner,juridical_address_dom:0
 msgid "House number"
@@ -172,6 +202,7 @@ msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,id:0
+#: field:crm.company_org_type,id:0
 #: field:crm.goodscategory,id:0
 #: field:crm.iml.opportunities.type,id:0
 #: field:crm.iml.sqlserver,id:0
@@ -195,6 +226,11 @@ msgid "Import/Export from NAV"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Index.."
+msgstr ""
+
+#. module: crm_iml
 #: selection:res.partner,type_of_counterparty:0
 msgid "Individual"
 msgstr ""
@@ -205,7 +241,13 @@ msgid "Internet shop name"
 msgstr ""
 
 #. module: crm_iml
+#: field:res.partner,juridical_name:0
+msgid "Jurudical company name"
+msgstr ""
+
+#. module: crm_iml
 #: field:crm.clientcategory,write_uid:0
+#: field:crm.company_org_type,write_uid:0
 #: field:crm.goodscategory,write_uid:0
 #: field:crm.iml.opportunities.type,write_uid:0
 #: field:crm.iml.sqlserver,write_uid:0
@@ -215,6 +257,7 @@ msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,write_date:0
+#: field:crm.company_org_type,write_date:0
 #: field:crm.goodscategory,write_date:0
 #: field:crm.iml.opportunities.type,write_date:0
 #: field:crm.iml.sqlserver,write_date:0
@@ -245,6 +288,7 @@ msgstr ""
 #. module: crm_iml
 #: view:crm.clientcategory:crm_iml.crm_clientcategory_view
 #: field:crm.clientcategory,name:0
+#: field:crm.company_org_type,name:0
 #: view:crm.goodscategory:crm_iml.crm_goodscategory_view
 #: field:crm.goodscategory,name:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
@@ -253,6 +297,11 @@ msgstr ""
 #: view:crm.shipping_storage:crm_iml.crm_shippingstorages_view
 #: field:crm.shipping_storage,name:0
 msgid "Name"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,number_of_powerOfattorney:0
+msgid "Number of The Power of Attorney"
 msgstr ""
 
 #. module: crm_iml
@@ -276,9 +325,24 @@ msgid "OKVED"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Office"
+msgstr ""
+
+#. module: crm_iml
 #: field:res.partner,actual_address_office:0
 #: field:res.partner,juridical_address_office:0
 msgid "Office number"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.ui.menu,name:crm_iml.menu_crm_company_org_type
+msgid "Org form of company"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_company_org_type
+msgid "Organisation form of company"
 msgstr ""
 
 #. module: crm_iml
@@ -389,11 +453,17 @@ msgid "SqlTableName"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "State"
+msgstr ""
+
+#. module: crm_iml
 #: field:res.partner,storage_of_shipping:0
 msgid "Storage of shipping"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,actual_address_street_name:0
 #: field:res.partner,juridical_address_street_name:0
 msgid "Street"
@@ -412,6 +482,16 @@ msgstr ""
 #. module: crm_iml
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "Test connect to database"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,date_of_powerOfattorney:0
+msgid "The date of The Power of Attorney"
+msgstr ""
+
+#. module: crm_iml
+#: help:crm.company_org_type,name:0
+msgid "The name of the organisation form."
 msgstr ""
 
 #. module: crm_iml
@@ -457,6 +537,11 @@ msgid "User"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "ZIP"
+msgstr ""
+
+#. module: crm_iml
 #: field:res.partner,exportDateToNAV:0
 msgid "crm.iml.export.date.res.partner"
 msgstr ""
@@ -480,6 +565,7 @@ msgstr ""
 #: field:base.config.settings,export_sql_server:0
 #: field:crm.lead,type_of_opport_id:0
 #: field:res.partner,categoryClient_id:0
+#: field:res.partner,company_org_type:0
 msgid "name"
 msgstr ""
 
@@ -501,6 +587,16 @@ msgstr ""
 #. module: crm_iml
 #: model:ir.ui.menu,name:crm_iml.menu_config_catalog
 msgid "Справочники"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Строение"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Улица..."
 msgstr ""
 
 #. module: crm_iml
