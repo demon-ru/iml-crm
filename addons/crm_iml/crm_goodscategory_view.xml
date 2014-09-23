@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
 		<group col="2" colspan="2">
                      <field string="Name" name="name"/>
+		     <field name='nav_id'/>
                      <field string="Description" name="description"/>
 		</group>
             </field>
