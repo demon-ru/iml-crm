@@ -33,12 +33,12 @@ class crm_iml_sqlserver(osv.osv):
 	_columns = {
 		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
 		'lastImportDate': fields.datetime('Date last successful import' , readonly=True),
-		'name': fields.char('mysqlservername', size=128, required=True),	
-		'server': fields.char('SQLServer', size=128, required=True),
-		'user': fields.char('SQLUser', size=128, required=True),
-		'password': fields.char('SQLPass', size=128),
-		'dbname': fields.char('SqlDbName', size=128),
-		'tableName':fields.char('SqlTableName', size=128),
+		'name': fields.char('Name', size=128, required=True),	
+		'server': fields.char('SQL Server', size=128, required=True),
+		'user': fields.char('User', size=128, required=True),
+		'password': fields.char('Password', size=128),
+		'dbname': fields.char('Database name', size=128),
+		'tableName':fields.char('Table Name', size=128),
 	}
 
 	"""
@@ -140,6 +140,9 @@ class crm_iml_sqlserver(osv.osv):
 				vType = "individual"
 			elif (row[30] == "Юр. лицо"):
 				vType = "legal_entity"
+		vDoverenostDate = None
+		if (row[13]):
+			vDoverenostDate = row[13].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
 		vals = {
 			#Информация о клиенте
 			"name":	row[1],		
@@ -187,6 +190,9 @@ class crm_iml_sqlserver(osv.osv):
 			#"category_of_goods" : vGoodsCategoryID,
 			"storage_of_shipping": vStorageShipID,
 			"type_of_counterparty": vType,
+			#Это просто доверенность :)
+			"number_of_powerOfattorney": row[12],
+			"date_of_powerOfattorney": vDoverenostDate,
 			}
 		if not(row[0] is None):
 			res_id = res_obj.search(cr, uid, [("id", 'in', [int(row[0])])], context=None)
@@ -215,8 +221,8 @@ class crm_iml_sqlserver(osv.osv):
 			RespPersonWhom - fio_authorized person_genitive_case - 9
 			RespPersonPosition - authorized_person_position_nominative_case - 10
 			RespPersonPositionWhom - authorized_person_position_genetive_case - 11
-			LoA_Number - 12 - ДОБАВИТСЯ ПОЗЖЕ
-			LoA_Date - 13 - ДОБАВИТСЯ ПОЗЖЕ
+			LoA_Number - number_of_powerOfattorney - 12 
+			LoA_Date - date_of_powerOfattorney - 13 
 			AddrZIP - juridical_address_index - 14
 			AddrSity - juridical_address_city_name - 15
 			AddrStreet - juridical_address_street_name - 16

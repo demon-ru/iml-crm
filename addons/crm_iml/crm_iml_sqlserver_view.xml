@@ -12,18 +12,18 @@
 		  </header>
 		  <sheet>
 			  <group col="2">
-				  <field string="Name" name="name"/>
+				  <field name="name"/>
 			  </group>
 			  <group col="2" string="Information about connection">
 			    	  <field name="lastTestDate"/>
 				  <field name="lastImportDate"/>	
 			  </group>
 			  <group col="2" string="Server Information">		
-				  <field string="SQL server" name="server"/>
-				  <field string="User" name="user"/>
-				  <field string="Password" name="password"/>
-				  <field string="Database name" name="dbname"/>	
-				  <field string="Table name" name="tableName"/>		
+				  <field name="server"/>
+				  <field name="user"/>
+				  <field name="password"/>
+				  <field name="dbname"/>	
+				  <field name="tableName"/>		
 			  </group>
 		  </sheet>
             </field>
@@ -34,11 +34,11 @@
 	    <field name="type">tree</field>
             <field name="arch" type="xml">
 		  <group col="2" string="Server Information">
-			  <field string="Name" name="name"/>			
-			  <field string="SQL server" name="server"/>
-			  <field string="User" name="user"/>
-			  <field string="Database name" name="dbname"/>	
-			  <field string="Table name" name="tableName"/>		
+			  <field name="name"/>			
+			  <field name="server"/>
+			  <field name="user"/>
+			  <field name="dbname"/>	
+			  <field name="tableName"/>		
 		  </group>
             </field>
         </record>
