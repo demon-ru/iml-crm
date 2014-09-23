@@ -44,6 +44,10 @@
         
         'crm_shipping_storages_view.xml',
         'crm_shipping_storages_menu.xml',
+        
+        'crm_company_org_type_data.xml',
+        'crm_company_org_type_view.xml',
+        'crm_company_org_type_menu.xml',
 
 	'res_partner_view.xml',
 	

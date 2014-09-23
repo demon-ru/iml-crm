@@ -18,13 +18,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import res_config
-import res_partner
-import crm_clientcategory
-import crm_lead
-import crm_iml_opportunities_type
-import crm_iml_html
-import crm_goods_category
-import crm_shipping_storages
-import crm_iml_sqlserver
-import crm_company_org_type
+
+from openerp.osv import fields,osv,orm
+
+class crm_company_org_type(osv.osv):
+
+    _name = "crm.company_org_type"
+    _description = "Organisation form of company"
+
+    _columns = {
+        'name': fields.char('Name', size=64, required=True, help='The name of the organisation form.'),
+        'description': fields.text('Description'),
+    }
+crm_company_org_type()
