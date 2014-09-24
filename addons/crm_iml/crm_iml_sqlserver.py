@@ -124,11 +124,12 @@ class crm_iml_sqlserver(osv.osv):
 		vRegDate = None
 		if (row[35]):
 			vRegDate = row[35].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
-		vGoodsCategoryID = None
-		if (row[5]):
-			vGoodsCategory = self.findObject(cr, uid,"crm.goodscategory", 'nav_id', row[5])
-			if (vGoodsCategory):
-				vGoodsCategoryID = vGoodsCategory.id 
+		vRegion = None
+		if (row[7]):
+			if (row[7] == 0):
+				vRegion = 'moscow'
+			elif (row[7] == 1):
+				vRegion = 'regions'
 		vStorageShipID = None
 		if (row[6]):
 			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", 'nav_id', row[6])
@@ -156,6 +157,8 @@ class crm_iml_sqlserver(osv.osv):
 			"fio_authorized person_genitive_case": row[9],
 			"authorized_person_position_nominative_case": row[10], 
 			"authorized_person_position_genetive_case": row[11],
+			'category_of_goods': row[5],
+			'region_of_delivery': vRegion,
 			#Юридический адрес
 			"juridical_address_index": row[14],
 			"juridical_address_city_name": row[15],
@@ -186,8 +189,6 @@ class crm_iml_sqlserver(osv.osv):
 			"date_of_accounting": vDateAccount,
 			"registration_date": vRegDate,
 			#Ссылки на объекты
-			#Не понимаю что делать с категорией товара
-			#"category_of_goods" : vGoodsCategoryID,
 			"storage_of_shipping": vStorageShipID,
 			"type_of_counterparty": vType,
 			#Это просто доверенность :)
@@ -214,9 +215,9 @@ class crm_iml_sqlserver(osv.osv):
 			NAV_UNC - NavUIN - 2
 			ShopName - internet_shop_name - 3
 			WebSite - 4 - website
-			GoodsCategory_ID - category_of_goods - 5
+			GoodsCategory - category_of_goods - 5
 			Warehouse_ID - storage_of_shipping - 6
-			Region_ID - 7
+			Region_ID - region_of_delivery - 7
 			RespPerson - fio_authorized person_nominative_case - 8
 			RespPersonWhom - fio_authorized person_genitive_case - 9
 			RespPersonPosition - authorized_person_position_nominative_case - 10
@@ -258,7 +259,7 @@ class crm_iml_sqlserver(osv.osv):
 				wherePart = ''
 				if (server.lastImportDate): 
 					wherePart = " where nav_timestamp >'" + str(server.lastImportDate) + "'"
-				query = "select crm_id, customername, nav_unc, ShopName, WebSite, GoodsCategory_ID, Warehouse_ID, Region_ID, RespPerson, RespPersonWhom, RespPersonPosition, RespPersonPositionWhom, LoA_Number, LoA_Date, AddrZIP, AddrSity, AddrStreet, AddrBuilding, AddrBuilding2, AddrOffice, LocAddrZIP, LocAddrSity, LocAddrStreet, LocAddrBuilding, LocAddrBuilding2, LocAddrOffice, AccountNo, BIC, BankName, CorrAccountNo, PartnerType, ITN, TRRC, TRDate, OGRN, RegistrationDate, OCVED, OCPO, OCATO  from " + server.tableName + wherePart
+				query = "select crm_id, customername, nav_unc, ShopName, WebSite, GoodsCategory, Warehouse_ID, Region_ID, RespPerson, RespPersonWhom, RespPersonPosition, RespPersonPositionWhom, LoA_Number, LoA_Date, AddrZIP, AddrSity, AddrStreet, AddrBuilding, AddrBuilding2, AddrOffice, LocAddrZIP, LocAddrSity, LocAddrStreet, LocAddrBuilding, LocAddrBuilding2, LocAddrOffice, AccountNo, BIC, BankName, CorrAccountNo, PartnerType, ITN, TRRC, TRDate, OGRN, RegistrationDate, OCVED, OCPO, OCATO  from " + server.tableName + wherePart
 				cursor.execute(query)
 				for row in cursor.fetchall():
 					cur_obj = server.createOrFindResPartner(row)
