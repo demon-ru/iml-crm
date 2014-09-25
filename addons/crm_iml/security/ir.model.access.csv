@@ -9,3 +9,5 @@ iml_goods_user,iml.crm.user.goods,model_crm_goodscategory,base.group_sale_salesm
 iml_goods_manager,iml.crm.manager.goods,model_crm_goodscategory,base.group_sale_manager,1,1,1,1
 iml_storage_user,iml.crm.user.storage,model_crm_shipping_storage,base.group_sale_salesman,1,0,0,0
 iml_storage_manager,iml.crm.manager.storage,model_crm_shipping_storage,base.group_sale_manager,1,1,1,1
+iml_company_org_type_user,iml.crm.manager.company_org_type,model_crm_company_org_type,base.group_sale_salesman,1,0,0,0
+iml_company_org_type_manager,iml.crm.user.company_org_type,model_crm_company_org_type,base.group_sale_manager,1,1,1,1
