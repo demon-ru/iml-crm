@@ -23,6 +23,12 @@
             <field eval="18" name="priority"/>
             <field name="arch" type="xml">
                 <data>
+                	<field name="parent_id" position="replace">
+	                	<field name="parent_id"
+	                            placeholder="Company"
+	                            domain="[('is_company', '=', True), ('id', '!=', id)]" context="{'default_is_company': True}"
+	                            />
+                    </field>
                 	<xpath
                 		expr="//group/group" position="replace"> 
                         <group invisible="True">
@@ -153,8 +159,7 @@
 				        <group>
 							<field string="Last export date" name="exportDateToNAV"/>
 							<field string="customer UIN in NAV" name="NavUIN"/>
-							<button name="iml_crm_export_id" string="Export custromer id" type="object"/>	
-							<field name="is_company" invisible="1"/>
+							<button name="iml_crm_export_id" string="Export custromer id" type="object"/>
 				        </group>
 				    </page>
             	</notebook>
