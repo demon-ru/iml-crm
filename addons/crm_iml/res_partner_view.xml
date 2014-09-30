@@ -71,6 +71,26 @@
 							<field  name="categoryClient_id"/>
 							<field string="Состояние обслуживания клиента" name="client_in_service"/>
 					</field>
+					<!-- сокрытие полей контактов для компаний, TaskId = 59 -->
+                        <field name="phone" position="replace">
+                        	<field name="phone" placeholder="e.g. +32.81.81.37.00" attrs="{'invisible': [('is_company','=', True)]}"/>
+                        </field>
+                        <field name="mobile" position="replace">
+                        	<field name="mobile" attrs="{'invisible': [('is_company','=', True)]}"/>
+                        </field>
+                        <field name="fax" position="replace">
+                        	<field name="fax" attrs="{'invisible': [('is_company','=', True)]}"/>
+                        </field>
+                        <field name="email" position="replace">
+                        	<field name="email" widget="email" attrs="{'required': [('user_ids','!=', [])], 'invisible': [('is_company','=', True)]}"/>
+                        </field>
+                        <field name="title" domain="[('domain','=','contact')]" options='{"no_open": True}' position="replace">
+                        </field>
+                        <field name="title" domain="[('domain','=','partner')]" context="{'default_domain': 'partner'}" position="replace">
+                            <field name="title" domain="[('domain','=','partner')]" options='{"no_open": True}' attrs="{'invisible': [('is_company','=',True)]}" context="{'default_domain': 'partner'}"/>
+                        </field>
+                    <!-- закончили сокрытие полей контактов для компаний -->
+
 					<page string="Contacts" position="before">
 						<page name='base_info' string= 'Основное'>
 							<group>
