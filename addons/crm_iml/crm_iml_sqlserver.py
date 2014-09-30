@@ -70,27 +70,28 @@ class crm_iml_sqlserver(osv.osv):
 		Метод вставляет ID клиента в промежуточную базу
 		Параметры
 			customerID - id заказчика в crm
-			NavUNC - id в NAV
+			IdImport - id в промежуточной базе
 			conectuion - подключение к БД
 			MakeCommit - делать коммит и закрывать ли подключение или это промежуточная запись
 	"""
-	def insert_record(self, customerID, NavUNC=None, conection=None, MakeCommit=True):
+	def insert_record(self, customerID, IdImport=None, conection=None, MakeCommit=True):
 		try:
 			if (conection is None): 
 				conection = self.connectToServer()
 			cursor = conection.cursor()
 			wherePart = ""
-			if not(NavUNC is None):
-				wherePart = unicode(" where nav_unc = '" + str(NavUNC) + "'", "utf-8")				
+			if not(IdImport is None):
+				wherePart = unicode(" where idimport = " + str(IdImport), "utf-8")				
 			else:
 				wherePart = " where crm_id = " + str(customerID) 
 			query = "select crm_id from " + self.tableName + wherePart
 			cursor.execute(query)
 			data = cursor.fetchone()
-			if ((data == None) and (NavUNC is None)) :
-				query = "INSERT into " + self.tableName + " (crm_id) values (" + str(customerID) +")"
+			importdate = time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			if ((data == None) and (IdImport is None)) :
+				query = "INSERT into " + self.tableName + " (crm_id, CRM_TimeStamp) values (" + str(customerID) +", '" + importdate + "')"
 			elif not(data == None):
-				query = "update " + self.tableName + " set crm_id = " + str(customerID) + wherePart
+				query = "update " + self.tableName + " set crm_id = " + str(customerID) + ", CRM_TimeStamp = '" + importdate + "' " + wherePart
 			cursor.execute(query)
 			if MakeCommit:
 				conection.commit()
@@ -101,13 +102,27 @@ class crm_iml_sqlserver(osv.osv):
 			if ((conection) and (MakeCommit)):
 				conection.close()
 		return True
-
-	def findObject(self, cr, uid, classObj, searchField, searchVal):
+	"""
+		Находит или создает объект заданного класса
+		Параметры:
+			classObj - класс искомого объекта
+			condition - условие для поиска
+			CreateNewObj - если объект не найден создавать его или нет
+			vals - атрибуты объекта
+			UpdateSearchingObj - обновить найденный объект или нет
+	"""
+	def findObject(self, cr, uid, classObj, condition, CreateNewObj=False, vals=None, UpdateSearchingObj=False):
 		res_obj = self.pool.get(classObj)
 		cur_obj = None
-		res_id = res_obj.search(cr, uid, [(searchField, 'in', [searchVal])], context=None)
+		res_id = res_obj.search(cr, uid, condition, context=None)
 		if len(res_id) > 0:
 			cur_obj = res_obj.browse(cr, uid, res_id[0])
+		if cur_obj:
+			if (vals) and (UpdateSearchingObj):
+				cur_obj.write(vals)
+		elif CreateNewObj: 
+			cur_obj = self.pool.get(classObj)
+			cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=None))	 	
 		return cur_obj
 	
 	"""
@@ -120,45 +135,65 @@ class crm_iml_sqlserver(osv.osv):
 		res_obj = self.pool.get('res.partner')
 		vDateAccount = None
 		if (row[33]):
-			vDateAccount = row[33].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			#Хак в случае если год в дате будет меньше 1900
+			try:
+				vDateAccount = row[33].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			except ValueError:
+				vDateAccount = None
 		vRegDate = None
 		if (row[35]):
-			vRegDate = row[35].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			try:
+				vRegDate = row[35].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			except ValueError:
+				vRegDate = None
 		vRegion = None
 		if (row[7]):
-			if (row[7] == 0):
+			if (row[7] == unicode("МСКРЦ", "utf-8")):
 				vRegion = 'moscow'
-			elif (row[7] == 1):
+			elif (row[7] == unicode("РЕГРЦ", "utf-8")):
 				vRegion = 'regions'
+		#Поиск склада 
 		vStorageShipID = None
 		if (row[6]):
-			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", 'nav_id', row[6])
+			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", [('nav_id', "in", [row[6]])])
 			if (vStorageShip):
 				vStorageShipID = vStorageShip.id 
+		#Поиск категории товара
+		vCategoryOfGoodsID = None
+		if (row[5]):
+			vCategoryOfGoods = self.findObject(cr, uid,"crm.goodscategory", [('nav_id', "in", [row[5]])])
+			if (vCategoryOfGoods):
+				vCategoryOfGoodsID = vCategoryOfGoods.id 
+		#Определение типа физ/юр лицо		
 		vType = None
 		if (row[30]):
 			if (row[30] == "Физ. лицо"):
 				vType = "individual"
 			elif (row[30] == "Юр. лицо"):
 				vType = "legal_entity"
+		#Дата доверенности
 		vDoverenostDate = None
 		if (row[13]):
-			vDoverenostDate = row[13].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			try:
+				vDoverenostDate = row[13].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			except ValueError:
+				vDoverenostDate = None
+		#Поиск организационной формы компании
+		vOrgTypeID = None
+		if (row[46]):
+			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [row[46]])])
+			if (vOrgType):
+				vOrgTypeID = vOrgType.id 	
 		vals = {
 			#Информация о клиенте
 			"name":	row[1],		
 			"short_name": row[1],
-			"NavUIN": row[2],
+			"unk": row[2],
 			"is_company": True,
-			"internet_shop_name": row[3],
+			"juridical_name": row[3],
 			"website": row[4],
 			#Вкладка Основная
-			"fio_authorized person_nominative_case": row[8],
-			"fio_authorized person_genitive_case": row[9],
-			"authorized_person_position_nominative_case": row[10], 
-			"authorized_person_position_genetive_case": row[11],
-			'category_of_goods': row[5],
-			'region_of_delivery': vRegion,
+			#'category_of_goods': row[5],
 			#Юридический адрес
 			"juridical_address_index": row[14],
 			"juridical_address_city_name": row[15],
@@ -166,19 +201,14 @@ class crm_iml_sqlserver(osv.osv):
 			"juridical_address_dom": row[17],
 			"juridical_address_building": row[18],
 			"juridical_address_office": row[19],
-			"actual_address_index": row[20],
 			#Фактический адрес
+			"actual_address_index": row[20],
 			"actual_address_city_name": row[21],
 			"actual_address_street_name": row[22],
 			"actual_address_dom": row[23],
 			"actual_address_building": row[24],
 			"actual_address_office": row[25],
-			"account_number": row[26],
-			#Банк
-			"BIN": row[27],
-			"bank_name": row[28],
 			#Коды
-			"correspondent_account_number": row[29],
 			"inn": row[31],
 			"registration_reason_code": row[32],
 			"OGRN_OGRNIP": row[34],
@@ -189,20 +219,54 @@ class crm_iml_sqlserver(osv.osv):
 			"date_of_accounting": vDateAccount,
 			"registration_date": vRegDate,
 			#Ссылки на объекты
-			"storage_of_shipping": vStorageShipID,
 			"type_of_counterparty": vType,
-			#Это просто доверенность :)
-			"number_of_powerOfattorney": row[12],
-			"date_of_powerOfattorney": vDoverenostDate,
+			"company_org_type": vOrgTypeID,
 			}
 		if not(row[0] is None):
-			res_id = res_obj.search(cr, uid, [("id", 'in', [int(row[0])])], context=None)
-			if len(res_id) > 0:
-				cur_obj = res_obj.browse(cr, uid, res_id[0])
+			cur_obj = self.findObject(cr, uid,"res.partner", [('id',"in", [row[0]])])
+			if cur_obj:
 				cur_obj.write(vals)
-		else:
+		elif not(row[2] is None):
+			cur_obj = self.findObject(cr, uid,"res.partner", [('unk',"in", [row[2]])])
+			if cur_obj:
+				cur_obj.write(vals)
+		if (row[0] is None) and not(cur_obj):
 			cur_obj = self.pool.get('res.partner')
 			cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=None))
+		#Если мы нашли или создали компанию - то пытаемся создать договор и контактное лицо
+		if cur_obj:
+			if row[39]:
+				vStartDate = None
+				if (row[47]):
+					#Хак в случае если год в дате будет меньше 1900
+					try:
+						vStartDate = row[47].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+					except ValueError:
+						vStartDate = None				
+				#Атрибуты договора
+				vals_add_obj = {
+					'name': row[39],
+					'crm_number': row[39],
+					'partner_id': cur_obj.id,
+					"fio_authorized person_nominative_case": row[8],
+					"fio_authorized person_genitive_case": row[9],
+					"authorized_person_position_nominative_case": row[10], 
+					"authorized_person_position_genetive_case": row[11],
+					'region_of_delivery': vRegion,
+					"storage_of_shipping": vStorageShipID,
+					"number_of_powerOfattorney": row[12],
+					"date_of_powerOfattorney": vDoverenostDate,
+					"date_start": vStartDate,
+				}
+				self.findObject(cr, uid,"account.analytic.account", ['&',('crm_number',"in", [row[39]]),('partner_id', 'in',[cur_obj.id])], True, vals_add_obj, True)			
+			if row[42]:			
+				vals_add_obj = {
+					"name": row[42],
+					"email": row[43],
+					"phone": row[44],
+					'parent_id': cur_obj.id
+				}
+				self.findObject(cr, uid,'res.partner', ["&",('name', 'in' ,[row[42]]),"&",('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
 		return cur_obj
 	
 	"""	
@@ -212,7 +276,7 @@ class crm_iml_sqlserver(osv.osv):
 		К сожалению после select запроса выгружается в массив и к полям нужно обращатся по номерам:
 			crm_id - id - 0
 			CustomerName - name - 1
-			NAV_UNC - NavUIN - 2
+			NAV_UNC - unk - 2
 			ShopName - internet_shop_name - 3
 			WebSite - 4 - website
 			GoodsCategory - category_of_goods - 5
@@ -222,7 +286,6 @@ class crm_iml_sqlserver(osv.osv):
 			RespPersonWhom - fio_authorized person_genitive_case - 9
 			RespPersonPosition - authorized_person_position_nominative_case - 10
 			RespPersonPositionWhom - authorized_person_position_genetive_case - 11
-			LoA_Number - number_of_powerOfattorney - 12 
 			LoA_Date - date_of_powerOfattorney - 13 
 			AddrZIP - juridical_address_index - 14
 			AddrSity - juridical_address_city_name - 15
@@ -249,6 +312,15 @@ class crm_iml_sqlserver(osv.osv):
 			OCVED - OKVED - 36
 			OCPO - OKPO - 37
 			OCATO - OKATO - 38
+			AgreementNo - name in account.analytic.account - 39
+			FactAdrStr - фактически адрес строкой - Добавлю позже - 40 
+			JurAdrStr - юридический адрес строкой - Добавлю позже - 41
+			Contact - ФИО контактого лица - 42
+			Email - email - 43
+			Phone - phone - 44
+			idimport - уникальный ключ для поиска записи импорта - 45
+			CompOrgTypeID - company_org_type - 46
+			AgreementDate - дата договора date_start у договора- 47
 """
 	def import_records(self,cr, uid, ids, context=None):
 		conection = None
@@ -259,15 +331,15 @@ class crm_iml_sqlserver(osv.osv):
 				wherePart = ''
 				if (server.lastImportDate): 
 					wherePart = " where nav_timestamp >'" + str(server.lastImportDate) + "'"
-				query = "select crm_id, customername, nav_unc, ShopName, WebSite, GoodsCategory, Warehouse_ID, Region_ID, RespPerson, RespPersonWhom, RespPersonPosition, RespPersonPositionWhom, LoA_Number, LoA_Date, AddrZIP, AddrSity, AddrStreet, AddrBuilding, AddrBuilding2, AddrOffice, LocAddrZIP, LocAddrSity, LocAddrStreet, LocAddrBuilding, LocAddrBuilding2, LocAddrOffice, AccountNo, BIC, BankName, CorrAccountNo, PartnerType, ITN, TRRC, TRDate, OGRN, RegistrationDate, OCVED, OCPO, OCATO  from " + server.tableName + wherePart
+				query = "select crm_id, customername, nav_unc, ShopName, WebSite, GoodsCategory, Warehouse_ID, Region_ID, RespPerson, RespPersonWhom, RespPersonPosition, RespPersonPositionWhom, LoA_Number, LoA_Date, AddrZIP, AddrSity, AddrStreet, AddrBuilding, AddrBuilding2, AddrOffice, LocAddrZIP, LocAddrSity, LocAddrStreet, LocAddrBuilding, LocAddrBuilding2, LocAddrOffice, AccountNo, BIC, BankName, CorrAccountNo, PartnerType, ITN, TRRC, TRDate, OGRN, RegistrationDate, OCVED, OCPO, OCATO, AgreementNo, FactAdrStr, JurAdrStr, Contact, Email, Phone, idimport, CompOrgTypeID, AgreementDate from " + server.tableName + wherePart
 				cursor.execute(query)
 				for row in cursor.fetchall():
 					cur_obj = server.createOrFindResPartner(row)
 					if (cur_obj is None):
 						#TODO Сделать логирование импорта
-						sys.stdout.write("ERROR! Not found client in system with id =" + row[0])
-					if (row[0] is None) and not(row[2] is None): 
-						server.insert_record(cur_obj.id, row[2], conection, False);
+						sys.stdout.write("ERROR! Not found client in system with id =" + str(row[0]))
+					if not(cur_obj is None) and (row[0] is None) and not(row[45] is None): 
+						server.insert_record(cur_obj.id, row[45], conection, False);
 				conection.commit()
 		except Exception, e:
 			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))

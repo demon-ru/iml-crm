@@ -28,3 +28,4 @@ import crm_goods_category
 import crm_shipping_storages
 import crm_iml_sqlserver
 import crm_company_org_type
+import account_analytic_account

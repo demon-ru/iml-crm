@@ -29,9 +29,9 @@
 """,
     'author': 'OrientExpress',
     'website': 'http://www.iml.oe-it.ru',
-    # I think depends our module is like as crm module
     'depends': [
-	'crm'
+	'crm',
+	'analytic',
     ],
     'data': [
 
@@ -63,6 +63,8 @@
 	'security/ir.model.access.csv',
 
 	"res_config_view.xml",	
+
+	"account_analytic_account_view.xml",
 
     ],
     
