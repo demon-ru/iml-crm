@@ -128,7 +128,7 @@
 						</page>
 					</page>
 					<page name='internal_notes' position="before">
-						<page name='bank_info' string= 'Банк'>
+						<page name='bank_info' string= 'Банк' invisible="True">
 							<group>
 								<field  name="account_number" />
 								<field  name="BIN"/>
