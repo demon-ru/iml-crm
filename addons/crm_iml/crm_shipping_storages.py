@@ -29,6 +29,6 @@ class crm_shipping_storages(osv.osv):
     _columns = {
         'name': fields.char('Name', size=255, required=True, help='The name of the storage.'),
 	'nav_id': fields.integer("External code"),
-        'description': fields.text('Description'),
+        'type': fields.integer('Type'),
     }
 crm_shipping_storages()
