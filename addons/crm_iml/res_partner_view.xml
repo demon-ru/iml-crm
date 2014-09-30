@@ -64,7 +64,6 @@
             		</xpath>
                 		
 					<field name="function" position="after" >
-							<field  name="internet_shop_name" />
 							<field  name="short_name" invisible="True"/>
 							<field  name="unk"/>
 							<field  name="company_org_type"/>
