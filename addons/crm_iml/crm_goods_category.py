@@ -29,6 +29,6 @@ class crm_goodscategory(osv.osv):
     _columns = {
         'name': fields.char('Name', size=64, required=True, help='The name of the segmentation.'),
         'description': fields.text('Description'),
-	'nav_id': fields.integer("External code"),
+	'nav_id': fields.char("External code",  size=100),
     }
 crm_goodscategory()

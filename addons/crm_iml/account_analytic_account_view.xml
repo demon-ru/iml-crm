@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data> 
+
+       <record id="view_account_form_iml_crm1" model="ir.ui.view">
+            <field name="name">view.account.analytic.form.iml.crm.inherited1</field>
+            <field name="model">account.analytic.account</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
+            <field eval="18" name="priority"/>
+            <field name="arch" type="xml">
+                <data>
+                      <page string="Contract Information" position="before">
+                          <page name='base_info' string= 'Основное'>  
+                              <group>
+				<field name="crm_number" />
+				<field  name="storage_of_shipping" />
+				<field  name="region_of_delivery"/>				
+				<field  name="fio_authorized person_nominative_case" string="ФИО уполномоченного лица, именительный падеж"/>
+				<field  name="fio_authorized person_genitive_case" string="ФИО уполномоченного лица, родительный падеж"/>							
+				<field  name="authorized_person_position_nominative_case"/>
+				<field  name="authorized_person_position_genetive_case"/>
+				<field  name="number_of_powerOfattorney"/>
+				<field  name="date_of_powerOfattorney"/>
+                              </group>
+                          </page>
+                       </page>
+                </data>
+            </field>
+        </record>
+     </data>
+</openerp>

@@ -29,5 +29,6 @@ class crm_company_org_type(osv.osv):
     _columns = {
         'name': fields.char('Name', size=64, required=True, help='The name of the organisation form.'),
         'description': fields.text('Description'),
+	'nav_id': fields.char("External code",  size=100),
     }
 crm_company_org_type()
