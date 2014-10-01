@@ -95,16 +95,6 @@
 						<page name='base_info' string= 'Основное'>
 							<group>
 								<field  name="category_of_goods" />
-								<field  name="storage_of_shipping" />
-								<field  name="region_of_delivery"/>
-								
-								<field  name="fio_authorized person_nominative_case" string="ФИО уполномоченного лица, именительный падеж"/>
-								<field  name="fio_authorized person_genitive_case" string="ФИО уполномоченного лица, родительный падеж"/>
-								
-								<field  name="authorized_person_position_nominative_case"/>
-								<field  name="authorized_person_position_genetive_case"/>
-								<field  name="number_of_powerOfattorney"/>
-								<field  name="date_of_powerOfattorney"/>
 							</group>
 						</page>
 					</page>
