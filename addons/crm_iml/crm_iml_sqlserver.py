@@ -87,7 +87,7 @@ class crm_iml_sqlserver(osv.osv):
 			query = "select crm_id from " + self.tableName + wherePart
 			cursor.execute(query)
 			data = cursor.fetchone()
-			importdate = time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			importdate = time.strftime('%Y-%m-%d %H:%M:%S')
 			if ((data == None) and (IdImport is None)) :
 				query = "INSERT into " + self.tableName + " (crm_id, CRM_TimeStamp) values (" + str(customerID) +", '" + importdate + "')"
 			elif not(data == None):
@@ -167,9 +167,9 @@ class crm_iml_sqlserver(osv.osv):
 		#Определение типа физ/юр лицо		
 		vType = None
 		if (row[30]):
-			if (row[30] == "Физ. лицо"):
+			if (row[30] == unicode("Физ. лицо", "utf-8")):
 				vType = "individual"
-			elif (row[30] == "Юр. лицо"):
+			elif (row[30] == unicode("Юр. лицо", "utf-8")):
 				vType = "legal_entity"
 		#Дата доверенности
 		vDoverenostDate = None
@@ -181,7 +181,7 @@ class crm_iml_sqlserver(osv.osv):
 		#Поиск организационной формы компании
 		vOrgTypeID = None
 		if (row[46]):
-			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [row[46]])])
+			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [row[46], "utf-8"])])
 			if (vOrgType):
 				vOrgTypeID = vOrgType.id 	
 		vals = {
@@ -221,6 +221,7 @@ class crm_iml_sqlserver(osv.osv):
 			#Ссылки на объекты
 			"type_of_counterparty": vType,
 			"company_org_type": vOrgTypeID,
+			'category_of_goods' : vCategoryOfGoodsID,
 			}
 		if not(row[0] is None):
 			cur_obj = self.findObject(cr, uid,"res.partner", [('id',"in", [row[0]])])

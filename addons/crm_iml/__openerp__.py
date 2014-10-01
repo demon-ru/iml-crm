@@ -32,6 +32,7 @@
     'depends': [
 	'crm',
 	'analytic',
+	'account',
     ],
     'data': [
 

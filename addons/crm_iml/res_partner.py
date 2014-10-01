@@ -144,17 +144,7 @@ class res_partner(osv.osv):
 #        'client_service_status' : 
         # Страница "Основное"
         'internet_shop_name' : fields.char('Internet shop name', size = 255),
-        #'category_of_goods' : fields.many2one('crm.goodscategory', 'Categories of goods'),
-        'category_of_goods' : fields.char('Category of Good', size = 255),
-        'storage_of_shipping' : fields.many2one('crm.shipping_storage', 'Storage of shipping') ,
-        'region_of_delivery' : fields.selection([('moscow', 'Moscow'), ('regions', 'Regions except Moscow')], 'Delivery region'),
-        'fio_authorized person_nominative_case' : fields.char('Full name of authorized person in nominative case', size = 255),
-        'fio_authorized person_genitive_case' : fields.char('Full name of authorized person in genitive case', size = 255),
-        'authorized_person_position_nominative_case' : fields.char('Position of authorized person in nominative case', size = 255), 
-        'authorized_person_position_genetive_case' : fields.char('Position of authorized person in genetive case', size = 255),
-        # это банальная доверенность
-        'number_of_powerOfattorney' : fields.char('Number of The Power of Attorney', size = 255),
-        'date_of_powerOfattorney' : fields.date('The date of The Power of Attorney'),
+        'category_of_goods' : fields.many2one('crm.goodscategory', 'Categories of goods'),
         # Страница "Адреса"
         # группа "Юридический адрес"
         'juridical_address_index' : fields.char('Post index', size = 255),
@@ -185,6 +175,21 @@ class res_partner(osv.osv):
         'OKVED' : fields.char('OKVED', size = 255),
         'OKPO' : fields.char('OKPO', size = 255),
         'OKATO' : fields.char('OKATO', size = 255),
+	#Переопределил эти поля  - сделал необязательными
+	'property_account_payable': fields.property(
+            type='many2one',
+            relation='account.account',
+            string="Account Payable",
+            domain="[('type', '=', 'payable')]",
+            help="This account will be used instead of the default one as the payable account for the current partner",
+            required=False),
+        'property_account_receivable': fields.property(
+            type='many2one',
+            relation='account.account',
+            string="Account Receivable",
+            domain="[('type', '=', 'receivable')]",
+            help="This account will be used instead of the default one as the receivable account for the current partner",
+            required=False),
         
 		# работа с NAV
 		'exportDateToNAV': fields.datetime('crm.iml.export.date.res.partner' , readonly=True),
