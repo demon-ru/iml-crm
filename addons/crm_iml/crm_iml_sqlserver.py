@@ -181,7 +181,7 @@ class crm_iml_sqlserver(osv.osv):
 		#Поиск организационной формы компании
 		vOrgTypeID = None
 		if (row[46]):
-			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [row[46], "utf-8"])])
+			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [row[46]])])
 			if (vOrgType):
 				vOrgTypeID = vOrgType.id 	
 		vals = {
