@@ -251,6 +251,7 @@ msgstr "Юридическое название организации"
 #: field:crm.goodscategory,write_uid:0
 #: field:crm.iml.opportunities.type,write_uid:0
 #: field:crm.iml.sqlserver,write_uid:0
+#: field:crm.settlement_center,write_uid:0
 #: field:crm.shipping_storage,write_uid:0
 msgid "Last Updated by"
 msgstr "Обновлен(а)"
@@ -261,6 +262,7 @@ msgstr "Обновлен(а)"
 #: field:crm.goodscategory,write_date:0
 #: field:crm.iml.opportunities.type,write_date:0
 #: field:crm.iml.sqlserver,write_date:0
+#: field:crm.settlement_center,write_date:0
 #: field:crm.shipping_storage,write_date:0
 msgid "Last Updated on"
 msgstr "Обновлен(а)"
@@ -412,6 +414,13 @@ msgid "Server Information"
 msgstr "Server Information"
 
 #. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_settlement_center_all
+#: model:ir.model,name:crm_iml.model_crm_settlement_center
+#: model:ir.ui.menu,name:crm_iml.menu_crm_settlement_center
+msgid "Settlement Center"
+msgstr "Расчетный центр"
+
+#. module: crm_iml
 #: model:ir.model,name:crm_iml.model_crm_shipping_storage
 #: model:ir.ui.menu,name:crm_iml.menu_crm_shippingstorages_view
 msgid "Shipping storages"
@@ -499,6 +508,11 @@ msgstr "Название организационной формы компан�
 #: help:crm.goodscategory,name:0
 msgid "The name of the segmentation."
 msgstr "Наименование категории"
+
+#. module: crm_iml
+#: help:crm.settlement_center,name:0
+msgid "The name of the settlement Center."
+msgstr "Наименование рассчетного центра"
 
 #. module: crm_iml
 #: help:crm.shipping_storage,name:0

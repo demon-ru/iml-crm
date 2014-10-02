@@ -49,23 +49,26 @@
         'crm_company_org_type_data.xml',
         'crm_company_org_type_view.xml',
         'crm_company_org_type_menu.xml',
+        
+        'crm_settlement_center_view.xml',
+        'crm_settlement_center_menu.xml',
 
-	'res_partner_view.xml',
+		'res_partner_view.xml',
 	
-	"crm_iml_sqlserver_view.xml",
-	"crm_iml_sqlserver_menu.xml",
+		"crm_iml_sqlserver_view.xml",
+		"crm_iml_sqlserver_menu.xml",
 
-	'crm_iml_opportunities_type_data.xml',
-	'crm_iml_opportunities_type_view.xml',
-	'crm_iml_opportunities_type_menu.xml',
+		'crm_iml_opportunities_type_data.xml',
+		'crm_iml_opportunities_type_view.xml',
+		'crm_iml_opportunities_type_menu.xml',
 
-	'crm_lead_view.xml',
+		'crm_lead_view.xml',
 
-	'security/ir.model.access.csv',
+		'security/ir.model.access.csv',
 
-	"res_config_view.xml",	
+		"res_config_view.xml",	
 
-	"account_analytic_account_view.xml",
+		"account_analytic_account_view.xml",
 
     ],
     

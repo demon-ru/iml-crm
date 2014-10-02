@@ -1,0 +1,16 @@
+﻿<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record id="crm_settlement_center_view" model="ir.ui.view">
+            <field name="name">settlement_center</field>
+            <field name="model">crm.settlement_center</field>
+	    <field name="type">form</field>
+            <field name="arch" type="xml">
+		<group col="2" colspan="2">
+                     <field name="name"/>
+				     <field name="nav_id"/>
+		</group>
+            </field>
+        </record>
+   </data>
+</openerp>
