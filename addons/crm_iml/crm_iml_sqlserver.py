@@ -222,6 +222,9 @@ class crm_iml_sqlserver(osv.osv):
 			"type_of_counterparty": vType,
 			"company_org_type": vOrgTypeID,
 			'category_of_goods' : vCategoryOfGoodsID,
+			#Не стандартная часть адреса
+			'actual_adress_non_stand_part': row[40],
+			'juridical_adress_non_stand_part': row[41],
 			}
 		if not(row[0] is None):
 			cur_obj = self.findObject(cr, uid,"res.partner", [('id',"in", [row[0]])])
@@ -314,8 +317,8 @@ class crm_iml_sqlserver(osv.osv):
 			OCPO - OKPO - 37
 			OCATO - OKATO - 38
 			AgreementNo - name in account.analytic.account - 39
-			FactAdrStr - фактически адрес строкой - Добавлю позже - 40 
-			JurAdrStr - юридический адрес строкой - Добавлю позже - 41
+			FactAdrStr - actual_adress_non_stand_part - фактически адрес строкой - 40 
+			JurAdrStr - juridical_adress_non_stand_part - юридический адрес строкой - 41
 			Contact - ФИО контактого лица - 42
 			Email - email - 43
 			Phone - phone - 44

@@ -147,19 +147,23 @@ class res_partner(osv.osv):
         'category_of_goods' : fields.many2one('crm.goodscategory', 'Categories of goods'),
         # Страница "Адреса"
         # группа "Юридический адрес"
+	"juridical_address_country" : fields.char('Country', size = 255), 
         'juridical_address_index' : fields.char('Post index', size = 255),
         'juridical_address_city_name' : fields.char('City', size = 255),
         'juridical_address_street_name' : fields.char('Street', size = 255),
         'juridical_address_dom' : fields.char('House number', size = 255),
         'juridical_address_building' : fields.char('Building', size = 255),
         'juridical_address_office' : fields.char('Office number', size = 255),
+	'juridical_adress_non_stand_part' : fields.char("Non-standard part", size = 255),
         # группа "Фактический адрес"
+	"actual_address_country" : fields.char('Country', size = 255), 
         'actual_address_index' : fields.char('Post index', size = 255),
         'actual_address_city_name' : fields.char('City', size = 255),
         'actual_address_street_name' : fields.char('Street', size = 255),
         'actual_address_dom' : fields.char('House number', size = 255),
         'actual_address_building' : fields.char('Building', size = 255),
         'actual_address_office' : fields.char('Office number', size = 255),
+	'actual_adress_non_stand_part' : fields.char("Non-standard part", size = 255),
         # Страница "Банк"
         'account_number' : fields.char('Account number', size = 255), 
         'BIN' : fields.char('BIN', size = 255),
@@ -196,6 +200,30 @@ class res_partner(osv.osv):
 		'NavUIN': fields.char('crm.iml.nav.uin' , size=512, readonly=True),
     }
 
+    _defaults = {
+	"juridical_address_country": "Российская Федерация",
+	"actual_address_country": "Российская Федерация",
+    }
+
+    def onchange_adress(self, cr, uid, ids, address_index, city_name, street_name, dom, building, office, adressField):
+	v={}	 
+	vAdress = ""  
+	if (address_index and address_index.strip() != ""):
+		vAdress = address_index.strip()
+	if (city_name and city_name.strip() != ""):
+		vAdress = vAdress + " " + city_name.strip()
+	if (street_name and street_name.strip() != ""):
+		vAdress = vAdress + " " + street_name.strip()
+	if (dom and dom.strip() != ""):
+		vAdress = vAdress + unicode(" д.", "utf-8") + dom.strip()
+	if (building and building.strip() != ""):
+		vAdress = vAdress + unicode(" cтроение: ", "utf-8") + building.strip()
+	if (office and office.strip() != ""):
+		vAdress = vAdress + unicode(" офис: ", "utf-8") + office.strip() 
+	if (vAdress != "" and adressField):
+		v[adressField] = vAdress
+    	return {'value':v}
+
     def iml_crm_export_id(self,cr, uid, ids, context=None):
 		for partn in self.browse(cr, uid, ids, context=context):
 			params = self.pool.get('ir.config_parameter')
@@ -209,4 +237,13 @@ class res_partner(osv.osv):
 				partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 		return True
 
+    def write(self, cr, uid, ids, vals, context=None):
+        # stage change: update date_last_stage_update
+        if ('juridical_address_city_name' in vals or 'juridical_address_index' in vals or 'juridical_address_street_name' in vals or 'juridical_address_dom' in vals or 'juridical_address_building' in vals or 'juridical_address_office' in vals) and not('juridical_adress_non_stand_part' in vals):
+		jur_adress = self.onchange_adress(cr, uid, ids, vals.get('juridical_address_index'), vals.get('juridical_address_city_name'), vals.get('juridical_address_street_name'), vals.get('juridical_address_dom'), vals.get('juridical_address_building'), vals.get('juridical_address_office'), 'juridical_adress_non_stand_part')['value']
+		vals.update(jur_adress)
+        if ('actual_address_city_name' in vals or 'actual_address_index' in vals or 'actual_address_street_name' in vals or 'actual_address_dom' in vals or 'actual_address_building' in vals or 'actual_address_office' in vals) and not('actual_adress_non_stand_part' in vals):
+		actual_adress = self.onchange_adress(cr, uid, ids, vals.get('actual_address_index'), vals.get('actual_address_city_name'), vals.get('actual_address_street_name'), vals.get('actual_address_dom'), vals.get('actual_address_building'), vals.get('actual_address_office'), 'actual_adress_non_stand_part')['value']
+		vals.update(actual_adress)
+        return super(res_partner, self).write(cr, uid, ids, vals, context=context)
 
