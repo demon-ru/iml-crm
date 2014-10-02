@@ -18,15 +18,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import res_config
-import res_partner
-import crm_clientcategory
-import crm_lead
-import crm_iml_opportunities_type
-import crm_iml_html
-import crm_goods_category
-import crm_shipping_storages
-import crm_iml_sqlserver
-import crm_company_org_type
-import account_analytic_account
-import crm_settlement_center
+
+from openerp.osv import fields,osv,orm
+
+class crm_settlement_center(osv.osv):
+
+    _name = "crm.settlement_center"
+    _description = "Settlement Center"
+
+    _columns = {
+        'name': fields.char('Name', size=255, help='The name of the settlement Center.'),
+		'nav_id': fields.char("External code"),
+    }
+crm_settlement_center()
