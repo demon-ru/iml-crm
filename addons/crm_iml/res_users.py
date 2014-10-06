@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    OpernERP module for Customer Relationship Management for Logistic company
@@ -18,16 +18,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import res_config
-import res_partner
-import crm_clientcategory
-import crm_lead
-import crm_iml_opportunities_type
-import crm_iml_html
-import crm_goods_category
-import crm_shipping_storages
-import crm_iml_sqlserver
-import crm_company_org_type
-import account_analytic_account
-import crm_settlement_center
-import res_users
+
+from openerp.osv import fields,osv
+
+class res_users(osv.osv):
+	_inherit = 'res.users'
+	_columns = {
+		"nav_id": fields.char("External code", size=100),
+	}

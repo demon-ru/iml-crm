@@ -69,6 +69,7 @@
 		"res_config_view.xml",	
 
 		"account_analytic_account_view.xml",
+		"res_users_view.xml",
 
     ],
     
