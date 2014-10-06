@@ -23,7 +23,8 @@
 				  <field name="user"/>
 				  <field name="password"/>
 				  <field name="dbname"/>	
-				  <field name="tableName"/>		
+				  <field name="tableName"/>	
+				  <field name="exchange_type"/>
 			  </group>
 		  </sheet>
             </field>

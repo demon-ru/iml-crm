@@ -83,6 +83,7 @@ class crm_iml_sqlserver(osv.osv):
 		'password': fields.char('Password', size=128),
 		'dbname': fields.char('Database name', size=128),
 		'tableName':fields.char('Table Name', size=128),
+		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange')], 'Exchange type'),
 	}
 
 	"""
