@@ -628,7 +628,7 @@ msgid "Основное"
 msgstr "Основное"
 
 #. module: crm_iml
-ы#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "Состояние обслуживания клиента"
 msgstr "Состояние обслуживания клиента"
 
