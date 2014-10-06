@@ -9,7 +9,9 @@
                  <div> 
                      <label for="export_sql_server" string='Export/Import my sql server'/>
                      <field name="export_sql_server" class="oe_inline"/> 
-		 </div>
+                     <label for="exchange_settings" string="Settings for MySQL db connection" />
+                     <field name="exchange_settings" class="oe_inline"/>
+				 </div>
             </field>
         </record>
 

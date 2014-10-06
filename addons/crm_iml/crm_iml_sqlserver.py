@@ -27,6 +27,50 @@ from openerp import tools, api
 from openerp.tools.translate import _
 from openerp import pooler
 
+
+class crm_iml_exchangeserver_settings(osv.osv):
+	_name = "crm.iml.exchange_server_settings"
+	_description = "Settings for importing and exporting data to MySQL database"
+	_columns = {
+		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
+		'name' : fields.char('Name', size=255, required=True),
+		'server' : fields.char('SQL server', size=255, required=True),
+		'user' : fields.char('User', size=255, required=True),
+		'password' : fields.char('Password', size=255),
+		'dbname' : fields.char('Database name', size=255),
+		'tableName' : fields.char('Table name', size=255),
+
+	}
+	_sql_constraints = [
+        ('name_unique_constrait', 'unique(name)', "Config with this name alredy exists. Name must be unique."),
+    ]
+
+	"""
+		Создает подключение к серверу
+	"""
+	def connectToServer(self):	
+		db = None
+		try:
+			db = MySQLdb.connect(self.server, self.user, 
+			  self.password, self.dbname, charset="utf8", use_unicode=True)
+		except Exception, e:
+			raise osv.except_osv(_("Connection failed!"), _("Here is what we got instead:\n %s.") % 					  tools.ustr(e))
+		return db
+			
+	"""	
+		Teстовое подключение  к БД
+	"""
+	def test_iml_crm_sql_server(self,cr, uid, ids, context=None):	
+		db = None;	
+		try:
+			for server in self.browse(cr, uid, ids, context=context):
+				db = server.connectToServer();
+		finally:
+			if (db):
+				db.close()
+		server.write({'lastTestDate': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
+		return True
+
 class crm_iml_sqlserver(osv.osv):
 	_name = "crm.iml.sqlserver"
 	_description = "Sql server for export/import data from OpenErp to my sql database"

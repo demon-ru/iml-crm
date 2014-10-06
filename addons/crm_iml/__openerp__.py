@@ -58,6 +58,8 @@
 		"crm_iml_sqlserver_view.xml",
 		"crm_iml_sqlserver_menu.xml",
 
+        "crm_iml_exchange_settings.xml",
+
 		'crm_iml_opportunities_type_data.xml',
 		'crm_iml_opportunities_type_view.xml',
 		'crm_iml_opportunities_type_menu.xml',
