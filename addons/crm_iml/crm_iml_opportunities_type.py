@@ -23,11 +23,17 @@ from openerp.osv import fields,osv,orm
 
 class crm_iml_opportunities_type(osv.osv):
 
-    _name = "crm.iml.opportunities.type"
-    _description = "Type of opportunities"
+	_name = "crm.iml.opportunities.type"
+	_description = "Type of opportunities"
 
-    _columns = {
-        'name': fields.char('Name', size=64, required=True),
-        'description': fields.text('Description'),
-    }
+	_columns = {
+		'description': fields.char('Description', size=256, required=True),
+		'name': fields.char('Name', size=64, required=True),
+	}
+
+	def name_get(self,cr, user, ids, context=None):
+		res = []
+		for typeOport in self.browse(cr, user, ids, context=context):
+			res.append((typeOport.id,typeOport.description))
+		return res
 crm_iml_opportunities_type()

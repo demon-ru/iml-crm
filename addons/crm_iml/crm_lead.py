@@ -37,95 +37,98 @@ from openerp.tools import email_re
 
 class crm_lead(format_address, osv.osv):
 
-    _inherit = 'crm.lead'
-    _name = "crm.lead"
+	_inherit = 'crm.lead'
+	_name = "crm.lead"
 
-    _columns = {
-	'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'description'),
-    }
+	_columns = {
+		'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'Type of opportunities'),
+	}
 
-    def parse_json(self,description):
-        stringText = ''
-	stringText = description.replace('\r\n', '\n')
-	stringText = description.replace('\r', '\n')
-	stringText = stringText.replace('\n', ' ')
-	stringText = stringText.replace('" ', '"')
-	stringText = stringText.replace(' "', '"')
-	indexBeginJSON = stringText.rfind('{')
-	indexEndJSON = stringText.rfind('}')
-	strJSON = ''
-	if (indexBeginJSON > -1 and indexEndJSON > -1):         
-		strJSON = stringText[indexBeginJSON : indexEndJSON + 1]
-	if strJSON <> '':
-   	     aObj = json.loads(strJSON)
-        return aObj
+	def parse_json(self,description):
+		stringText = ''
+		stringText = description.replace('\r\n', '\n')
+		stringText = description.replace('\r', '\n')
+		stringText = stringText.replace('\n', ' ')
+		stringText = stringText.replace('" ', '"')
+		stringText = stringText.replace(' "', '"')
+		indexBeginJSON = stringText.rfind('{')
+		indexEndJSON = stringText.rfind('}')
+		strJSON = ''
+		if (indexBeginJSON > -1 and indexEndJSON > -1):         
+			strJSON = stringText[indexBeginJSON : indexEndJSON + 1]
+		if strJSON <> '':
+	   	     aObj = json.loads(strJSON)
+		return aObj
     
-    def findOrCreateObject(self, cr, uid, context, classObj, searchField, searchVal, vals):
-	res_obj = self.pool.get(classObj)
-	res_id = res_obj.search(cr, uid, [(searchField, 'in', [searchVal])], context=context)
-	if len(res_id) > 0:
-		cur_obj = res_obj.browse(cr, uid, res_id[0])
-	else:
-		cur_obj = self.pool.get(classObj)
-		cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=context))
-	return cur_obj
+	def findOrCreateObject(self, cr, uid, context, classObj, searchField, searchVal, vals):
+		res_obj = self.pool.get(classObj)
+		res_id = res_obj.search(cr, uid, [(searchField, 'in', [searchVal])], context=context)
+		if len(res_id) > 0:
+			cur_obj = res_obj.browse(cr, uid, res_id[0])
+		else:
+			cur_obj = self.pool.get(classObj)
+			cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=context))
+		return cur_obj
 
-    def replaceBadQuotes(self, text):
-	""" 
-		Replace quotes in different coding on &quot
-	"""
-	text = text.replace('&#8216', '&#8221')
-	text = text.replace('&#8217', '&#8221')
-	text = text.replace('&#8220', '&#8221')
-	text = text.replace('&#8220', '&#8221')
-	text = text.replace('&#8222', '&#8221')
-	text = text.replace('&#171', '&#8221')
-	text = text.replace('&#187', '&#8221')
-	text = text.replace('&laquo', '&#8221')
-	text = text.replace('&raquo', '&#8221')
-	text = text.replace('&#8221', '&quot')
-	return text
+	def replaceBadQuotes(self, text):
+		""" 
+			Replace quotes in different coding on &quot
+		"""
+		text = text.replace('&#8216', '&#8221')
+		text = text.replace('&#8217', '&#8221')
+		text = text.replace('&#8220', '&#8221')
+		text = text.replace('&#8220', '&#8221')
+		text = text.replace('&#8222', '&#8221')
+		text = text.replace('&#171', '&#8221')
+		text = text.replace('&#187', '&#8221')
+		text = text.replace('&laquo', '&#8221')
+		text = text.replace('&raquo', '&#8221')
+		text = text.replace('&#8221', '&quot')
+		return text
 
-    def message_new(self, cr, uid, msg, custom_values=None, context=None):
-        """ Overrides mail_thread message_new that is called by the mailgateway
-            through message_process.
-            This override updates the document according to the email.
-        """
-	aMailBody = html2plaintextWithoutLinks(self.replaceBadQuotes(msg.get('body'))) if msg.get('body') else ''
-	aObj = self.parse_json(aMailBody)
-	if custom_values is None:
-		custom_values = {}
-	vPhone = ''
-	if 'phone' in aObj:  
-		vPhone = aObj['phone']
-	vEmail = ''
-	if 'email' in aObj: 
-		vEmail = aObj['email'].replace(" ", "")
-	vName = aObj['name']
-	vals_obj = {'name': vName,
-                'phone': vPhone,
-                'email': vEmail}
-	if vName <> '':	 
-		partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
-	vType = ""
-	if 'type' in aObj:
-		vType = aObj['type']
-	vTypeID = 0
-	if (vType <> ""):
-		vals_obj = {'name': vType}
-		vTypeObj = self.findOrCreateObject(cr, uid, context, 'crm.iml.opportunities.type', 'name', vType, vals_obj)	
-		vTypeID = vTypeObj.id
-	defaults = {
-            'name':  msg.get('subject') or _("No Subject"),
-            'email_from': vEmail,
-            'email_cc': vEmail,
-            'partner_id': partner.id,
-            'phone': vPhone or "",
-            'type': 'opportunity',
-            'user_id': False,
-            'type_of_opport_id': vTypeID, 
-        }     
-	if msg.get('priority') in dict(crm.AVAILABLE_PRIORITIES):
-            defaults['priority'] = msg.get('priority')
-        defaults.update(custom_values)
-        return super(crm_lead, self).message_new(cr, uid, msg, custom_values=defaults, context=context)
+	def message_new(self, cr, uid, msg, custom_values=None, context=None):
+		""" Overrides mail_thread message_new that is called by the mailgateway
+			through message_process.
+			This override updates the document according to the email.
+		"""
+		if msg.get('body'):
+			aMailBody = html2plaintextWithoutLinks(self.replaceBadQuotes(msg.get('body'))) 
+		else: 	
+			aMailBody = ""
+		aObj = self.parse_json(aMailBody)
+		if custom_values is None:
+			custom_values = {}
+		vPhone = ''
+		if 'phone' in aObj:  
+			vPhone = aObj['phone']
+		vEmail = ''
+		if 'email' in aObj: 
+			vEmail = aObj['email'].replace(" ", "")
+		vName = aObj['name']
+		vals_obj = {'name': vName,
+				    'phone': vPhone,
+				    'email': vEmail}
+		if vName <> '':	 
+			partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
+		vType = ""
+		if 'type' in aObj:
+			vType = aObj['type']
+		vTypeID = 0
+		if (vType <> ""):
+			vals_obj = {'name': vType}
+			vTypeObj = self.findOrCreateObject(cr, uid, context, 'crm.iml.opportunities.type', 'name', vType, vals_obj)	
+			vTypeID = vTypeObj.id
+		defaults = {
+				'name':  msg.get('subject') or _("No Subject"),
+				'email_from': vEmail,
+				'email_cc': vEmail,
+				'partner_id': partner.id,
+				'phone': vPhone or "",
+				'type': 'opportunity',
+				'user_id': False,
+				'type_of_opport_id': vTypeID, 
+			}     
+		if msg.get('priority') in dict(crm.AVAILABLE_PRIORITIES):
+			defaults['priority'] = msg.get('priority')
+		defaults.update(custom_values)
+		return super(crm_lead, self).message_new(cr, uid, msg, custom_values=defaults, context=context)

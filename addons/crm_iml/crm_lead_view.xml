@@ -8,9 +8,32 @@
             <field eval="21" name="priority"/>
             <field name="arch" type="xml">
                 <data>
-		    <field name="priority" position="before">
-		        <field string="Type" name="type_of_opport_id"/>
-		    </field>
+		    		<field name="priority" position="before">
+		     		   <field name="type_of_opport_id"/>
+		    		</field> 	
+					<field name="partner_name" position="after">
+						<field name="email_from" string="Email" widget="email"/>
+						<field name="phone"/>
+					</field>
+					<xpath expr="//group/group/field[@name='email_from']" position="replace">
+						<field name="email_from" invisible="True"/>
+					</xpath>
+					<xpath expr="//group/group/field[@name='phone']" position="replace">
+						<field name="phone" invisible="True"/>
+					</xpath>
+					<xpath expr="//group/group/field[@name='phone']" position="replace"/>
+					<xpath expr="//page[@string='Lead']/group/group/label[@string='Address']" position="replace">
+						<label for="street" string="Address" invisible="True"/>
+					</xpath>
+					<xpath expr="//page[@string='Lead']/group/group/div" position="replace">
+						<field name="city" placeholder="City" style="width: 40%%" invisible="True"/>
+						<field name="state_id" options='{"no_open": True}' on_change="onchange_state(state_id)" placeholder="State" style="width: 24%%" invisible="True"/>
+						<field name="zip" placeholder="ZIP" style="width: 34%%" invisible="True"/>
+					</xpath>
+					<xpath expr="//page[@string='Lead']/group/group[@name='mailings']" position="replace"/>
+					<xpath expr="//page[@string='Lead']/group/group[@string='Misc']" position="replace"/>
+					<xpath expr="//page[@string='Lead']/group/group[@string='References']" position="replace"/>
+					<xpath expr="//group/group/div/button[@name='case_escalate']" position="replace"/>	
                 </data>
             </field>
         </record>

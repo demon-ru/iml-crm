@@ -197,7 +197,6 @@ class res_partner(osv.osv):
         
 		# работа с NAV
 		'exportDateToNAV': fields.datetime('crm.iml.export.date.res.partner' , readonly=True),
-		'NavUIN': fields.char('crm.iml.nav.uin' , size=512, readonly=True),
     }
 
     _defaults = {
