@@ -103,38 +103,46 @@
 							<group name="juridical_address" String="Юридический адрес">
 							<div>
 								<div>
-									<field  name="juridical_address_city_name" style="width: 25%%" placeholder="City.."/>
-									<field  name="juridical_address_index" style="width: 25%%" placeholder="Index.."/>
+									<field  name="juridical_address_country"  style="width: 25%%" placeholder="Country.."/>
+									<field  name="juridical_address_city_name" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 25%%" placeholder="City.."/>
+									<field  name="juridical_address_index" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 25%%" placeholder="Index.."/>
 								</div>
-								<field  name="juridical_address_street_name" style="width: 50%%" placeholder="Street"/>
+								<field  name="juridical_address_street_name" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 50%%" placeholder="Street"/>
 								<div class="address_format">
-									<label name="label_house" string="Дом"/>
-									<field  name="juridical_address_dom" style="width: 14%%" placeholder="House number"/>
+									<label name="label_house" string="Дом" />
+									<field  name="juridical_address_dom" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 14%%" placeholder="House number"/>
 									<label name="label_building" string="Строение"/>
-									<field  name="juridical_address_building" style="width: 14%%" placeholder="Building"/>
-									<label name="label_office" string="Офис"/>
-									<field  name="juridical_address_office" style="width: 13%%" placeholder="Office"/>
+									<field  name="juridical_address_building" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 14%%" placeholder="Building"/>
+									<label name="label_office" string="Офис" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')"/>
+									<field  name="juridical_address_office" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 13%%" placeholder="Office"/>
 								</div>
 							</div>
-								
 							</group>
+							<group>
+								<field  name="juridical_adress_non_stand_part"/>
+							</group>						
 							<group String="Фактический адрес">
 								<div>
 									<div>
-										<field  name="actual_address_city_name" style="width: 25%%" placeholder="City.."/>
-										<field  name="actual_address_index" style="width: 25%%" placeholder="Index.."/>
+										<field  name="actual_address_country" style="width: 25%%" placeholder="Country.."/>
+										<field  name="actual_address_city_name" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 25%%" placeholder="City.."/>
+										<field  name="actual_address_index" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 25%%" placeholder="Index.."/>
 									</div>
-									<field  name="actual_address_street_name" style="width: 50%%" placeholder="Street"/>
+									<field  name="actual_address_street_name" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 50%%" placeholder="Street"/>
 									<div class="address_format">
 										<label name="label_house" string="Дом"/>
-										<field  name="actual_address_dom" style="width: 14%%" placeholder="House number"/>
+										<field  name="actual_address_dom" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 14%%" placeholder="House number"/>
 										<label name="label_building" string="Строение"/>
-										<field  name="actual_address_building" style="width: 14%%" placeholder="Building"/>
+										<field  name="actual_address_building" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 14%%" placeholder="Building"/>
 										<label name="label_office" string="Офис"/>
-										<field  name="actual_address_office" style="width: 13%%" placeholder="Office"/>
+										<field  name="actual_address_office" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 13%%" placeholder="Office"/>
 									</div>
 								</div>
+								
                         	</group>
+							<group>
+								<field  name="actual_adress_non_stand_part"/>
+							</group>
 						</page>
 					</page>
 					<page name='internal_notes' position="before">

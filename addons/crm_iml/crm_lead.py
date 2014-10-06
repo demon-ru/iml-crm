@@ -41,7 +41,7 @@ class crm_lead(format_address, osv.osv):
     _name = "crm.lead"
 
     _columns = {
-	'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'name'),
+	'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'description'),
     }
 
     def parse_json(self,description):
