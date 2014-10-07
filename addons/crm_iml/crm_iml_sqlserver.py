@@ -79,13 +79,13 @@ class crm_iml_sqlserver(osv.osv):
 		'name': fields.char('Name', size=128, required=True),
 		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
 		# to delete 
-		'server': fields.char('SQL Server', size=128, required=True),
-		'user': fields.char('User', size=128, required=True),
-		'password': fields.char('Password', size=128),
-		'dbname': fields.char('Database name', size=128),
+		#'server': fields.char('SQL Server', size=128, required=True),
+		#'user': fields.char('User', size=128, required=True),
+		#'password': fields.char('Password', size=128),
+		#'dbname': fields.char('Database name', size=128),
 		# to delete
 		'tableName':fields.char('Table Name', size=128),
-		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange')], 'Exchange type'),
+		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange')], 'Exchange type', required=True),
 		'exchange_server':fields.many2one('crm.iml.exchange_server_settings', 'name'),
 	}
 
@@ -374,7 +374,12 @@ class crm_iml_sqlserver(osv.osv):
 			CompOrgTypeID - company_org_type - 46
 			AgreementDate - дата договора date_start у договора- 47
 """
-	def import_records(self,cr, uid, ids, context=None):
+
+		
+	# здесь объявляем обработчики
+
+
+	def partner_import(self,cr, uid, ids, context=None):
 		conection = None
 		try:
 			for server in self.browse(cr, uid, ids, context=context):
@@ -402,11 +407,20 @@ class crm_iml_sqlserver(osv.osv):
 		server.write({'lastImportDate': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 	 	return True
 
+
+	def holdings_import(self, cr, uid, ids, context=None):
+	 	write("ok")
+
  
-					
+	# словарь, где хранится соответсвие тип обмена - обработчик
+	exchange_types = { 
+				"partner" : partner_import,
+				"holdings": holdings_import,
+		}
 
-			
-
-
-
-
+	# развилка в импорте, метод - роутер
+	# в данном методе принимаем решение, какой импорт дальше запускать
+	# 
+	def perform_import(self, cr, uid, ids, context=None):
+		for exchange_proc in self.browse(cr, uid, ids, context=context):
+			self.exchange_types[exchange_proc.exchange_type](self, cr, uid, ids, context);
