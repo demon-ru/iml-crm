@@ -75,15 +75,18 @@ class crm_iml_sqlserver(osv.osv):
 	_name = "crm.iml.sqlserver"
 	_description = "Sql server for export/import data from OpenErp to my sql database"
 	_columns = {
-		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
 		'lastImportDate': fields.datetime('Date last successful import' , readonly=True),
-		'name': fields.char('Name', size=128, required=True),	
+		'name': fields.char('Name', size=128, required=True),
+		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
+		# to delete 
 		'server': fields.char('SQL Server', size=128, required=True),
 		'user': fields.char('User', size=128, required=True),
 		'password': fields.char('Password', size=128),
 		'dbname': fields.char('Database name', size=128),
+		# to delete
 		'tableName':fields.char('Table Name', size=128),
 		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange')], 'Exchange type'),
+		'exchange_server':fields.many2one('crm.iml.exchange_server_settings', 'name'),
 	}
 
 	"""
@@ -105,7 +108,7 @@ class crm_iml_sqlserver(osv.osv):
 		db = None;	
 		try:
 			for server in self.browse(cr, uid, ids, context=context):
-				db = server.connectToServer();
+				db = server.exchange_server.connectToServer();
 		finally:
 			if (db):
 				db.close()
@@ -375,7 +378,8 @@ class crm_iml_sqlserver(osv.osv):
 		conection = None
 		try:
 			for server in self.browse(cr, uid, ids, context=context):
-				conection = server.connectToServer();
+				exchange_server = server.exchange_server
+				conection = exchange_server.connectToServer()
 				cursor = conection.cursor()
 				wherePart = ''
 				if (server.lastImportDate): 

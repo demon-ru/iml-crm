@@ -19,12 +19,9 @@
 				  <field name="lastImportDate"/>	
 			  </group>
 			  <group col="2" string="Server Information">		
-				  <field name="server"/>
-				  <field name="user"/>
-				  <field name="password"/>
-				  <field name="dbname"/>	
 				  <field name="tableName"/>	
 				  <field name="exchange_type"/>
+				  <field name="exchange_server"/>
 			  </group>
 		  </sheet>
             </field>
@@ -35,11 +32,9 @@
 	    <field name="type">tree</field>
             <field name="arch" type="xml">
 		  <group col="2" string="Server Information">
-			  <field name="name"/>			
-			  <field name="server"/>
-			  <field name="user"/>
-			  <field name="dbname"/>	
-			  <field name="tableName"/>		
+			  <field name="name"/>
+			  <field name="tableName"/>
+			  <field name="exchange_server"/>
 		  </group>
             </field>
         </record>
