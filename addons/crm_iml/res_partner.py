@@ -145,29 +145,33 @@ class res_partner(osv.osv):
         'nav_holdingId' : fields.char('Client Holding Id in NAV'),
         'company_org_type' : fields.many2one('crm.company_org_type', 'name'),
         'juridical_name' : fields.char('Jurudical company name', size = 255, required = False),
-#        'client_service_status' : 
+#          'client_service_status' : 
         # Страница "Основное"
         'internet_shop_name' : fields.char('Internet shop name', size = 255),
         'category_of_goods' : fields.many2one('crm.goodscategory', 'Categories of goods'),
         # Страница "Адреса"
         # группа "Юридический адрес"
-	"juridical_address_country" : fields.char('Country', size = 255), 
+        "juridical_address_country" : fields.char('Country', size = 255), 
         'juridical_address_index' : fields.char('Post index', size = 255),
         'juridical_address_city_name' : fields.char('City', size = 255),
         'juridical_address_street_name' : fields.char('Street', size = 255),
         'juridical_address_dom' : fields.char('House number', size = 255),
         'juridical_address_building' : fields.char('Building', size = 255),
         'juridical_address_office' : fields.char('Office number', size = 255),
-	'juridical_adress_non_stand_part' : fields.char("Non-standard part", size = 255),
+        'juridical_adress_non_stand_part' : fields.char("Non-standard part", size = 255),
+        'juridical_adress_region': fields.char("Регион", size = 255),
+        'juridical_adress_full_adress': fields.char("Полный адрес:", size = 1000),
         # группа "Фактический адрес"
-	"actual_address_country" : fields.char('Country', size = 255), 
+        "actual_address_country" : fields.char('Country', size = 255), 
         'actual_address_index' : fields.char('Post index', size = 255),
         'actual_address_city_name' : fields.char('City', size = 255),
         'actual_address_street_name' : fields.char('Street', size = 255),
         'actual_address_dom' : fields.char('House number', size = 255),
         'actual_address_building' : fields.char('Building', size = 255),
         'actual_address_office' : fields.char('Office number', size = 255),
-	'actual_adress_non_stand_part' : fields.char("Non-standard part", size = 255),
+        'actual_adress_non_stand_part' : fields.char("Non-standard part", size = 255),
+        'actual_adress_region': fields.char('Регион', size = 255),
+        'actual_adress_full_adress': fields.char("Полный адрес", size = 1000),
         # Страница "Банк"
         'account_number' : fields.char('Account number', size = 255), 
         'BIN' : fields.char('BIN', size = 255),
@@ -183,8 +187,8 @@ class res_partner(osv.osv):
         'OKVED' : fields.char('OKVED', size = 255),
         'OKPO' : fields.char('OKPO', size = 255),
         'OKATO' : fields.char('OKATO', size = 255),
-	#Переопределил эти поля  - сделал необязательными
-	'property_account_payable': fields.property(
+        #Переопределил эти поля  - сделал необязательными
+        'property_account_payable': fields.property(
             type='many2one',
             relation='account.account',
             string="Account Payable",
@@ -204,28 +208,30 @@ class res_partner(osv.osv):
     }
 
     _defaults = {
-	"juridical_address_country": "Российская Федерация",
-	"actual_address_country": "Российская Федерация",
+        "juridical_address_country": "Российская Федерация",
+        "actual_address_country": "Российская Федерация",
     }
 
-    def onchange_adress(self, cr, uid, ids, address_index, city_name, street_name, dom, building, office, adressField):
-	v={}	 
-	vAdress = ""  
-	if (address_index and address_index.strip() != ""):
-		vAdress = address_index.strip()
-	if (city_name and city_name.strip() != ""):
-		vAdress = vAdress + " " + city_name.strip()
-	if (street_name and street_name.strip() != ""):
-		vAdress = vAdress + " " + street_name.strip()
-	if (dom and dom.strip() != ""):
-		vAdress = vAdress + unicode(" д.", "utf-8") + dom.strip()
-	if (building and building.strip() != ""):
-		vAdress = vAdress + unicode(" cтроение: ", "utf-8") + building.strip()
-	if (office and office.strip() != ""):
-		vAdress = vAdress + unicode(" офис: ", "utf-8") + office.strip() 
-	if (vAdress != "" and adressField):
-		v[adressField] = vAdress
-    	return {'value':v}
+    def onchange_adress(self, cr, uid, ids, address_index, city_name, street_name, dom, building, office, nonstnpart, adressField):
+    	v={}	 
+    	vAdress = ""  
+    	if (address_index and address_index.strip() != ""):
+    		vAdress = vAdress + " " + address_index.strip()
+    	if (city_name and city_name.strip() != ""):
+    		vAdress = vAdress + " " + city_name.strip()
+    	if (street_name and street_name.strip() != ""):
+    		vAdress = vAdress + " " + street_name.strip()
+    	if (dom and dom.strip() != ""):
+    		vAdress = vAdress + unicode(" д.", "utf-8") + dom.strip()
+    	if (building and building.strip() != ""):
+    		vAdress = vAdress + unicode(" cтроение: ", "utf-8") + building.strip()
+    	if (office and office.strip() != ""):
+    		vAdress = vAdress + unicode(" офис: ", "utf-8") + office.strip() 
+        if (nonstnpart and nonstnpart.strip() != ""):
+            vAdress = vAdress + " " + nonstnpart.strip()
+    	if (vAdress != "" and adressField):
+    		v[adressField] = vAdress.strip()
+        return {'value':v}
 
     def iml_crm_export_id(self,cr, uid, ids, context=None):
 		for partn in self.browse(cr, uid, ids, context=context):
@@ -241,12 +247,54 @@ class res_partner(osv.osv):
 		return True
 
     def write(self, cr, uid, ids, vals, context=None):
-        # stage change: update date_last_stage_update
-        if ('juridical_address_city_name' in vals or 'juridical_address_index' in vals or 'juridical_address_street_name' in vals or 'juridical_address_dom' in vals or 'juridical_address_building' in vals or 'juridical_address_office' in vals) and not('juridical_adress_non_stand_part' in vals):
-		jur_adress = self.onchange_adress(cr, uid, ids, vals.get('juridical_address_index'), vals.get('juridical_address_city_name'), vals.get('juridical_address_street_name'), vals.get('juridical_address_dom'), vals.get('juridical_address_building'), vals.get('juridical_address_office'), 'juridical_adress_non_stand_part')['value']
-		vals.update(jur_adress)
-        if ('actual_address_city_name' in vals or 'actual_address_index' in vals or 'actual_address_street_name' in vals or 'actual_address_dom' in vals or 'actual_address_building' in vals or 'actual_address_office' in vals) and not('actual_adress_non_stand_part' in vals):
-		actual_adress = self.onchange_adress(cr, uid, ids, vals.get('actual_address_index'), vals.get('actual_address_city_name'), vals.get('actual_address_street_name'), vals.get('actual_address_dom'), vals.get('actual_address_building'), vals.get('actual_address_office'), 'actual_adress_non_stand_part')['value']
-		vals.update(actual_adress)
+        for partn in self.browse(cr, uid, ids, context=context):
+            if ('juridical_address_city_name' in vals or 'juridical_address_index' in vals or 'juridical_address_street_name' in vals or 'juridical_address_dom' in vals or 'juridical_address_building' in vals or 'juridical_address_office' in vals or 'juridical_adress_non_stand_part' in vals):
+                vCity = partn.juridical_address_city_name
+                if ('juridical_address_city_name' in vals):
+                    vCity = vals.get('juridical_address_city_name')
+                vIndex = partn.juridical_address_index
+                if ('juridical_address_index' in vals):
+                    vIndex = vals.get("juridical_address_index")
+                vStreet = partn.juridical_address_street_name
+                if ("juridical_address_street_name" in vals):
+                    vStreet = vals.get("juridical_address_street_name")
+                vDom = partn.juridical_address_dom
+                if ("juridical_address_dom" in vals):
+                    vDom = vals.get("juridical_address_dom")
+                vBilding = partn.juridical_address_building
+                if ("juridical_address_building" in vals):
+                    vBilding = vals.get("juridical_address_building")
+                vOfice = partn.juridical_address_office
+                if ("juridical_address_office" in vals):
+                    vOfice = vals.get("juridical_address_office")
+                vNonStandart = partn.juridical_adress_non_stand_part
+                if ("juridical_adress_non_stand_part" in vals):
+                    vNonStandart = vals.get("juridical_adress_non_stand_part")
+                jur_adress = self.onchange_adress(cr, uid, ids, vIndex, vCity, vStreet, vDom, vBilding, vOfice, vNonStandart, "juridical_adress_full_adress")['value']
+                vals.update(jur_adress)
+            if ('actual_address_city_name' in vals or 'actual_address_index' in vals or 'actual_address_street_name' in vals or 'actual_address_dom' in vals or 'actual_address_building' in vals or 'actual_address_office' in vals or 'actual_adress_non_stand_part' in vals):
+                vCity = partn.actual_address_city_name
+                if ('actual_address_city_name' in vals):
+                    vCity = vals.get('actual_address_city_name')
+                vIndex = partn.actual_address_index
+                if ('actual_address_index' in vals):
+                    vIndex = vals.get("actual_address_index")
+                vStreet = partn.actual_address_street_name
+                if ("actual_address_street_name" in vals):
+                    vStreet = vals.get("actual_address_street_name")
+                vDom = partn.actual_address_dom
+                if ("actual_address_dom" in vals):
+                    vDom = vals.get("actual_address_dom")
+                vBilding = partn.actual_address_building
+                if ("actual_address_building" in vals):
+                    vBilding = vals.get("actual_address_building")
+                vOfice = partn.actual_address_office
+                if ("jactual_address_office" in vals):
+                    vOfice = vals.get("actual_address_office")
+                vNonStandart = partn.actual_adress_non_stand_part
+                if ("actual_adress_non_stand_part" in vals):
+                    vNonStandart = vals.get("actual_adress_non_stand_part")
+                actual_adress = self.onchange_adress(cr, uid, ids, vIndex, vCity, vStreet, vDom, vBilding, vOfice, vNonStandart, "actual_adress_full_adress")['value']
+                vals.update(actual_adress)
         return super(res_partner, self).write(cr, uid, ids, vals, context=context)
 
