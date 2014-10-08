@@ -22,7 +22,6 @@
 					  	<field name="user"/>
 					  	<field name="password"/>
 					  	<field name="dbname"/>	
-					  	<field name="tableName"/>		
 				  	</group>
 			  	</sheet>
             </field>
@@ -37,7 +36,6 @@
 				  	<field name="server"/>
 				  	<field name="user"/>
 				  	<field name="dbname"/>	
-				  	<field name="tableName"/>		
 			  	</group>
 	        </field>
 	    </record>

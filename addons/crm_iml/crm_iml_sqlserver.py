@@ -38,7 +38,6 @@ class crm_iml_exchangeserver_settings(osv.osv):
 		'user' : fields.char('User', size=255, required=True),
 		'password' : fields.char('Password', size=255),
 		'dbname' : fields.char('Database name', size=255),
-		'tableName' : fields.char('Table name', size=255),
 
 	}
 	_sql_constraints = [

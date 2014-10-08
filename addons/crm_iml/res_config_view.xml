@@ -7,8 +7,6 @@
             <field name="inherit_id" ref="base_setup.view_general_configuration"/>
             <field name="arch" type="xml">
                  <div> 
-                     <label for="export_sql_server" string='Export/Import my sql server'/>
-                     <field name="export_sql_server" class="oe_inline"/> 
                      <label for="exchange_settings" string="Settings for MySQL db connection" />
                      <field name="exchange_settings" class="oe_inline"/>
 				 </div>

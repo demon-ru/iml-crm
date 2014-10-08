@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0rc1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-23 09:21+0000\n"
-"PO-Revision-Date: 2014-09-23 09:21+0000\n"
+"POT-Creation-Date: 2014-10-08 09:32+0000\n"
+"PO-Revision-Date: 2014-10-08 09:32+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,8 +16,24 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "(edit company address)"
+msgstr ""
+
+#. module: crm_iml
 #: field:res.partner,account_number:0
 msgid "Account number"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Address"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_account_analytic_account
+msgid "Analytic Account"
 msgstr ""
 
 #. module: crm_iml
@@ -39,12 +55,8 @@ msgstr ""
 
 #. module: crm_iml
 #: model:ir.model,name:crm_iml.model_crm_goodscategory
-msgid "Categories of goods"
-msgstr ""
-
-#. module: crm_iml
 #: field:res.partner,category_of_goods:0
-msgid "Category of Good"
+msgid "Categories of goods"
 msgstr ""
 
 #. module: crm_iml
@@ -69,6 +81,7 @@ msgid "CategoryOfGoods"
 msgstr ""
 
 #. module: crm_iml
+#: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
 #: field:res.partner,actual_address_city_name:0
 #: field:res.partner,juridical_address_city_name:0
@@ -78,6 +91,11 @@ msgstr ""
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "City.."
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,nav_holdingId:0
+msgid "Client Holding Id in NAV"
 msgstr ""
 
 #. module: crm_iml
@@ -91,13 +109,33 @@ msgid "Client service status"
 msgstr ""
 
 #. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Company"
+msgstr ""
+
+#. module: crm_iml
 #: model:ir.actions.act_window,name:crm_iml.crm_case_company_org_type_all
 msgid "Company org type"
 msgstr ""
 
 #. module: crm_iml
+#: sql_constraint:crm.iml.exchange_server_settings:0
+msgid "Config with this name alredy exists. Name must be unique."
+msgstr ""
+
+#. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "Contacts"
+msgstr ""
+
+#. module: crm_iml
+#: view:account.analytic.account:crm_iml.view_account_form_iml_crm1
+msgid "Contract Information"
+msgstr ""
+
+#. module: crm_iml
+#: field:account.analytic.account,crm_number:0
+msgid "Contract number"
 msgstr ""
 
 #. module: crm_iml
@@ -107,15 +145,24 @@ msgstr ""
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: field:res.partner,actual_address_country:0
+#: field:res.partner,juridical_address_country:0
 msgid "Country"
+msgstr ""
+
+#. module: crm_iml
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Country.."
 msgstr ""
 
 #. module: crm_iml
 #: field:crm.clientcategory,create_uid:0
 #: field:crm.company_org_type,create_uid:0
 #: field:crm.goodscategory,create_uid:0
+#: field:crm.iml.exchange_server_settings,create_uid:0
 #: field:crm.iml.opportunities.type,create_uid:0
 #: field:crm.iml.sqlserver,create_uid:0
+#: field:crm.settlement_center,create_uid:0
 #: field:crm.shipping_storage,create_uid:0
 msgid "Created by"
 msgstr ""
@@ -124,18 +171,26 @@ msgstr ""
 #: field:crm.clientcategory,create_date:0
 #: field:crm.company_org_type,create_date:0
 #: field:crm.goodscategory,create_date:0
+#: field:crm.iml.exchange_server_settings,create_date:0
 #: field:crm.iml.opportunities.type,create_date:0
 #: field:crm.iml.sqlserver,create_date:0
+#: field:crm.settlement_center,create_date:0
 #: field:crm.shipping_storage,create_date:0
 msgid "Created on"
 msgstr ""
 
 #. module: crm_iml
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+#: field:crm.iml.exchange_server_settings,dbname:0
 msgid "Database name"
 msgstr ""
 
 #. module: crm_iml
+#: field:crm.iml.sqlserver,lastImportDate:0
+msgid "Date last successful import"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.exchange_server_settings,lastTestDate:0
 #: field:crm.iml.sqlserver,lastTestDate:0
 msgid "Date last successful test connect"
 msgstr ""
@@ -146,7 +201,7 @@ msgid "Date of Accounting"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,region_of_delivery:0
+#: field:account.analytic.account,region_of_delivery:0
 msgid "Delivery region"
 msgstr ""
 
@@ -158,9 +213,17 @@ msgstr ""
 #: field:crm.goodscategory,description:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
 #: field:crm.iml.opportunities.type,description:0
-#: view:crm.shipping_storage:crm_iml.crm_shippingstorages_view
-#: field:crm.shipping_storage,description:0
 msgid "Description"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
+msgid "Email"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,exchange_type:0
+msgid "Exchange type"
 msgstr ""
 
 #. module: crm_iml
@@ -179,18 +242,32 @@ msgid "Export/Import SQL server"
 msgstr ""
 
 #. module: crm_iml
-#: view:base.config.settings:crm_iml.view_server_config_settings
-msgid "Export/Import my sql server"
+#: field:crm.company_org_type,nav_id:0
+#: field:crm.goodscategory,nav_id:0
+#: field:crm.settlement_center,nav_id:0
+#: field:crm.shipping_storage,nav_id:0
+#: field:res.users,nav_id:0
+msgid "External code"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,fio_authorized person_genitive_case:0
+#: field:account.analytic.account,fio_authorized person_genitive_case:0
 msgid "Full name of authorized person in genitive case"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,fio_authorized person_nominative_case:0
+#: field:account.analytic.account,fio_authorized person_nominative_case:0
 msgid "Full name of authorized person in nominative case"
+msgstr ""
+
+#. module: crm_iml
+#: field:res.partner,holdingId:0
+msgid "Holding ID"
+msgstr ""
+
+#. module: crm_iml
+#: selection:crm.iml.sqlserver,exchange_type:0
+msgid "Holdings exchange"
 msgstr ""
 
 #. module: crm_iml
@@ -204,20 +281,23 @@ msgstr ""
 #: field:crm.clientcategory,id:0
 #: field:crm.company_org_type,id:0
 #: field:crm.goodscategory,id:0
+#: field:crm.iml.exchange_server_settings,id:0
 #: field:crm.iml.opportunities.type,id:0
 #: field:crm.iml.sqlserver,id:0
+#: field:crm.settlement_center,id:0
 #: field:crm.shipping_storage,id:0
 msgid "ID"
 msgstr ""
 
 #. module: crm_iml
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
-msgid "ID column name"
+#: field:res.partner,inn:0
+msgid "INN"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,inn:0
-msgid "INN"
+#: view:crm.iml.exchange_server_settings:crm_iml.crm_iml_exchangeserver_view
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Import from database"
 msgstr ""
 
 #. module: crm_iml
@@ -236,6 +316,12 @@ msgid "Individual"
 msgstr ""
 
 #. module: crm_iml
+#: view:crm.iml.exchange_server_settings:crm_iml.crm_iml_exchangeserver_view
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+msgid "Information about connection"
+msgstr ""
+
+#. module: crm_iml
 #: field:res.partner,internet_shop_name:0
 msgid "Internet shop name"
 msgstr ""
@@ -249,8 +335,10 @@ msgstr ""
 #: field:crm.clientcategory,write_uid:0
 #: field:crm.company_org_type,write_uid:0
 #: field:crm.goodscategory,write_uid:0
+#: field:crm.iml.exchange_server_settings,write_uid:0
 #: field:crm.iml.opportunities.type,write_uid:0
 #: field:crm.iml.sqlserver,write_uid:0
+#: field:crm.settlement_center,write_uid:0
 #: field:crm.shipping_storage,write_uid:0
 msgid "Last Updated by"
 msgstr ""
@@ -259,8 +347,10 @@ msgstr ""
 #: field:crm.clientcategory,write_date:0
 #: field:crm.company_org_type,write_date:0
 #: field:crm.goodscategory,write_date:0
+#: field:crm.iml.exchange_server_settings,write_date:0
 #: field:crm.iml.opportunities.type,write_date:0
 #: field:crm.iml.sqlserver,write_date:0
+#: field:crm.settlement_center,write_date:0
 #: field:crm.shipping_storage,write_date:0
 msgid "Last Updated on"
 msgstr ""
@@ -281,7 +371,7 @@ msgid "Legal Entity"
 msgstr ""
 
 #. module: crm_iml
-#: selection:res.partner,region_of_delivery:0
+#: selection:account.analytic.account,region_of_delivery:0
 msgid "Moscow"
 msgstr ""
 
@@ -291,16 +381,23 @@ msgstr ""
 #: field:crm.company_org_type,name:0
 #: view:crm.goodscategory:crm_iml.crm_goodscategory_view
 #: field:crm.goodscategory,name:0
+#: field:crm.iml.exchange_server_settings,name:0
 #: view:crm.iml.opportunities.type:crm_iml.crm_iml_opportunities_type_view
 #: field:crm.iml.opportunities.type,name:0
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
-#: view:crm.shipping_storage:crm_iml.crm_shippingstorages_view
+#: field:crm.iml.sqlserver,name:0
+#: field:crm.settlement_center,name:0
 #: field:crm.shipping_storage,name:0
 msgid "Name"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,number_of_powerOfattorney:0
+#: field:res.partner,actual_adress_non_stand_part:0
+#: field:res.partner,juridical_adress_non_stand_part:0
+msgid "Non-standard part"
+msgstr ""
+
+#. module: crm_iml
+#: field:account.analytic.account,number_of_powerOfattorney:0
 msgid "Number of The Power of Attorney"
 msgstr ""
 
@@ -351,17 +448,22 @@ msgid "Partner"
 msgstr ""
 
 #. module: crm_iml
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+#: selection:crm.iml.sqlserver,exchange_type:0
+msgid "Partner exchange"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.exchange_server_settings,password:0
 msgid "Password"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,authorized_person_position_genetive_case:0
+#: field:account.analytic.account,authorized_person_position_genetive_case:0
 msgid "Position of authorized person in genetive case"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,authorized_person_position_nominative_case:0
+#: field:account.analytic.account,authorized_person_position_nominative_case:0
 msgid "Position of authorized person in nominative case"
 msgstr ""
 
@@ -372,7 +474,7 @@ msgid "Post index"
 msgstr ""
 
 #. module: crm_iml
-#: selection:res.partner,region_of_delivery:0
+#: selection:account.analytic.account,region_of_delivery:0
 msgid "Regions except Moscow"
 msgstr ""
 
@@ -387,28 +489,33 @@ msgid "Registration Reason Code"
 msgstr ""
 
 #. module: crm_iml
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+#: field:crm.iml.exchange_server_settings,server:0
 msgid "SQL server"
 msgstr ""
 
 #. module: crm_iml
-#: field:crm.iml.sqlserver,password:0
-msgid "SQLPass"
-msgstr ""
-
-#. module: crm_iml
-#: field:crm.iml.sqlserver,server:0
-msgid "SQLServer"
-msgstr ""
-
-#. module: crm_iml
-#: field:crm.iml.sqlserver,user:0
-msgid "SQLUser"
-msgstr ""
-
-#. module: crm_iml
+#: view:crm.iml.exchange_server_settings:crm_iml.crm_iml_exchangeserver_tree
+#: view:crm.iml.exchange_server_settings:crm_iml.crm_iml_exchangeserver_view
+#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_tree
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "Server Information"
+msgstr ""
+
+#. module: crm_iml
+#: view:base.config.settings:crm_iml.view_server_config_settings
+msgid "Settings for MySQL db connection"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.model,name:crm_iml.model_crm_iml_exchange_server_settings
+msgid "Settings for importing and exporting data to MySQL database"
+msgstr ""
+
+#. module: crm_iml
+#: model:ir.actions.act_window,name:crm_iml.crm_settlement_center_all
+#: model:ir.model,name:crm_iml.model_crm_settlement_center
+#: model:ir.ui.menu,name:crm_iml.menu_crm_settlement_center
+msgid "Settlement Center"
 msgstr ""
 
 #. module: crm_iml
@@ -438,27 +545,13 @@ msgid "Sql server for export/import data from OpenErp to my sql database"
 msgstr ""
 
 #. module: crm_iml
-#: field:crm.iml.sqlserver,dbname:0
-msgid "SqlDbName"
-msgstr ""
-
-#. module: crm_iml
-#: field:crm.iml.sqlserver,IdColumnName:0
-msgid "SqlIdColumn"
-msgstr ""
-
-#. module: crm_iml
-#: field:crm.iml.sqlserver,tableName:0
-msgid "SqlTableName"
-msgstr ""
-
-#. module: crm_iml
+#: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "State"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,storage_of_shipping:0
+#: field:account.analytic.account,storage_of_shipping:0
 msgid "Storage of shipping"
 msgstr ""
 
@@ -470,7 +563,17 @@ msgid "Street"
 msgstr ""
 
 #. module: crm_iml
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "Street..."
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.sqlserver,tableName:0
+msgid "Table Name"
+msgstr ""
+
+#. module: crm_iml
+#: field:crm.iml.exchange_server_settings,tableName:0
 msgid "Table name"
 msgstr ""
 
@@ -480,12 +583,13 @@ msgid "Tag"
 msgstr ""
 
 #. module: crm_iml
+#: view:crm.iml.exchange_server_settings:crm_iml.crm_iml_exchangeserver_view
 #: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
 msgid "Test connect to database"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,date_of_powerOfattorney:0
+#: field:account.analytic.account,date_of_powerOfattorney:0
 msgid "The date of The Power of Attorney"
 msgstr ""
 
@@ -501,17 +605,17 @@ msgid "The name of the segmentation."
 msgstr ""
 
 #. module: crm_iml
+#: help:crm.settlement_center,name:0
+msgid "The name of the settlement Center."
+msgstr ""
+
+#. module: crm_iml
 #: help:crm.shipping_storage,name:0
 msgid "The name of the storage."
 msgstr ""
 
 #. module: crm_iml
-#: help:crm.iml.sqlserver,server:0
-msgid "The sql server."
-msgstr ""
-
-#. module: crm_iml
-#: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
+#: field:crm.shipping_storage,type:0
 msgid "Type"
 msgstr ""
 
@@ -521,6 +625,7 @@ msgid "Type of Counterparty"
 msgstr ""
 
 #. module: crm_iml
+#: field:crm.lead,type_of_opport_id:0
 #: model:ir.model,name:crm_iml.model_crm_iml_opportunities_type
 #: model:ir.ui.menu,name:crm_iml.menu_crm_iml_type_opportunities
 msgid "Type of opportunities"
@@ -532,11 +637,17 @@ msgid "TypeOfOpportunities"
 msgstr ""
 
 #. module: crm_iml
-#: view:crm.iml.sqlserver:crm_iml.crm_iml_slqserver_view
+#: field:crm.iml.exchange_server_settings,user:0
 msgid "User"
 msgstr ""
 
 #. module: crm_iml
+#: model:ir.model,name:crm_iml.model_res_users
+msgid "Users"
+msgstr ""
+
+#. module: crm_iml
+#: view:crm.lead:crm_iml.view_form_iml_crm_oppor1
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "ZIP"
 msgstr ""
@@ -547,23 +658,19 @@ msgid "crm.iml.export.date.res.partner"
 msgstr ""
 
 #. module: crm_iml
-#: field:res.partner,NavUIN:0
-msgid "crm.iml.nav.uin"
+#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+msgid "e.g. +32.81.81.37.00"
 msgstr ""
 
 #. module: crm_iml
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "customer UIN in NAV"
+msgid "e.g. www.odoo.com"
 msgstr ""
 
 #. module: crm_iml
-#: field:crm.iml.sqlserver,name:0
-msgid "mysqlservername"
-msgstr ""
-
-#. module: crm_iml
+#: field:base.config.settings,exchange_settings:0
 #: field:base.config.settings,export_sql_server:0
-#: field:crm.lead,type_of_opport_id:0
+#: field:crm.iml.sqlserver,exchange_server:0
 #: field:res.partner,categoryClient_id:0
 #: field:res.partner,company_org_type:0
 msgid "name"
@@ -575,6 +682,7 @@ msgid "Адреса"
 msgstr ""
 
 #. module: crm_iml
+#: view:account.analytic.account:crm_iml.view_account_form_iml_crm1
 #: view:res.partner:crm_iml.view_partners_form_iml_crm1
 msgid "Основное"
 msgstr ""
@@ -595,17 +703,12 @@ msgid "Строение"
 msgstr ""
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
-msgid "Улица..."
-msgstr ""
-
-#. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: view:account.analytic.account:crm_iml.view_account_form_iml_crm1
 msgid "ФИО уполномоченного лица, именительный падеж"
 msgstr ""
 
 #. module: crm_iml
-#: view:res.partner:crm_iml.view_partners_form_iml_crm1
+#: view:account.analytic.account:crm_iml.view_account_form_iml_crm1
 msgid "ФИО уполномоченного лица, родительный падеж"
 msgstr ""
 
