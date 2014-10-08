@@ -273,6 +273,7 @@ class crm_iml_sqlserver(osv.osv):
 			#Не стандартная часть адреса
 			'actual_adress_non_stand_part': row[40],
 			'juridical_adress_non_stand_part': row[41],
+			'nav_holdingId' : row[48],
 			}
 		if not(row[0] is None):
 			cur_obj = self.findObject(cr, uid,"res.partner", [('id',"in", [row[0]])])
@@ -373,6 +374,7 @@ class crm_iml_sqlserver(osv.osv):
 			idimport - уникальный ключ для поиска записи импорта - 45
 			CompOrgTypeID - company_org_type - 46
 			AgreementDate - дата договора date_start у договора- 47
+			???_ид_холдинга - идентификатор холдинга у клиента - 48
 """
 
 		
@@ -409,6 +411,43 @@ class crm_iml_sqlserver(osv.osv):
 
 
 	def holdings_import(self, cr, uid, ids, context=None):
+		try:
+			# сперва найдем все холдинги
+			for server in self.browse(cr, uid, ids, context=context):
+				exchange_server = server.exchange_server
+				connection = exchange_server.connectToServer()
+				cursor=connection.cursor()
+				# будем выбирать только те записи, которые созданы после предидущего импорта
+				if (server.lastImportDate):
+					wherePart = "where nav_timestamp > '" + str(server.lastImportDate) + "'"
+				# название столбцов до конца не известно, пока для информации
+				query = "select holding_id, holding_name from " + server.tableName + " " + wherePart
+				cursor.execute(query)
+				# итерируем холдинги
+				for row in cursor.fetchall():
+					# находим или создаем холдинг
+					# подготавливаем данные для создаваемого (в случае чего, холдинга)
+					vals_add_obj = {
+						#Информация о клиенте
+						"name":	row[1],		
+						"short_name": row[1],
+						"is_company": True,
+						# аттрибут холдинга
+						"holdingId" : row[48],
+					}
+					holding = self.findObject(cr, uid,'res.partner', ["&",('holdingId', 'in' ,[row[48]]),("is_company", '=', True)], True, vals_add_obj, False)
+					# находим клиентов, у которых nav_holdingId = ид холдинга
+					res_partner_obj = self.pool.get('res.partner')
+					res_partner_ids = res_partner_obj.search(cr, uid, [('nav_holdingId', 'in', holding.holdingId)], context=context)
+					res_partner = res_partner_obj.browse(cr, uid, res_partner_ids)
+		            # итерируем отобранных клиентов и устанавливаем им в качестве parent_id id холдинга
+					for partner in res_partner:
+						partner.parent_id = holding
+		except Exception, e:
+			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if connection:
+				connection.close();
 	 	write("ok")
 
  

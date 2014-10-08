@@ -139,6 +139,10 @@ class res_partner(osv.osv):
         'client_in_service': fields.function(_client_service_status, string="Client service status", type="char", fnct_search=_client_service_status_search),
         'short_name' : fields.char('Short name', size = 255, required = False),
         'unk' : fields.char('Client ID', size = 255, requred = True),
+        # ид холдинга в NAV, если аттрибут задан - значит, это холдинг
+        'holdingId' : fields.char('Holding ID', size=255),
+        # ид холдинга в NAV, если аттрибут задан - значит, клиент состоит в холдинге в NAV
+        'nav_holdingId' : fields.char('Client Holding Id in NAV'),
         'company_org_type' : fields.many2one('crm.company_org_type', 'name'),
         'juridical_name' : fields.char('Jurudical company name', size = 255, required = False),
 #        'client_service_status' : 
