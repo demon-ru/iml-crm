@@ -104,45 +104,68 @@
 							<div>
 								<div>
 									<field  name="juridical_address_country"  style="width: 25%%" placeholder="Country.."/>
-									<field  name="juridical_address_city_name" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 25%%" placeholder="City.."/>
-									<field  name="juridical_address_index" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 25%%" placeholder="Index.."/>
+									<field name="juridical_adress_region" style="width: 25%%" placeholder="Регион.."/>
+									<div class="oe_edit_only">
+										<field  name="juridical_address_city_name" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')" style="width: 25%%" placeholder="City.."/>
+										<field  name="juridical_address_index" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')" style="width: 25%%" placeholder="Index.."/>
+									</div>
 								</div>
-								<field  name="juridical_address_street_name" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 50%%" placeholder="Street"/>
-								<div class="address_format">
-									<label name="label_house" string="Дом" />
-									<field  name="juridical_address_dom" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 14%%" placeholder="House number"/>
-									<label name="label_building" string="Строение"/>
-									<field  name="juridical_address_building" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 14%%" placeholder="Building"/>
-									<label name="label_office" string="Офис" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')"/>
-									<field  name="juridical_address_office" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, 'juridical_adress_non_stand_part')" style="width: 13%%" placeholder="Office"/>
+								<div class="oe_edit_only">
+									<field  name="juridical_address_street_name" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')" style="width: 50%%" placeholder="Street"/>
+									<div class="address_format">
+										<label name="label_house" string="Дом" />
+										<field  name="juridical_address_dom" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')" style="width: 14%%" placeholder="House number"/>
+										<label name="label_building" string="Строение"/>
+										<field  name="juridical_address_building" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')" style="width: 14%%" placeholder="Building"/>
+										<label name="label_office" string="Офис" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')"/>
+										<field  name="juridical_address_office" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')" style="width: 13%%" placeholder="Office"/>
+									</div>
 								</div>
 							</div>
 							</group>
 							<group>
-								<field  name="juridical_adress_non_stand_part"/>
-							</group>						
+								<div class="oe_edit_only">
+									<label name="l_jur_nonestd_adress" string = "Окончание адреса"/>
+									<field  name="juridical_adress_non_stand_part" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')"/>
+								</div>
+							</group>
+							<div class="oe_edit_only">
+								<label name="l_jur_full_adress" string = "Полный адрес"/>
+							</div>
+							<field name="juridical_adress_full_adress"  readonly="True"/> 					
 							<group String="Фактический адрес">
 								<div>
 									<div>
-										<field  name="actual_address_country" style="width: 25%%" placeholder="Country.."/>
-										<field  name="actual_address_city_name" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 25%%" placeholder="City.."/>
-										<field  name="actual_address_index" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 25%%" placeholder="Index.."/>
+										<field name="actual_address_country" style="width: 25%%" placeholder="Country.."/>
+										<field name="actual_adress_region" style="width: 25%%" placeholder="Регион.."/>
+										<div class="oe_edit_only">
+											<field  name="actual_address_city_name" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')" style="width: 25%%" placeholder="City.."/>
+											<field  name="actual_address_index" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')" style="width: 25%%" placeholder="Index.."/>
+										</div>
 									</div>
-									<field  name="actual_address_street_name" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 50%%" placeholder="Street"/>
-									<div class="address_format">
-										<label name="label_house" string="Дом"/>
-										<field  name="actual_address_dom" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 14%%" placeholder="House number"/>
-										<label name="label_building" string="Строение"/>
-										<field  name="actual_address_building" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 14%%" placeholder="Building"/>
-										<label name="label_office" string="Офис"/>
-										<field  name="actual_address_office" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, 'actual_adress_non_stand_part')" style="width: 13%%" placeholder="Office"/>
+									<div class="oe_edit_only">
+										<field  name="actual_address_street_name" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')" style="width: 50%%" placeholder="Street"/>
+										<div class="address_format">
+											<label name="label_house" string="Дом"/>
+											<field  name="actual_address_dom" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')" style="width: 14%%" placeholder="House number"/>
+											<label name="label_building" string="Строение"/>
+											<field  name="actual_address_building" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')" style="width: 14%%" placeholder="Building"/>
+											<label name="label_office" string="Офис"/>
+											<field  name="actual_address_office" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')" style="width: 13%%" placeholder="Office"/>
+										</div>
 									</div>
-								</div>
-								
+								</div>	
                         	</group>
-							<group>
-								<field  name="actual_adress_non_stand_part"/>
+							<group>	
+								<div class="oe_edit_only">
+									<label name="l_act_nonestd_adress" string = "Окончание адреса"/>
+									<field  name="actual_adress_non_stand_part" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')"/>
+								</div>
 							</group>
+							<div class="oe_edit_only">
+								<label name="l_act_full_adress" string = "Полный адрес"/>
+							</div>
+							<field name="actual_adress_full_adress" readonly="True"/> 
 						</page>
 					</page>
 					<page name='internal_notes' position="before">
