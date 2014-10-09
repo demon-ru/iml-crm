@@ -15,7 +15,25 @@
 			   </field>
             </field>
         </record>
-        
+
+        <record id="view_partners_form_iml_crm2" model="ir.ui.view">
+        	<field name="name">view.res.partner.form.iml.crm.inherited2</field>
+        	<field name="model">res.partner</field>
+            <field name="inherit_id" ref="account.partner_view_buttons"/>
+            <field eval="18" name="priority"/>
+            <field name="arch" type="xml">
+            	<data>
+					<xpath expr="//div[@name='buttons']/button[@id='invoice_button']" position="replace"/>
+					<xpath expr="//div[@name='buttons']/button[@name='%(account.action_account_moves_all_tree)d']" position="replace"/>
+					<xpath expr="//div[@name='buttons']/button[@name='%(account.action_open_partner_analytic_accounts)d']/field[@name='contracts_count']" position="replace"/>
+					<xpath expr="//div[@name='buttons']/button[@name='%(account.action_open_partner_analytic_accounts)d']" position="inside">
+						<field string="Контракты" name="contracts_count" widget="statinfo"/>
+					</xpath>				
+				</data>
+			</field>
+		</record>
+
+
         <record id="view_partners_form_iml_crm1" model="ir.ui.view">
             <field name="name">view.res.partner.form.iml.crm.inherited1</field>
             <field name="model">res.partner</field>
@@ -29,15 +47,12 @@
 	                            domain="[('is_company', '=', True), ('id', '!=', id)]" context="{'default_is_company': True}"
 	                            />
                     </field>
-                	<xpath
-                		expr="//group/group" position="replace"> 
+                	<xpath expr="//group/group" position="replace"> 
                         <group invisible="True">
 		                        <label for="type" attrs="{'invisible': [('parent_id','=', False)]}"/>
 		                        <div attrs="{'invisible': [('parent_id','=', False)]}" name="div_type">
-		                            <field class="oe_inline"
-		                                name="type"/>
+		                            <field class="oe_inline" name="type"/>
 		                        </div>
-
 		                        <label for="street" string="Address"/>
 		                        <div>
 		                            <div class="oe_edit_only">
