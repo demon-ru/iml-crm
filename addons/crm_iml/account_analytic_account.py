@@ -25,11 +25,15 @@ class account_analytic_account(osv.osv):
 	_columns = {
 		"crm_number": fields.char('Contract number', size = 255), 
 		'storage_of_shipping' : fields.many2one('crm.shipping_storage', 'Storage of shipping') ,
-		'region_of_delivery' : fields.selection([('moscow', 'Moscow'), ('regions', 'Regions except Moscow')], 'Delivery region'),
+		'region_of_delivery' : fields.many2one('crm.settlement_center', 'Delivery region'),
 		'fio_authorized person_nominative_case' : fields.char('Full name of authorized person in nominative case', size = 255),
 		'fio_authorized person_genitive_case' : fields.char('Full name of authorized person in genitive case', size = 255),
 		'authorized_person_position_nominative_case' : fields.char('Position of authorized person in nominative case', size = 255), 
 		'authorized_person_position_genetive_case' : fields.char('Position of authorized person in genetive case', size = 255),
 		'number_of_powerOfattorney' : fields.char('Number of The Power of Attorney', size = 255),
 		'date_of_powerOfattorney' : fields.date('The date of The Power of Attorney'),
+		'dateOfContracts' : fields.date('Дата контракта'),
+	}
+	_defaults = {
+		'type': 'contract',
 	}
