@@ -8,12 +8,18 @@
             <field eval="21" name="priority"/>
             <field name="arch" type="xml">
                 <data>
-		    		<field name="priority" position="before">
-		     		   <field name="type_of_opport_id"/>
+		    		<field name="partner_name" position="after">
+						<field name="type_of_opport_id"/>
+						<field name="categ_ids"
+                               widget="many2many_tags"
+                               context="{'object_name': 'crm.lead'}"
+                               domain="[('object_id.model', '=', 'crm.lead')]"/>
 		    		</field> 	
-					<field name="partner_name" position="after">
-						<field name="email_from" string="Email" widget="email"/>
+					<field name="function" position="after">
 						<field name="phone"/>
+					</field>
+					<field name="fax" position="after">
+						<field name="email_from" string="Email" widget="email"/>
 					</field>
 					<xpath expr="//group/group/field[@name='email_from']" position="replace">
 						<field name="email_from" invisible="True"/>
@@ -32,8 +38,26 @@
 					</xpath>
 					<xpath expr="//page[@string='Lead']/group/group[@name='mailings']" position="replace"/>
 					<xpath expr="//page[@string='Lead']/group/group[@string='Misc']" position="replace"/>
+					<xpath expr="//page[@string='Lead']/group" position="after">
+						<field name="type" invisible="1"/>
+					</xpath>
 					<xpath expr="//page[@string='Lead']/group/group[@string='References']" position="replace"/>
 					<xpath expr="//group/group/div/button[@name='case_escalate']" position="replace"/>	
+					<xpath expr="//group/group/field[@name='categ_ids']" position="replace"/>
+					<xpath expr="//button[@name='%(crm.crm_case_categ_phone_incoming0)d']/div" position="replace"/>
+					<xpath expr="//button[@name='%(crm.crm_case_categ_phone_incoming0)d']">
+						<div>Звонки</div>
+					</xpath>
+					<xpath expr="//button[@name='action_schedule_meeting']/field[@name='meeting_count']" position="replace"/> 
+					<xpath  expr="//button[@name='action_schedule_meeting']">
+						<field string="Встречи" name="meeting_count" widget="statinfo"/>
+					</xpath>
+					<xpath expr="//page[@string='Internal Notes']" position="replace"/>
+					<xpath expr="//page[@string='Lead']" position="after">
+						<page string="Примечания">
+							<field name="description"/>
+						</page>
+					</xpath>
                 </data>
             </field>
         </record>

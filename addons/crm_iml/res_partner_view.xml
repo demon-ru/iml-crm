@@ -103,8 +103,10 @@
 							<group name="juridical_address" String="Юридический адрес">
 							<div>
 								<div>
-									<field  name="juridical_address_country"  style="width: 25%%" placeholder="Country.."/>
-									<field name="juridical_adress_region" style="width: 25%%" placeholder="Регион.."/>
+									<div class="oe_edit_only">
+										<field  name="juridical_address_country"  style="width: 25%%" placeholder="Country.."/>
+										<field name="juridical_adress_region" style="width: 25%%" placeholder="Регион.."/>
+									</div>
 									<div class="oe_edit_only">
 										<field  name="juridical_address_city_name" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')" style="width: 25%%" placeholder="City.."/>
 										<field  name="juridical_address_index" on_change="onchange_adress(juridical_address_index, juridical_address_city_name, juridical_address_street_name, juridical_address_dom, juridical_address_building, juridical_address_office, juridical_adress_non_stand_part, 'juridical_adress_full_adress')" style="width: 25%%" placeholder="Index.."/>
@@ -136,8 +138,10 @@
 							<group String="Фактический адрес">
 								<div>
 									<div>
-										<field name="actual_address_country" style="width: 25%%" placeholder="Country.."/>
-										<field name="actual_adress_region" style="width: 25%%" placeholder="Регион.."/>
+										<div class="oe_edit_only">
+											<field name="actual_address_country" style="width: 25%%" placeholder="Country.."/>
+											<field name="actual_adress_region" style="width: 25%%" placeholder="Регион.."/>
+										</div>
 										<div class="oe_edit_only">
 											<field  name="actual_address_city_name" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')" style="width: 25%%" placeholder="City.."/>
 											<field  name="actual_address_index" on_change="onchange_adress(actual_address_index, actual_address_city_name, actual_address_street_name, actual_address_dom, actual_address_building, actual_address_office, actual_adress_non_stand_part, 'actual_adress_full_adress')" style="width: 25%%" placeholder="Index.."/>
