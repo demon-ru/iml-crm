@@ -46,5 +46,29 @@
             </data>
           </field>
         </record>
+
+        <record id="view_account_tree_iml_crm1" model="ir.ui.view">
+          <field name="name">view.crm.iml.analytic.acount.inherited1</field>
+          <field name="model">account.analytic.account</field>
+          <field name="inherit_id" ref="account.view_account_analytic_account_tree"/>
+          <field eval="18" name="priority"/>
+          <field name="arch" type="xml">
+            <xpath expr="//tree/field[@name='complete_name']" position="replace"/>
+            <field name="name" position="after">
+              <field name="complete_name" string="Название"/>
+            </field>
+            <xpath expr="//tree/field[@name='type']" position="replace"/>
+            <field name="parent_id" position="after">
+              <field name="type" string="Тип документа"/>
+              <field name="dateOfContracts"/>
+              <field name="storage_of_shipping"/>
+              <field name="region_of_delivery"/>
+            </field>
+            <xpath expr="//tree/field[@name='code']" position='replace'/>
+            <xpath expr="//tree/field[@name='debit']" position='replace'/>
+            <xpath expr="//tree/field[@name='credit']" position='replace'/>
+            <xpath expr="//tree/field[@name='balance']" position='replace'/>
+          </field>
+        </record>
      </data>
 </openerp>
