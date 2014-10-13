@@ -205,6 +205,11 @@ class res_partner(osv.osv):
         
 		# работа с NAV
 		'exportDateToNAV': fields.datetime('crm.iml.export.date.res.partner' , readonly=True),
+        'notify_email': fields.selection([
+            ('none', 'Нет'),
+            ('always', 'Да'),
+            ], 'Receive Inbox Notifications by Email', required=True,
+            oldname='notification_email_send'),
     }
 
     _defaults = {
@@ -245,6 +250,24 @@ class res_partner(osv.osv):
 			if (result):
 				partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 		return True
+
+    def redirectToContact(self,cr,uid,ids,context=None): 
+        partn = self.browse(cr, uid, ids[0], context=context)
+        model_data = self.pool.get("ir.model.data")
+        # Get res_partner views
+        dummy, form_view = model_data.get_object_reference(cr, uid, 'base', 'view_partner_form')
+
+        return {
+            'return':True,
+            'view_mode': 'form',
+            'view_id': "base.view_partner_form",
+            'views': [(form_view or False,'form')],
+            'view_type': 'form',
+            'res_id' : partn.id,
+            'res_model': 'res.partner',
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+        }
 
     def write(self, cr, uid, ids, vals, context=None):
         for partn in self.browse(cr, uid, ids, context=context):
