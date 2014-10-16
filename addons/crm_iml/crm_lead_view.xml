@@ -13,6 +13,13 @@
                 	<xpath expr="//group/group/label[@for='section_id']" position="replace"/>
                 	<xpath expr="//group/group/div/button[@name='case_escalate']" position="replace"/>	
                 	<xpath expr="//group/group/div[@groups='base.group_multi_salesteams']" position="replace"/>
+                	<xpath expr="//group" position="inside">
+                		<field name="data_arraved" invisible="True"/>
+                		<group col="3">
+							<button name="send_customers_form" string="Отправить клиенту бланк для заполнения" type="object"/>
+							<button name="apply_data" string="Подтвердить данные" type="object" attrs="{'invisible': [('data_arraved','=', False)]}"/>
+						</group>
+					</xpath>
                 	<xpath expr="//group/group/field[@name='categ_ids']" position="replace"/>
 		    		<field name="partner_id" position="after">
 						<field name="type_of_opport_id"/>
