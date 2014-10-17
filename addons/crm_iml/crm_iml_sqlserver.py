@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    OpernERP module for Customer Relationship Management for Logistic company
@@ -21,6 +21,7 @@
 import MySQLdb
 import time
 import sys
+import chardet
 
 from openerp.osv import fields,osv,orm
 from openerp import tools, api
@@ -77,28 +78,10 @@ class crm_iml_sqlserver(osv.osv):
 		'lastImportDate': fields.datetime('Date last successful import' , readonly=True),
 		'name': fields.char('Name', size=128, required=True),
 		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
-		# to delete 
-		#'server': fields.char('SQL Server', size=128, required=True),
-		#'user': fields.char('User', size=128, required=True),
-		#'password': fields.char('Password', size=128),
-		#'dbname': fields.char('Database name', size=128),
-		# to delete
 		'tableName':fields.char('Table Name', size=128),
-		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange')], 'Exchange type', required=True),
+		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands', 'Commands exchange')], 'Exchange type', required=True),
 		'exchange_server':fields.many2one('crm.iml.exchange_server_settings', 'name'),
 	}
-
-	"""
-		Создает подключение к серверу
-	"""
-	def connectToServer(self):	
-		db = None
-		try:
-			db = MySQLdb.connect(self.server, self.user, 
-			  self.password, self.dbname, charset="utf8", use_unicode=True)
-		except Exception, e:
-			raise osv.except_osv(_("Connection failed!"), _("Here is what we got instead:\n %s.") % 					  tools.ustr(e))
-		return db
 			
 	"""	
 		Teстовое подключение  к БД
@@ -113,6 +96,80 @@ class crm_iml_sqlserver(osv.osv):
 				db.close()
 		server.write({'lastTestDate': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 		return True
+	"""
+		Метод экспорта клиента в промежуточную базу
+		Параметры:
+			partner - экспортируемый партнер
+	"""
+	def export_res_partner(self, partner):
+		export_params = {
+			"id": {"Field": "crm_id", "IsStr": False},
+			"name": {"Field": "CustomerName", "IsStr": True},
+			"juridical_name" : {"Field": "ShopName", "IsStr": True},
+			"website" : {"Field": "WebSite", "IsStr": True},
+			"category_of_goods.nav_id" : {"Field": "GoodsCategory", "IsStr": True},
+			"juridical_address_index" : {"Field": "AddrZIP", "IsStr": True},
+			"juridical_address_city_name" : {"Field": "AddrSity", "IsStr": True},
+			"juridical_address_street_name" : {"Field": "AddrStreet", "IsStr": True},
+			"juridical_address_dom" : {"Field": "AddrBuilding", "IsStr": True},
+			"juridical_address_building" : {"Field": "AddrBuilding2", "IsStr": True},
+			"juridical_address_office" : {"Field": "AddrOffice", "IsStr": True},
+			"actual_address_index" : {"Field": "LocAddrZIP", "IsStr": True},
+			"actual_address_city_name" : {"Field": "LocAddrSity", "IsStr": True},
+			"actual_address_street_name" : {"Field": "LocAddrStreet", "IsStr": True},
+			"actual_address_dom" : {"Field": "LocAddrBuilding", "IsStr": True},
+			"actual_address_building" : {"Field": "LocAddrBuilding2", "IsStr": True},
+			"actual_address_office" : {"Field": "LocAddrOffice", "IsStr": True},
+			"account_number" : {"Field": "AccountNo", "IsStr": True},
+			"inn" : {"Field": "ITN", "IsStr": True},
+			"registration_reason_code" : {"Field": "TRRC", "IsStr": True},
+			"date_of_accounting" : {"Field": "TRDate", "IsStr": True, "IsDate": True},
+			"OGRN_OGRNIP" : {"Field": "OGRN", "IsStr": True},
+			"registration_date" : {"Field": "RegistrationDate", "IsStr": True, "IsDate": True},
+			"OKVED" : {"Field": "OCVED", "IsStr": True},
+			"OKPO" : {"Field": "OCPO", "IsStr": True},
+			"OKATO" : {"Field": "OCATO", "IsStr": True},
+			"actual_adress_non_stand_part" : {"Field": "FactAdrStr", "IsStr": True},
+			"juridical_adress_non_stand_part" : {"Field": "JurAdrStr", "IsStr": True},
+		}
+		connection = None
+		try:
+			vSetParams = ""
+			vSetValues = ""
+			vParam = {}
+			for key in export_params:
+				vParam = export_params[key]
+				vArrayOfAtr = key.split('.')
+				value = ""
+				var = None
+				if (len(vArrayOfAtr) > 1):
+					vObj = getattr(partner, vArrayOfAtr[0])
+					if vObj:
+						var = getattr(vObj, vArrayOfAtr[1])
+				else:
+					var = getattr(partner, vArrayOfAtr[0])
+				if var:
+					if (vParam["IsStr"]):
+						value = var.encode("utf-8")
+					else:
+						value = str(var)
+				if (value != ""):
+					vSetParams = self.addCondition(vParam["Field"].encode("utf-8"), vSetParams)
+					vSetValues = self.addCondition(value , vSetValues, None, vParam['IsStr'], "IsDate" in vParam)
+			vSetParams = self.addCondition("CRM_TimeStamp", vSetParams)
+			vSetValues = self.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, None, True)
+			query = "insert into " + self.tableName.encode("ascii") + " (" + vSetParams + ") values(" + vSetValues + ")"
+			connection = self.exchange_server.connectToServer()
+			cursor = connection.cursor()	
+			cursor.execute(query)
+			connection.commit()	
+		except Exception, e:
+			raise osv.except_osv(_("Export failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if connection:
+				connection.close()
+
+
 	""" 
 		Метод вставляет ID клиента в промежуточную базу
 		Параметры
@@ -124,7 +181,7 @@ class crm_iml_sqlserver(osv.osv):
 	def insert_record(self, customerID, IdImport=None, conection=None, MakeCommit=True):
 		try:
 			if (conection is None): 
-				conection = self.connectToServer()
+				conection = self.exchange_server.connectToServer()
 			cursor = conection.cursor()
 			wherePart = ""
 			if not(IdImport is None):
@@ -149,6 +206,7 @@ class crm_iml_sqlserver(osv.osv):
 			if ((conection) and (MakeCommit)):
 				conection.close()
 		return True
+
 	"""
 		Находит или создает объект заданного класса
 		Параметры:
@@ -202,13 +260,13 @@ class crm_iml_sqlserver(osv.osv):
 		#Поиск склада 
 		vStorageShipID = None
 		if (row[6]):
-			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", [('nav_id', "in", [row[6]])])
+			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", [('nav_id', "in", [str(row[6])])])
 			if (vStorageShip):
 				vStorageShipID = vStorageShip.id 
 		#Поиск категории товара
 		vCategoryOfGoodsID = None
 		if (row[5]):
-			vCategoryOfGoods = self.findObject(cr, uid,"crm.goodscategory", [('nav_id', "in", [row[5]])])
+			vCategoryOfGoods = self.findObject(cr, uid, "crm.goodscategory", [('nav_id', "in", [str(row[5])])])
 			if (vCategoryOfGoods):
 				vCategoryOfGoodsID = vCategoryOfGoods.id 
 		#Определение типа физ/юр лицо		
@@ -228,7 +286,7 @@ class crm_iml_sqlserver(osv.osv):
 		#Поиск организационной формы компании
 		vOrgTypeID = None
 		if (row[46]):
-			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [row[46]])])
+			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [str(row[46])])])
 			if (vOrgType):
 				vOrgTypeID = vOrgType.id 	
 		vals = {
@@ -239,6 +297,7 @@ class crm_iml_sqlserver(osv.osv):
 			"is_company": True,
 			"juridical_name": row[3],
 			"website": row[4],
+			"active": True,
 			#Вкладка Основная
 			#'category_of_goods': row[5],
 			#Юридический адрес
@@ -272,14 +331,15 @@ class crm_iml_sqlserver(osv.osv):
 			#Не стандартная часть адреса
 			'actual_adress_non_stand_part': row[40],
 			'juridical_adress_non_stand_part': row[41],
-			'nav_holdingId' : row[48],
+			#'nav_holdingId' : row[48],
 			}
 		if not(row[0] is None):
-			cur_obj = self.findObject(cr, uid,"res.partner", [('id',"in", [row[0]])])
+			res_obj = self.pool.get("res.partner")
+			cur_obj = res_obj.browse(cr, uid, int(row[0]))
 			if cur_obj:
 				cur_obj.write(vals)
 		elif not(row[2] is None):
-			cur_obj = self.findObject(cr, uid,"res.partner", [('unk',"in", [row[2]])])
+			cur_obj = self.findObject(cr, uid,"res.partner", [('unk',"in", [str(row[2])])])
 			if cur_obj:
 				cur_obj.write(vals)
 		if (row[0] is None) and not(cur_obj):
@@ -310,7 +370,7 @@ class crm_iml_sqlserver(osv.osv):
 					"date_of_powerOfattorney": vDoverenostDate,
 					"date_start": vStartDate,
 				}
-				self.findObject(cr, uid,"account.analytic.account", ['&',('crm_number',"in", [row[39]]),('partner_id', 'in',[cur_obj.id])], True, vals_add_obj, True)			
+				self.findObject(cr, uid,"account.analytic.account", ['&',('crm_number',"in", [str(row[39])]),('partner_id', 'in',[cur_obj.id])], True, vals_add_obj, True)			
 			if row[42]:			
 				vals_add_obj = {
 					"name": row[42],
@@ -318,9 +378,14 @@ class crm_iml_sqlserver(osv.osv):
 					"phone": row[44],
 					'parent_id': cur_obj.id
 				}
-				self.findObject(cr, uid,'res.partner', ["&",('name', 'in' ,[row[42]]),"&",('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
+				self.findObject(cr, uid,'res.partner', ["&",('name', 'in' ,[str(row[42])]),"&",('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
 		return cur_obj
-	
+
+	def getQuery_partner(self):
+		#TODO Сделать запрос просто собираемым
+		query = "select crm_id, customername, nav_unc, ShopName, WebSite, GoodsCategory, Warehouse_ID, Region_ID, RespPerson, RespPersonWhom, RespPersonPosition, RespPersonPositionWhom, LoA_Number, LoA_Date, AddrZIP, AddrSity, AddrStreet, AddrBuilding, AddrBuilding2, AddrOffice, LocAddrZIP, LocAddrSity, LocAddrStreet, LocAddrBuilding, LocAddrBuilding2, LocAddrOffice, AccountNo, BIC, BankName, CorrAccountNo, PartnerType, ITN, TRRC, TRDate, OGRN, RegistrationDate, OCVED, OCPO, OCATO, AgreementNo, FactAdrStr, JurAdrStr, Contact, Email, Phone, idimport, CompOrgTypeID, AgreementDate from " + self.tableName
+		return query
+
 	"""	
 		Импорт из промежуточной базы в crm
 	"""
@@ -329,7 +394,7 @@ class crm_iml_sqlserver(osv.osv):
 			crm_id - id - 0
 			CustomerName - name - 1
 			NAV_UNC - unk - 2
-			ShopName - internet_shop_name - 3
+			ShopName - internet_shop_name - juridical_name - 3
 			WebSite - 4 - website
 			GoodsCategory - category_of_goods - 5
 			Warehouse_ID - storage_of_shipping - 6
@@ -352,10 +417,12 @@ class crm_iml_sqlserver(osv.osv):
 			LocAddrBuilding2 - actual_address_building - 24
 			LocAddrOffice - actual_address_office - 25
 			AccountNo - account_number - 26
+			--Не грузим -------------
 			BIC - BIN - 27
 			BankName - bank_name - 28
 			CorrAccountNo - correspondent_account_number - 29
 			PartnerType - type_of_counterparty - 30
+			------------------------------------------
 			ITN - inn - 31
 			TRRC - registration_reason_code - 32
 			TRDate - date_of_accounting - 33
@@ -390,7 +457,7 @@ class crm_iml_sqlserver(osv.osv):
 				wherePart = ''
 				if (server.lastImportDate): 
 					wherePart = " where nav_timestamp >'" + str(server.lastImportDate) + "'"
-				query = "select crm_id, customername, nav_unc, ShopName, WebSite, GoodsCategory, Warehouse_ID, Region_ID, RespPerson, RespPersonWhom, RespPersonPosition, RespPersonPositionWhom, LoA_Number, LoA_Date, AddrZIP, AddrSity, AddrStreet, AddrBuilding, AddrBuilding2, AddrOffice, LocAddrZIP, LocAddrSity, LocAddrStreet, LocAddrBuilding, LocAddrBuilding2, LocAddrOffice, AccountNo, BIC, BankName, CorrAccountNo, PartnerType, ITN, TRRC, TRDate, OGRN, RegistrationDate, OCVED, OCPO, OCATO, AgreementNo, FactAdrStr, JurAdrStr, Contact, Email, Phone, idimport, CompOrgTypeID, AgreementDate from " + server.tableName + wherePart
+				query = server.getQuery_partner() + wherePart
 				cursor.execute(query)
 				for row in cursor.fetchall():
 					cur_obj = server.createOrFindResPartner(row)
@@ -449,11 +516,151 @@ class crm_iml_sqlserver(osv.osv):
 				connection.close();
 	 	write("ok")
 
+
+	var_field = {
+		"CRM_ID": 0,
+		"External_ID": 1,
+		"Source": 2,
+		"Dest" : 3,
+		"Command": 4,
+		"id": 5,
+	}
+
+	def commands_import(self, cr, uid, ids, context=None):
+		connection = None
+		try:
+			for server in self.browse(cr, uid, ids, context=context):
+				vFieldParam = ""
+				for key in vals:
+					if (vFieldParam == ""):
+						vFieldParam = key
+					else:
+						vFieldParam = vFieldParam + ", " + key 
+				query = "select  " + vFieldParam + " from " + server.tableName.encode("ascii") + " where DoneTime is null and Dest = 'crm'"
+				connection = server.exchange_server.connectToServer()
+				cursor=connection.cursor()
+				cursor.execute(query)
+				for row in cursor.fetchall():
+					partner_id = row[var_field["CRM_ID"]]
+					res_obj = self.pool.get('res.partner')
+					partn = res_obj.browse(cr, uid, partner_id)
+					command = row[var_field["Command"]]
+					server.processCommand(partn, command, None, var)
+		except Exception, e:
+			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if connection:
+				connection.close()
+
+	def processCommand(self, cr, uid, ids, partner, command, opport=None, added_var=None):
+		connection = None
+		comm_connection = None
+		for server in self.browse(cr, uid, ids, context=None):
+			if not(opport):
+				opport = self.findObject(cr, uid, 'crm.lead', [('creating_partner','=', partner_id)])
+			server_res_partner = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["partner"])]) 
+			if not(server_res_partner):
+				sys.stdout.write("ERROR! Пожалуйста настройте таблицу для экспорта/импорта клиентов!")
+			query = server_res_partner.getQuery_partner()
+			wherePart = ""
+			if (command == "UpdateCustomerData"):
+				wherePart = " where CRM_ID=" + str(partner.id)
+			elif (command == "UpdatedUNC"):
+				if (added_var):
+					unc = added_var[var_field["External_ID"]]
+					wherePart = " where NAV_UNC = " + unc.encode(utf-8) + " and CRM_TimeStamp is null"
+			if (wherePart != ""):
+				try:
+					query = query + wherePart
+					connection = server_res_partner.exchange_server.connectToServer()
+					comm_connection = server.exchange_server.connectToServer()
+					cursor_for_command = comm_connection.cursor()
+					cursor=connection.cursor()
+					cursor.execute(query)
+					for row_part in cursor.fetchall():
+						cur_obj = server_res_partner.createOrFindResPartner(row_part)
+						if (cur_obj is None):
+							#TODO Сделать логирование импорта
+							sys.stdout.write("ERROR! Not found client in system with id =" + str(row_part[0]))
+						if not(cur_obj is None) and not(row_part[45] is None): 
+							server_res_partner.insert_record(cur_obj.id, row_part[45], connection, False);
+						if (cur_obj):
+							query_command = "update " + server.tableName.encode("ascii") + " set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where CRM_ID= " + str(row_part[0]) + " and Command= '" + command + "' and DoneTime is null" 
+							print "==========================="
+							print query_command
+							print "============================"
+							cursor_for_command.execute(query_command)
+					connection.commit()
+					comm_connection.commit()
+				finally:
+					if (connection):
+						connection.close()
+					if (comm_connection):
+						comm_connection.close()
+
+
+	def addCondition(self,valueCond, stringCond, KeyValue=None, isStr=False, isDate=False):
+		#Перечисление полей, которые являются строкой 
+		vStrFields = {
+			"External_ID": True,
+			"Source": True,
+			"Dest":  True,
+			"Command": True,
+			"TextMessage": True,
+			"CreateTime": True,
+		}
+		if (isDate):
+			date_object = valueCond
+			valueCond = str(date_object)
+		if (stringCond) and (stringCond != ""):
+			stringCond = stringCond + ", "
+		if ((KeyValue) and (KeyValue in vStrFields)) or (isStr):
+			stringCond = stringCond + "'".encode("ascii") + valueCond + "'".encode("ascii")
+		else:
+			stringCond = stringCond + valueCond
+		return stringCond
+
+	#Обмен командами с системой
+	def commands_exchange(self, cr, uid, ids, vals, needExportCl, partner=None):
+		connection = None
+		try:
+			for server in self.browse(cr, uid, ids, context=None):
+				vSetParams = ""
+				vSetValues = ""
+				for key in vals:
+					if (vals[key]) and (vals[key] != ""):
+						vSetParams = server.addCondition(key, vSetParams)
+						vSetValues = server.addCondition(str(vals[key]), vSetValues, key)
+				if not("CreateTime" in vals):
+					vSetParams = server.addCondition("CreateTime", vSetParams)
+					vSetValues = server.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, "CreateTime")
+				query = "insert into " + server.tableName + " (" + vSetParams + ") values(" + vSetValues + ")"
+				exchange_server = server.exchange_server
+				connection = exchange_server.connectToServer()	
+				cursor = connection.cursor()	
+				cursor.execute(query)
+				connection.commit()	
+				export_server = None
+				if (needExportCl and "CRM_ID" in vals):
+					export_server = server.findObject("crm.iml.sqlserver", [('exchange_type',"=", "partner")])
+					if not(partner):
+						partner = server.findObject("res.partner", [('id',"in", [int(vals["CRM_ID"])])])
+					if not export_server:
+						raise osv.except_osv(_("Send commands failed!"), _("Не задан сервер для импорта клиентов! Обратитесь к администратору."))
+					export_server.export_res_partner(partner)				
+		except Exception, e:
+			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if connection:
+				connection.close()
+		
+
  
 	# словарь, где хранится соответсвие тип обмена - обработчик
 	exchange_types = { 
 				"partner" : partner_import,
 				"holdings": holdings_import,
+				"commands": commands_import,
 		}
 
 	# развилка в импорте, метод - роутер

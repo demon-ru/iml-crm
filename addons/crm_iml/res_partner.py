@@ -239,17 +239,31 @@ class res_partner(osv.osv):
         return {'value':v}
 
     def iml_crm_export_id(self,cr, uid, ids, context=None):
-		for partn in self.browse(cr, uid, ids, context=context):
-			params = self.pool.get('ir.config_parameter')
-			serv = int(params.get_param(cr, uid, 'crm_iml_export_server_id',default='0' ,context=context))
-			res_obj = self.pool.get('crm.iml.sqlserver')
-			server = res_obj.browse(cr, uid, serv)
-			if not(server):
-				raise osv.except_osv(('Warning!'), ("Export SQL Server is not specified. Set Export/Import SQL server in General settings!"))
-		 	result = server.insert_record(partn.id)
-			if (result):
-				partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
-		return True
+        com_vals = {}
+        for partn in self.browse(cr, uid, ids, context=context):
+            com_vals = {
+                "Source": "crm",
+                "Dest": "nav",
+                "Command": "GetUNC",
+                "CRM_ID": unicode(str(partn.id), "utf-8"),
+            }
+            res_obj = self.pool.get("crm.iml.sqlserver")
+            res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["commands"])], context=context)
+            server = None
+            if len(res_id) > 0:
+                server = res_obj.browse(cr, uid, res_id[0])
+            else:
+                raise osv.except_osv(_("Нельзя отправить команду!"), _("Не задана таблица для обмена команд. Обратитесь к администратору."))
+            res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["partner"])], context=context)
+            server_res_part = None
+            if len(res_id) > 0:
+                server_res_part = res_obj.browse(cr, uid, res_id[0])
+            else:
+                raise osv.except_osv(_("Нельзя отправить команду!"), _("Не задана таблица для импорта/экспорта клиентов. Обратитесь к администратору."))
+            server.commands_exchange(com_vals)
+            server_res_part.export_res_partner(partn)
+            partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
+        return True
 
     def redirectToContact(self,cr,uid,ids,context=None): 
         partn = self.browse(cr, uid, ids[0], context=context)
