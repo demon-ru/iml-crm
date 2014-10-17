@@ -21,7 +21,6 @@
 import MySQLdb
 import time
 import sys
-import chardet
 
 from openerp.osv import fields,osv,orm
 from openerp import tools, api
