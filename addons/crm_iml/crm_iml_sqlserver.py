@@ -130,6 +130,9 @@ class crm_iml_sqlserver(osv.osv):
 			"OKATO" : {"Field": "OCATO", "IsStr": True},
 			"actual_adress_non_stand_part" : {"Field": "FactAdrStr", "IsStr": True},
 			"juridical_adress_non_stand_part" : {"Field": "JurAdrStr", "IsStr": True},
+			"tech_questions.name" : {"Field": "Contact", "IsStr": True},
+			"tech_questions.email": {"Field": "Email", "IsStr": True},
+			"tech_questions.phone": {"Field": "Phone", "IsStr": True}, 
 		}
 		connection = None
 		try:

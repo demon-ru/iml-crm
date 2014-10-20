@@ -122,18 +122,27 @@
 						</page>
 					</xpath>
 					<field name="function" position="after" >
-							<field  name="short_name" invisible="True"/>
-							<label for="unk"/>
-							<div>
-								<field  name="unk" style="width: 60%%"/>
-								<button name="iml_crm_export_id" string="Получить УНК из NAV" type="object" style="width: 35%%" attrs="{'invisible': ['|',('is_company','=', False),('unk', '!=', False)]}"/>	
-							</div>
+						<field  name="short_name" invisible="True"/>
+						<field  name="unk"/>
+						<field  name="juridical_name"/>
+						<field name="signer" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
+						<field name="logistics_respons_person" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
+						<field name="financial_resp_per" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
+						<field name="tech_questions" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
+						<group attrs="{'invisible': [('is_company','=', False)]}">
 							<field  name="company_org_type"/>
-							<field  name="juridical_name"/>
 							<field  name="categoryClient_id"/>
-							<field string="Состояние обслуживания клиента" name="client_in_service"/>
+							<field string="Состояние обслуживания" name="client_in_service"/>
+						</group>
+						<group attrs="{'invisible': [('is_company','=', False)]}">
 							<field  name="category_of_goods" />
 							<field name="website" widget="url" placeholder="e.g. www.odoo.com"/>
+						</group>
+						<field  name="company_org_type" attrs="{'invisible': [('is_company','=', True)]}"/>
+						<field  name="categoryClient_id" attrs="{'invisible': [('is_company','=', True)]}"/>
+						<field string="Состояние обслуживания" name="client_in_service" attrs="{'invisible': [('is_company','=', True)]}"/>
+						<field  name="category_of_goods" attrs="{'invisible': [('is_company','=', True)]}"/>
+						<field name="website" widget="url" placeholder="e.g. www.odoo.com" attrs="{'invisible': [('is_company','=', True)]}"/>
 					</field>
 					<!-- сокрытие полей контактов для компаний, TaskId = 59 -->
                         <field name="phone" position="replace">
