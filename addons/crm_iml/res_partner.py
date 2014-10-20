@@ -149,7 +149,7 @@ class res_partner(osv.osv):
         # Страница "Основное"
         'internet_shop_name' : fields.char('Internet shop name', size = 255),
         'category_of_goods' : fields.many2one('crm.goodscategory', 'Categories of goods'),
-        # Страница "Адреса"
+        # Странself._sock,nameица "Адреса"
         # группа "Юридический адрес"
         "juridical_address_country" : fields.char('Country', size = 255), 
         'juridical_address_index' : fields.char('Post index', size = 255),
@@ -293,15 +293,10 @@ class res_partner(osv.osv):
         if isinstance(ids, (int, long)):
             ids = [ids]
         res = []
-        print "name_get !"
-        print context
-        for record in self.browse(cr, uid, ids, context=context):
-            if context.get("show_with_function_edit"):
-                print "name_get show_with_function only"
         for record in self.browse(cr, uid, ids, context=context):
             if record.parent_id and not(record.is_company) and context.get('show_with_function'):
                 print "name_get show_with_function"
-                name =  "%s, %s" % (record.name, record.function)
+                name =  "%s %s" % (record.name, "," + record.function if record.function else "" )
                 res.append((record.id, name))
             else:
                 res = res + (super(res_partner, self).name_get(cr, uid, [record.id], context))

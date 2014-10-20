@@ -13,3 +13,5 @@ iml_company_org_type_user,iml.crm.manager.company_org_type,model_crm_company_org
 iml_company_org_type_manager,iml.crm.user.company_org_type,model_crm_company_org_type,base.group_sale_manager,1,1,1,1
 iml_settlement_center_user,iml.crm.manager.settlement_center,model_crm_settlement_center,base.group_sale_salesman,1,0,0,0
 iml_settlement_center_manager,iml.crm.user.settlement_center,model_crm_settlement_center,base.group_sale_manager,1,1,1,1
+iml_setting_sqlserver,iml.crm.sqlserver.manager,model_crm_iml_sqlserver,base.group_sale_manager,1,1,0,0
+iml_setting_exserver,iml.crm.exserver.manager,model_crm_iml_exchange_server_settings,base.group_sale_manager,1,1,0,0
