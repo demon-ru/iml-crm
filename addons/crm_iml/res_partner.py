@@ -149,7 +149,7 @@ class res_partner(osv.osv):
         # Страница "Основное"
         'internet_shop_name' : fields.char('Internet shop name', size = 255),
         'category_of_goods' : fields.many2one('crm.goodscategory', 'Categories of goods'),
-        # Страница "Адреса"
+        # Странself._sock,nameица "Адреса"
         # группа "Юридический адрес"
         "juridical_address_country" : fields.char('Country', size = 255), 
         'juridical_address_index' : fields.char('Post index', size = 255),
@@ -210,6 +210,10 @@ class res_partner(osv.osv):
             ('always', 'Да'),
             ], 'Receive Inbox Notifications by Email', required=True,
             oldname='notification_email_send'),
+        'signer': fields.many2one("res.partner", "Подписант", domain='[("parent_id", "=", id)]', context="{'show_with_function'=True}"),
+        'logistics_respons_person': fields.many2one("res.partner", "Логистическая деятельность", help="Логистическая деятельность\Вопросы доставки", domain='[("parent_id", "=", id)]'),
+        'financial_resp_per': fields.many2one("res.partner", "Финансовая деятельность", domain='[("parent_id", "=", id)]'),
+        'tech_questions': fields.many2one("res.partner", "Технические вопросы", domain='[("parent_id", "=", id)]'),
     }
 
     _defaults = {
@@ -282,6 +286,21 @@ class res_partner(osv.osv):
             'target': 'current',
             'type': 'ir.actions.act_window',
         }
+
+    def name_get(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        if isinstance(ids, (int, long)):
+            ids = [ids]
+        res = []
+        for record in self.browse(cr, uid, ids, context=context):
+            if record.parent_id and not(record.is_company) and context.get('show_with_function'):
+                print "name_get show_with_function"
+                name =  "%s %s" % (record.name, "," + record.function if record.function else "" )
+                res.append((record.id, name))
+            else:
+                res = res + (super(res_partner, self).name_get(cr, uid, [record.id], context))
+        return res
 
     def write(self, cr, uid, ids, vals, context=None):
         for partn in self.browse(cr, uid, ids, context=context):

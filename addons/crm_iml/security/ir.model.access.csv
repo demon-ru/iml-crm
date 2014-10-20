@@ -14,3 +14,5 @@ iml_company_org_type_manager,iml.crm.user.company_org_type,model_crm_company_org
 iml_settlement_center_user,iml.crm.manager.settlement_center,model_crm_settlement_center,base.group_sale_salesman,1,0,0,0
 iml_settlement_center_manager,iml.crm.user.settlement_center,model_crm_settlement_center,base.group_sale_manager,1,1,1,1
 iml_access_account_move_line_salesman,iml.crm.account.move.line invoice,account.model_account_move_line,base.group_sale_salesman,1,0,0,0
+iml_setting_sqlserver,iml.crm.sqlserver.manager,model_crm_iml_sqlserver,base.group_sale_manager,1,1,0,0
+iml_setting_exserver,iml.crm.exserver.manager,model_crm_iml_exchange_server_settings,base.group_sale_manager,1,1,0,0
