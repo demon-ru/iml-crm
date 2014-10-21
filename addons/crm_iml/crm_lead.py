@@ -129,11 +129,19 @@ class crm_lead(format_address, osv.osv):
 		vType = ""
 		if 'type' in aObj:
 			vType = aObj['type']
+		vUser = 0
+		vSection = 0
 		vTypeID = 0
 		if (vType != ""):
 			vals_obj = {'name': vType}
 			vTypeObj = self.findOrCreateObject(cr, uid, context, 'crm.iml.opportunities.type', 'name', vType, vals_obj)	
 			vTypeID = vTypeObj.id
+			if (vTypeObj.user_id):
+				vUser = vTypeObj.user_id.id
+			elif (vTypeObj.section_id) and (vTypeObj.section_id.user_id):
+				vUser = vTypeObj.section_id.user_id.id
+				#Если указан отдел мы можем однозначно задать и отдел
+				vSection = vTypeObj.section_id.id
 		defaults = {
 				'name':  msg.get('subject') or _("No Subject"),
 				'email_from': vEmail,
@@ -141,7 +149,8 @@ class crm_lead(format_address, osv.osv):
 				'partner_id': partner.id,
 				'phone': vPhone or "",
 				'type': 'opportunity',
-				'user_id': False,
+				'user_id': vUser,
+				"section_id": vSection,
 				'type_of_opport_id': vTypeID, 
 			}     
 		if msg.get('priority') in dict(crm.AVAILABLE_PRIORITIES):
