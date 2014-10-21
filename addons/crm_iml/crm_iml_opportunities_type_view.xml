@@ -4,13 +4,15 @@
         <record id="crm_iml_opportunities_type_view" model="ir.ui.view">
             <field name="name">Type</field>
             <field name="model">crm.iml.opportunities.type</field>
-	    <field name="type">form</field>
+            <field name="type">form</field>
             <field name="arch" type="xml">
-		<group col="2" colspan="2">
-                     <field string="Name" name="name"/>
-                     <field string="Description" name="description"/>
-		</group>
+                <group col="2" colspan="2">
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="user_id"/>
+                    <field name="section_id"/>
+                </group>
             </field>
-        </record>
-   </data>
+        </record>ы
+    </data>
 </openerp>

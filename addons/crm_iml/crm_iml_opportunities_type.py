@@ -29,6 +29,8 @@ class crm_iml_opportunities_type(osv.osv):
 	_columns = {
 		'description': fields.char('Description', size=256, required=True),
 		'name': fields.char('Name', size=64, required=True),
+		'user_id': fields.many2one('res.users', 'Ответственный по умолчанию'),
+		'section_id': fields.many2one('crm.case.section', 'Отдел по умолчанию'),
 	}
 
 	def name_get(self,cr, user, ids, context=None):

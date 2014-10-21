@@ -6,10 +6,10 @@
             <field name="model">base.config.settings</field>
             <field name="inherit_id" ref="base_setup.view_general_configuration"/>
             <field name="arch" type="xml">
-                 <div> 
-                     <label for="exchange_settings" string="Settings for MySQL db connection" />
-                     <field name="exchange_settings" class="oe_inline"/>
-				 </div>
+                <group>
+                    <field name="exchange_settings" class="oe_inline" string="Настройка по умолчанию SQL сервера"/>
+                    <field name="url_pattern" class="oe_inline" string="URL ссылка на сайт для клиентов"/>
+                </group>
             </field>
         </record>
 

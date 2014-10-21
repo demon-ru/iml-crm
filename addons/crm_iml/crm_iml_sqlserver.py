@@ -62,8 +62,8 @@ class crm_iml_exchangeserver_settings(osv.osv):
 	def test_iml_crm_sql_server(self,cr, uid, ids, context=None):	
 		db = None;	
 		try:
-			for server in self.browse(cr, uid, ids, context=context):
-				db = server.connectToServer();
+			server = self.browse(cr, uid, ids[0], context=context)
+			db = server.connectToServer();
 		finally:
 			if (db):
 				db.close()
@@ -88,8 +88,8 @@ class crm_iml_sqlserver(osv.osv):
 	def test_iml_crm_sql_server(self,cr, uid, ids, context=None):	
 		db = None;	
 		try:
-			for server in self.browse(cr, uid, ids, context=context):
-				db = server.exchange_server.connectToServer();
+			server = self.browse(cr, uid, ids, context=context)
+			db = server.exchange_server.connectToServer();
 		finally:
 			if (db):
 				db.close()
@@ -262,13 +262,13 @@ class crm_iml_sqlserver(osv.osv):
 		#Поиск склада 
 		vStorageShipID = None
 		if (row[6]):
-			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", [('nav_id', "in", [str(row[6])])])
+			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", [('nav_id', "in", [str(row[6].encode("utf-8"))])])
 			if (vStorageShip):
 				vStorageShipID = vStorageShip.id 
 		#Поиск категории товара
 		vCategoryOfGoodsID = None
 		if (row[5]):
-			vCategoryOfGoods = self.findObject(cr, uid, "crm.goodscategory", [('nav_id', "in", [str(row[5])])])
+			vCategoryOfGoods = self.findObject(cr, uid, "crm.goodscategory", [('nav_id', "in", [str(row[5].encode("utf-8"))])])
 			if (vCategoryOfGoods):
 				vCategoryOfGoodsID = vCategoryOfGoods.id 
 		#Определение типа физ/юр лицо		
@@ -288,7 +288,7 @@ class crm_iml_sqlserver(osv.osv):
 		#Поиск организационной формы компании
 		vOrgTypeID = None
 		if (row[46]):
-			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [str(row[46])])])
+			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [str(row[46].encode("utf-8"))])])
 			if (vOrgType):
 				vOrgTypeID = vOrgType.id 	
 		vals = {
@@ -341,7 +341,7 @@ class crm_iml_sqlserver(osv.osv):
 			if cur_obj:
 				cur_obj.write(vals)
 		elif not(row[2] is None):
-			cur_obj = self.findObject(cr, uid,"res.partner", [('unk',"in", [str(row[2])])])
+			cur_obj = self.findObject(cr, uid,"res.partner", [('unk',"in", [str(row[2].encode("utf-8"))])])
 			if cur_obj:
 				cur_obj.write(vals)
 		if (row[0] is None) and not(cur_obj):
@@ -359,28 +359,28 @@ class crm_iml_sqlserver(osv.osv):
 						vStartDate = None				
 				#Атрибуты договора
 				vals_add_obj = {
-					'name': row[39],
-					'crm_number': row[39],
+					'name': row[39].encode("utf-8"),
+					'crm_number': row[39].encode("utf-8"),
 					'partner_id': cur_obj.id,
-					"fio_authorized person_nominative_case": row[8],
-					"fio_authorized person_genitive_case": row[9],
-					"authorized_person_position_nominative_case": row[10], 
-					"authorized_person_position_genetive_case": row[11],
+					"fio_authorized person_nominative_case": row[8].encode("utf-8"),
+					"fio_authorized person_genitive_case": row[9].encode("utf-8"),
+					"authorized_person_position_nominative_case": row[10].encode("utf-8"), 
+					"authorized_person_position_genetive_case": row[11].encode("utf-8"),
 					'region_of_delivery': vRegion,
 					"storage_of_shipping": vStorageShipID,
-					"number_of_powerOfattorney": row[12],
+					"number_of_powerOfattorney": row[12].encode("utf-8"),
 					"date_of_powerOfattorney": vDoverenostDate,
 					"date_start": vStartDate,
 				}
-				self.findObject(cr, uid,"account.analytic.account", ['&',('crm_number',"in", [str(row[39])]),('partner_id', 'in',[cur_obj.id])], True, vals_add_obj, True)			
+				self.findObject(cr, uid,"account.analytic.account", ['&',('crm_number',"in", [str(row[39].encode("utf-8"))]),('partner_id', 'in',[cur_obj.id])], True, vals_add_obj, True)			
 			if row[42]:			
 				vals_add_obj = {
-					"name": row[42],
-					"email": row[43],
-					"phone": row[44],
+					"name": row[42].encode("utf-8"),
+					"email": row[43].encode("utf-8"),
+					"phone": row[44].encode("utf-8"),
 					'parent_id': cur_obj.id
 				}
-				self.findObject(cr, uid,'res.partner', ["&",('name', 'in' ,[str(row[42])]),"&",('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
+				self.findObject(cr, uid,'res.partner', ["&",('name', 'in' ,[str(row[42].encode("utf-8"))]),"&",('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
 		return cur_obj
 
 	def getQuery_partner(self):
@@ -452,23 +452,23 @@ class crm_iml_sqlserver(osv.osv):
 	def partner_import(self,cr, uid, ids, context=None):
 		conection = None
 		try:
-			for server in self.browse(cr, uid, ids, context=context):
-				exchange_server = server.exchange_server
-				conection = exchange_server.connectToServer()
-				cursor = conection.cursor()
-				wherePart = ''
-				if (server.lastImportDate): 
-					wherePart = " where nav_timestamp >'" + str(server.lastImportDate) + "'"
-				query = server.getQuery_partner() + wherePart
-				cursor.execute(query)
-				for row in cursor.fetchall():
-					cur_obj = server.createOrFindResPartner(row)
-					if (cur_obj is None):
-						#TODO Сделать логирование импорта
-						sys.stdout.write("ERROR! Not found client in system with id =" + str(row[0]))
-					if not(cur_obj is None) and (row[0] is None) and not(row[45] is None): 
-						server.insert_record(cur_obj.id, row[45], conection, False);
-				conection.commit()
+			server = self.browse(cr, uid, ids[0], context=context)
+			exchange_server = server.exchange_server
+			conection = exchange_server.connectToServer()
+			cursor = conection.cursor()
+			wherePart = ''
+			if (server.lastImportDate): 
+				wherePart = " where nav_timestamp >'" + str(server.lastImportDate) + "'"
+			query = server.getQuery_partner() + wherePart
+			cursor.execute(query)
+			for row in cursor.fetchall():
+				cur_obj = server.createOrFindResPartner(row)
+				if (cur_obj is None):
+					#TODO Сделать логирование импорта
+					sys.stdout.write("ERROR! Not found client in system with id =" + str(row[0]))
+				if not(cur_obj is None) and (row[0] is None) and not(row[45] is None): 
+					server.insert_record(cur_obj.id, row[45], conection, False);
+			conection.commit()
 		except Exception, e:
 			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
 		finally:
@@ -531,23 +531,23 @@ class crm_iml_sqlserver(osv.osv):
 	def commands_import(self, cr, uid, ids, context=None):
 		connection = None
 		try:
-			for server in self.browse(cr, uid, ids, context=context):
-				vFieldParam = ""
-				for key in vals:
-					if (vFieldParam == ""):
-						vFieldParam = key
-					else:
-						vFieldParam = vFieldParam + ", " + key 
-				query = "select  " + vFieldParam + " from " + server.tableName.encode("ascii") + " where DoneTime is null and Dest = 'crm'"
-				connection = server.exchange_server.connectToServer()
-				cursor=connection.cursor()
-				cursor.execute(query)
-				for row in cursor.fetchall():
-					partner_id = row[var_field["CRM_ID"]]
-					res_obj = self.pool.get('res.partner')
-					partn = res_obj.browse(cr, uid, partner_id)
-					command = row[var_field["Command"]]
-					server.processCommand(partn, command, None, var)
+			server = self.browse(cr, uid, ids[0], context=context)
+			vFieldParam = ""
+			for key in vals:
+				if (vFieldParam == ""):
+					vFieldParam = key
+				else:
+					vFieldParam = vFieldParam + ", " + key 
+			query = "select  " + vFieldParam + " from " + server.tableName.encode("ascii") + " where DoneTime is null and Dest = 'crm'"
+			connection = server.exchange_server.connectToServer()
+			cursor=connection.cursor()
+			cursor.execute(query)
+			for row in cursor.fetchall():
+				partner_id = row[var_field["CRM_ID"]]
+				res_obj = self.pool.get('res.partner')
+				partn = res_obj.browse(cr, uid, partner_id)
+				command = row[var_field["Command"]]
+				server.processCommand(partn, command, None, var)
 		except Exception, e:
 			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
 		finally:
@@ -557,48 +557,41 @@ class crm_iml_sqlserver(osv.osv):
 	def processCommand(self, cr, uid, ids, partner, command, opport=None, added_var=None):
 		connection = None
 		comm_connection = None
-		for server in self.browse(cr, uid, ids, context=None):
-			if not(opport):
-				opport = self.findObject(cr, uid, 'crm.lead', [('creating_partner','=', partner_id)])
-			server_res_partner = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["partner"])]) 
-			if not(server_res_partner):
-				sys.stdout.write("ERROR! Пожалуйста настройте таблицу для экспорта/импорта клиентов!")
-			query = server_res_partner.getQuery_partner()
-			wherePart = ""
-			if (command == "UpdateCustomerData"):
-				wherePart = " where CRM_ID=" + str(partner.id)
-			elif (command == "UpdatedUNC"):
-				if (added_var):
-					unc = added_var[var_field["External_ID"]]
-					wherePart = " where NAV_UNC = " + unc.encode(utf-8) + " and CRM_TimeStamp is null"
-			if (wherePart != ""):
-				try:
-					query = query + wherePart
-					connection = server_res_partner.exchange_server.connectToServer()
-					comm_connection = server.exchange_server.connectToServer()
-					cursor_for_command = comm_connection.cursor()
-					cursor=connection.cursor()
-					cursor.execute(query)
-					for row_part in cursor.fetchall():
-						cur_obj = server_res_partner.createOrFindResPartner(row_part)
-						if (cur_obj is None):
-							#TODO Сделать логирование импорта
-							sys.stdout.write("ERROR! Not found client in system with id =" + str(row_part[0]))
-						if not(cur_obj is None) and not(row_part[45] is None): 
-							server_res_partner.insert_record(cur_obj.id, row_part[45], connection, False);
-						if (cur_obj):
-							query_command = "update " + server.tableName.encode("ascii") + " set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where CRM_ID= " + str(row_part[0]) + " and Command= '" + command + "' and DoneTime is null" 
-							print "==========================="
-							print query_command
-							print "============================"
-							cursor_for_command.execute(query_command)
-					connection.commit()
-					comm_connection.commit()
-				finally:
-					if (connection):
-						connection.close()
-					if (comm_connection):
-						comm_connection.close()
+		server = self.browse(cr, uid, ids[0], context=None)
+		if not(opport):
+			opport = self.findObject(cr, uid, 'crm.lead', [('creating_partner','=', partner_id)])
+		server_res_partner = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["partner"])]) 
+		if not(server_res_partner):
+			sys.stdout.write("ERROR! Пожалуйста настройте таблицу для экспорта/импорта клиентов!")
+		query = server_res_partner.getQuery_partner()
+		wherePart = ""
+		if (command == "UpdateCustomerData"):
+			wherePart = " where CRM_ID=" + str(partner.id)
+		elif (command == "UpdatedUNC"):
+			if (added_var):
+				unc = added_var[var_field["External_ID"]]
+				wherePart = " where NAV_UNC = " + unc.encode(utf-8) + " and CRM_TimeStamp is null"
+		if (wherePart != ""):
+			try:
+				query = query + wherePart
+				connection = server_res_partner.exchange_server.connectToServer()
+				cursor=connection.cursor()
+				cursor.execute(query)
+				for row_part in cursor.fetchall():
+					cur_obj = server_res_partner.createOrFindResPartner(row_part)
+					if (cur_obj is None):
+						#TODO Сделать логирование импорта
+						sys.stdout.write("ERROR! Not found client in system with id =" + str(row_part[0]))
+					if not(cur_obj is None) and not(row_part[45] is None): 
+						server_res_partner.insert_record(cur_obj.id, row_part[45], connection, False);
+					if (cur_obj) and (command=="UpdateCustomerData"):
+						cur_obj.iml_crm_export_id()
+				connection.commit()
+			finally:
+				if (connection):
+					connection.close()
+				if (comm_connection):
+					comm_connection.close()
 
 
 	def addCondition(self,valueCond, stringCond, KeyValue=None, isStr=False, isDate=False):
@@ -626,30 +619,30 @@ class crm_iml_sqlserver(osv.osv):
 	def commands_exchange(self, cr, uid, ids, vals, needExportCl, partner=None):
 		connection = None
 		try:
-			for server in self.browse(cr, uid, ids, context=None):
-				vSetParams = ""
-				vSetValues = ""
-				for key in vals:
-					if (vals[key]) and (vals[key] != ""):
-						vSetParams = server.addCondition(key, vSetParams)
-						vSetValues = server.addCondition(str(vals[key]), vSetValues, key)
-				if not("CreateTime" in vals):
-					vSetParams = server.addCondition("CreateTime", vSetParams)
-					vSetValues = server.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, "CreateTime")
-				query = "insert into " + server.tableName + " (" + vSetParams + ") values(" + vSetValues + ")"
-				exchange_server = server.exchange_server
-				connection = exchange_server.connectToServer()	
-				cursor = connection.cursor()	
-				cursor.execute(query)
-				connection.commit()	
-				export_server = None
-				if (needExportCl and "CRM_ID" in vals):
-					export_server = server.findObject("crm.iml.sqlserver", [('exchange_type',"=", "partner")])
-					if not(partner):
-						partner = server.findObject("res.partner", [('id',"in", [int(vals["CRM_ID"])])])
-					if not export_server:
-						raise osv.except_osv(_("Send commands failed!"), _("Не задан сервер для импорта клиентов! Обратитесь к администратору."))
-					export_server.export_res_partner(partner)				
+			server = self.browse(cr, uid, ids[0], context=None)
+			vSetParams = ""
+			vSetValues = ""
+			for key in vals:
+				if (vals[key]) and (vals[key] != ""):
+					vSetParams = server.addCondition(key, vSetParams)
+					vSetValues = server.addCondition(str(vals[key]), vSetValues, key)
+			if not("CreateTime" in vals):
+				vSetParams = server.addCondition("CreateTime", vSetParams)
+				vSetValues = server.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, "CreateTime")
+			query = "insert into " + server.tableName + " (" + vSetParams + ") values(" + vSetValues + ")"
+			exchange_server = server.exchange_server
+			connection = exchange_server.connectToServer()	
+			cursor = connection.cursor()	
+			cursor.execute(query)
+			connection.commit()	
+			export_server = None
+			if (needExportCl and "CRM_ID" in vals):
+				export_server = server.findObject("crm.iml.sqlserver", [('exchange_type',"=", "partner")])
+				if not(partner):
+					partner = server.findObject("res.partner", [('id',"in", [int(vals["CRM_ID"])])])
+				if not export_server:
+					raise osv.except_osv(_("Send commands failed!"), _("Не задан сервер для импорта клиентов! Обратитесь к администратору."))
+				export_server.export_res_partner(partner)				
 		except Exception, e:
 			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
 		finally:
