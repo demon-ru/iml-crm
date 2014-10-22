@@ -232,9 +232,19 @@ class res_partner(osv.osv):
         'claim_count': fields.function(_claim_count, string='# Claims', type='integer'),
     }
 
+    def _default_category_of_goods(self, cr, uid, ids):
+        def_id = 0
+        res_obj = self.pool.get("crm.goodscategory")
+        cur_obj = None
+        res_id = res_obj.search(cr, uid, [("nav_id","=", "0")], context=None)
+        if len(res_id) > 0:
+            def_id = res_id[0]
+        return def_id
+
     _defaults = {
         "juridical_address_country": "Российская Федерация",
         "actual_address_country": "Российская Федерация",
+        "category_of_goods": _default_category_of_goods,
     }
 
     def onchange_adress(self, cr, uid, ids, address_index, city_name, street_name, dom, building, office, nonstnpart, adressField):
