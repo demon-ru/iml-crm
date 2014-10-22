@@ -33,6 +33,7 @@
 	'crm',
 	'analytic',
 	'account',
+    'crm_claim',
     ],
     'data': [
 
@@ -72,6 +73,8 @@
 
 		"account_analytic_account_view.xml",
 		"res_users_view.xml",
+        "crm_claim_view.xml",
+        "crm_iml_exchange_settings_menu.xml",
 
     ],
     

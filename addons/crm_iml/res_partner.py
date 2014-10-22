@@ -131,6 +131,21 @@ class res_partner(osv.osv):
         
         return res
 
+    def getArray(self, childs):
+        vArray = []
+        if childs:
+            for child in childs:
+                vArray.append(child.id)
+        return vArray
+
+    def _claim_count(self, cr, uid, ids, field_name, arg, context=None):
+        Claim = self.pool['crm.claim']
+        return {
+            partner.id: Claim.search_count(cr,uid, ["|",('partner_id', '=', partner.id), ("partner_id","in", self.getArray(partner.child_ids))], context=context)  
+            for partner in self.browse(cr, uid, ids, context=context)
+        }
+
+
     _columns = {
         'categoryClient_id': fields.many2one('crm.clientcategory', 'name'),
         # расширение модели партнера в соответствии с требованиями "ВЕДЕНИЕ КЛИЕНТСКОЙ БАЗЫ / КАРТОЧКА КЛИЕНТА"
@@ -214,6 +229,7 @@ class res_partner(osv.osv):
         'logistics_respons_person': fields.many2one("res.partner", "Логистическая деятельность", help="Логистическая деятельность\Вопросы доставки", domain='[("parent_id", "=", id)]'),
         'financial_resp_per': fields.many2one("res.partner", "Финансовая деятельность", domain='[("parent_id", "=", id)]'),
         'tech_questions': fields.many2one("res.partner", "Технические вопросы", domain='[("parent_id", "=", id)]'),
+        'claim_count': fields.function(_claim_count, string='# Claims', type='integer'),
     }
 
     _defaults = {
@@ -353,4 +369,5 @@ class res_partner(osv.osv):
                 actual_adress = self.onchange_adress(cr, uid, ids, vIndex, vCity, vStreet, vDom, vBilding, vOfice, vNonStandart, "actual_adress_full_adress")['value']
                 vals.update(actual_adress)
         return super(res_partner, self).write(cr, uid, ids, vals, context=context)
+
 
