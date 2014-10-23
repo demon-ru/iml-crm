@@ -51,9 +51,6 @@ class crm_iml_exchangeserver_settings(osv.osv):
 		password = '1'
 		database = 'Test'
 		con_string = 'DSN=%s;UID=%s;PWD=%s;DATABASE=%s;' % (dsn, user, password, database)
-		print "*********************************"
-		print "test_MsSQL"
-		print "*********************************"
 		cnxn = pyodbc.connect(con_string)
 		cursor = cnxn.cursor()
 		cursor.execute("select Test from Test")
@@ -215,9 +212,6 @@ class crm_iml_sqlserver(osv.osv):
 				query = "INSERT into " + self.tableName + " (crm_id, CRM_TimeStamp) values (" + str(customerID) +", '" + importdate + "')"
 			elif not(data == None):
 				query = "update " + self.tableName + " set crm_id = " + str(customerID) + ", CRM_TimeStamp = '" + importdate + "' " + wherePart
-			print "************************"
-			print query
-			print "************************"
 			cursor.execute(query)
 			if MakeCommit:
 				conection.commit()
