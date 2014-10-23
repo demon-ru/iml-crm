@@ -215,6 +215,9 @@ class crm_iml_sqlserver(osv.osv):
 				query = "INSERT into " + self.tableName + " (crm_id, CRM_TimeStamp) values (" + str(customerID) +", '" + importdate + "')"
 			elif not(data == None):
 				query = "update " + self.tableName + " set crm_id = " + str(customerID) + ", CRM_TimeStamp = '" + importdate + "' " + wherePart
+			print "************************"
+			print query
+			print "************************"
 			cursor.execute(query)
 			if MakeCommit:
 				conection.commit()
@@ -392,9 +395,9 @@ class crm_iml_sqlserver(osv.osv):
 				self.findObject(cr, uid,"account.analytic.account", ['&',('crm_number',"in", [str(row[39].encode("utf-8"))]),('partner_id', 'in',[cur_obj.id])], True, vals_add_obj, True)			
 			if row[42]:			
 				vals_add_obj = {
-					"name": row[42].encode("utf-8"),
-					"email": row[43].encode("utf-8"),
-					"phone": row[44].encode("utf-8"),
+					"name": row[42],
+					"email": row[43],
+					"phone": row[44],
 					'parent_id': cur_obj.id
 				}
 				self.findObject(cr, uid,'res.partner', ["&",('name', 'in' ,[str(row[42].encode("utf-8"))]),"&",('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
@@ -558,6 +561,8 @@ class crm_iml_sqlserver(osv.osv):
 				partner_id = row[var_field["CRM_ID"]]
 				res_obj = self.pool.get('res.partner')
 				partn = res_obj.browse(cr, uid, partner_id)
+				if not(partn):
+					raise osv.except_osv(_("Send commands failed!"), _("Клиента с ID " + str(row[var_field["CRM_ID"]]) + " не найден в crm"))
 				command = row[var_field["Command"]]
 				server.processCommand(partn, command, None, row)
 				query = "update " + server.tableName.encode("ascii") + " set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id = " + str(row[var_field["id"]])
@@ -617,7 +622,7 @@ class crm_iml_sqlserver(osv.osv):
 					if (comm_connection):
 						comm_connection.close()
 		else:	
-			if (opport.user_id) and (opport.user_id.partner_id) and (opport.user_id.partner_id.email):
+			if (opport) and (opport.user_id) and (opport.user_id.partner_id) and (opport.user_id.partner_id.email):
 				customer_name = ""
 				if (opport.partner_id):
 					customer_name = opport.partner_id.name

@@ -170,6 +170,26 @@ class crm_lead(format_address, osv.osv):
 			partn = opport.creating_partner
 			server.processCommand(partn, "UpdateCustomerData", opport)
 			opport.write({"data_arraved": False, "hash_for_url": "",})
+
+	def on_change_partner_id(self, cr, uid, ids, partner_id, context=None):
+		values = {}
+		if partner_id:
+			partner = self.pool.get('res.partner').browse(cr, uid, partner_id, context=context)
+			values = {
+				'partner_name': partner.parent_id.name if partner.parent_id else False,
+				'contact_name': partner.name if partner else False,
+				'street': partner.street,
+				'street2': partner.street2,
+				'city': partner.city,
+				'state_id': partner.state_id and partner.state_id.id or False,
+				'country_id': partner.country_id and partner.country_id.id or False,
+				'email_from': partner.email,
+				'phone': partner.phone,
+				'mobile': partner.mobile,
+				'fax': partner.fax,
+				'zip': partner.zip,
+			}
+		return {'value': values}
 	
 	def look_at_information(self,cr, uid, ids, context=None):
 		params = self.pool.get('ir.config_parameter')
@@ -284,6 +304,7 @@ class crm_lead(format_address, osv.osv):
 			"model": "crm.lead",
 			"res_id": opport.id,
 		}
+		opport.write({"data_arraved": True})
 		res_obj = self.pool.get("mail.compose.message")
 		mess = self.pool.get("mail.compose.message")
 		mess = res_obj.browse(cr, uid, mess.create(cr, uid, vals_mess, context=None))
@@ -299,5 +320,4 @@ class crm_lead(format_address, osv.osv):
 			'res_id' : mess.id,
 			'target': 'new'
 		}
-		opport.write({"data_arraved": True})
 		return ret_vals

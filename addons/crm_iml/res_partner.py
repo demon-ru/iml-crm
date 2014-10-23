@@ -291,7 +291,7 @@ class res_partner(osv.osv):
             else:
                 raise osv.except_osv(_("Нельзя отправить команду!"), _("Не задана таблица для импорта/экспорта клиентов. Обратитесь к администратору."))
             server.commands_exchange(com_vals, False)
-            server_res_part.export_res_partner(partn)
+            #server_res_part.export_res_partner(partn)
             partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
         return True
 
