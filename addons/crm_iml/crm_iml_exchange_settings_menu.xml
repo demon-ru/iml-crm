@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record model="ir.actions.act_window" id="crm_iml_ex_sqlserver_all">
+            <field name="name">Sql server</field>
+            <field name="res_model">crm.iml.exchange_server_settings</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="crm_iml_exchangeserver_view"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_crm_iml_ex_tree_sqlserver_oppor11">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="crm_iml_exchangeserver_tree"/>
+            <field name="act_window_id" ref="crm_iml_ex_sqlserver_all"/>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_crm_iml_ex_form_sqlserver_oppor11">
+            <field name="sequence" eval="2"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="crm_iml_exchangeserver_view"/>
+            <field name="act_window_id" ref="crm_iml_ex_sqlserver_all"/>
+        </record>	
+
+        <menuitem name="Export my sql database" id="menu_crm_iml_ex_sqlserver" parent="menu_config_catalog" sequence="7" action="crm_iml_ex_sqlserver_all"/>
+
+    </data>
+</openerp>

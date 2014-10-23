@@ -21,6 +21,7 @@
 import MySQLdb
 import time
 import sys
+import pyodbc
 
 from openerp.osv import fields,osv,orm
 from openerp import tools, api
@@ -43,6 +44,22 @@ class crm_iml_exchangeserver_settings(osv.osv):
 	_sql_constraints = [
         ('name_unique_constrait', 'unique(name)', "Config with this name alredy exists. Name must be unique."),
     ]
+
+	def test_MsSQL(self):
+		dsn = 'sqlserverdatasource'
+		user = 'Test'
+		password = '1'
+		database = 'Test'
+		con_string = 'DSN=%s;UID=%s;PWD=%s;DATABASE=%s;' % (dsn, user, password, database)
+		print "*********************************"
+		print "test_MsSQL"
+		print "*********************************"
+		cnxn = pyodbc.connect(con_string)
+		cursor = cnxn.cursor()
+		cursor.execute("select Test from Test")
+		row = cursor.fetchall()
+		if row:
+			print row
 
 	"""
 		Создает подключение к серверу

@@ -1,42 +1,43 @@
 ﻿<?xml version="1.0"?>
 <openerp>
     <data>
-        <record id="crm_iml_slqserver_view" model="ir.ui.view">
-            <field name="name">SqlServer</field>
-            <field name="model">crm.iml.sqlserver</field>
-	    <field name="type">form</field>
-            <field name="arch" type="xml">
-		  <header>
-			<button name="test_iml_crm_sql_server" string="Test connect to database" type="object"/>
-			<button name="perform_import" string="Import from database" type="object"/>
-		  </header>
-		  <sheet>
-			  <group col="2">
-				  <field name="name"/>
-			  </group>
-			  <group col="2" string="Information about connection">
-			    	  <field name="lastTestDate"/>
-				  <field name="lastImportDate"/>	
-			  </group>
-			  <group col="2" string="Server Information">		
-				  <field name="tableName"/>	
-				  <field name="exchange_type"/>
-				  <field name="exchange_server"/>
-			  </group>
-		  </sheet>
-            </field>
-        </record>
-	<record id="crm_iml_slqserver_tree" model="ir.ui.view">
-            <field name="name">SqlServerTree</field>
-            <field name="model">crm.iml.sqlserver</field>
-	    <field name="type">tree</field>
-            <field name="arch" type="xml">
-		  <group col="2" string="Server Information">
-			  <field name="name"/>
-			  <field name="tableName"/>
-			  <field name="exchange_server"/>
-		  </group>
-            </field>
-        </record>
-   </data>
+		<record id="crm_iml_slqserver_view" model="ir.ui.view">
+			<field name="name">SqlServer</field>
+			<field name="model">crm.iml.sqlserver</field>
+			<field name="type">form</field>
+			<field name="arch" type="xml">
+				<header>
+					<button name="test_iml_crm_sql_server" string="Test connect to database" type="object"/>
+					<button name="perform_import" string="Import from database" type="object"/>
+				</header>
+				<sheet>
+					<group col="2">
+						<field name="name"/>
+					</group>
+					<group col="2" string="Information about connection">
+						<field name="lastTestDate"/>
+						<field name="lastImportDate"/>	
+					</group>
+					<group col="2" string="Server Information">		
+						<field name="tableName"/>	
+						<field name="exchange_type"/>
+						<field name="exchange_server"/>
+					</group>
+				</sheet>
+			</field>
+		</record>
+
+		<record id="crm_iml_slqserver_tree" model="ir.ui.view">
+			<field name="name">SqlServerTree</field>
+			<field name="model">crm.iml.sqlserver</field>
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<group col="2" string="Server Information">
+					<field name="name"/>
+					<field name="tableName"/>
+					<field name="exchange_server"/>
+				</group>
+			</field>
+		</record>
+	</data>
 </openerp>

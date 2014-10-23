@@ -31,3 +31,4 @@ import crm_company_org_type
 import account_analytic_account
 import crm_settlement_center
 import res_users
+import crm_claim

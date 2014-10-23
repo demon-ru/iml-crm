@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ##############################################################################
 #
 #    OpernERP module for Customer Relationship Management for Logistic company
@@ -18,17 +18,17 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp.osv import fields, osv
 
-from openerp.osv import fields,osv,orm
+class crm_claim(osv.osv):
+	_inherit = 'crm.claim'
 
-class crm_goodscategory(osv.osv):
-
-    _name = "crm.goodscategory"
-    _description = "Categories of goods"
-
-    _columns = {
-        'name': fields.char('Name', size=64, required=True, help='The name of the segmentation.'),
-        'description': fields.text('Description'),
-		'nav_id': fields.char("External code",  size=100),
-    }
-crm_goodscategory()
+	_columns = {
+		'name': fields.char('Суть обращения', required=True),
+		'date': fields.datetime('Дата обращения', select=True),
+		'section_id': fields.many2one('crm.case.section', 'Подразделение', \
+				select=True, help="Responsible sales team."\
+				" Define Responsible user and Email account for"\
+				" mail gateway."),
+		'date_deadline': fields.date('Крайний срок'),
+	}
