@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <group>
                     <field name="exchange_settings" class="oe_inline" string="Настройка по умолчанию SQL сервера"/>
+                    <field name="export_sql_server" class="oe_inline" string="Таблица по умолчанию"/>
                     <field name="url_pattern" class="oe_inline" string="URL ссылка на сайт для клиентов"/>
                 </group>
             </field>

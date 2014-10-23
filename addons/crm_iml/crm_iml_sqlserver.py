@@ -536,25 +536,20 @@ class crm_iml_sqlserver(osv.osv):
 	 	write("ok")
 
 
-	var_field = {
-		"CRM_ID": 0,
-		"External_ID": 1,
-		"Source": 2,
-		"Dest" : 3,
-		"Command": 4,
-		"id": 5,
-	}
-
 	def commands_import(self, cr, uid, ids, context=None):
+		var_field = {
+			"CRM_ID": 0,
+			"External_ID": 1,
+			"Source": 2,
+			"Dest" : 3,
+			"Command": 4,
+			"id": 5,
+		}
+		partner_id = 0
 		connection = None
 		try:
 			server = self.browse(cr, uid, ids[0], context=context)
-			vFieldParam = ""
-			for key in vals:
-				if (vFieldParam == ""):
-					vFieldParam = key
-				else:
-					vFieldParam = vFieldParam + ", " + key 
+			vFieldParam = "CRM_ID, External_ID, Source, Dest, Command, id"
 			query = "select  " + vFieldParam + " from " + server.tableName.encode("ascii") + " where DoneTime is null and Dest = 'crm'"
 			connection = server.exchange_server.connectToServer()
 			cursor=connection.cursor()
@@ -564,7 +559,10 @@ class crm_iml_sqlserver(osv.osv):
 				res_obj = self.pool.get('res.partner')
 				partn = res_obj.browse(cr, uid, partner_id)
 				command = row[var_field["Command"]]
-				server.processCommand(partn, command, None, var)
+				server.processCommand(partn, command, None, row)
+				query = "update " + server.tableName.encode("ascii") + " set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id = " + str(row[var_field["id"]])
+				cursor.execute(query)
+			connection.commit()
 		except Exception, e:
 			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
 		finally:
@@ -572,44 +570,78 @@ class crm_iml_sqlserver(osv.osv):
 				connection.close()
 
 	def processCommand(self, cr, uid, ids, partner, command, opport=None, added_var=None):
+		var_field = {
+			"CRM_ID": 0,
+			"External_ID": 1,
+			"Source": 2,
+			"Dest" : 3,
+			"Command": 4,
+			"id": 5,
+		}
 		connection = None
 		comm_connection = None
 		server = self.browse(cr, uid, ids[0], context=None)
 		if not(opport):
-			opport = self.findObject(cr, uid, 'crm.lead', [('creating_partner','=', partner_id)])
-		server_res_partner = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["partner"])]) 
-		if not(server_res_partner):
-			sys.stdout.write("ERROR! Пожалуйста настройте таблицу для экспорта/импорта клиентов!")
-		query = server_res_partner.getQuery_partner()
-		wherePart = ""
-		if (command == "UpdateCustomerData"):
-			wherePart = " where CRM_ID=" + str(partner.id)
-		elif (command == "UpdatedUNC"):
-			if (added_var):
-				unc = added_var[var_field["External_ID"]]
-				wherePart = " where NAV_UNC = " + unc.encode(utf-8) + " and CRM_TimeStamp is null"
-		if (wherePart != ""):
-			try:
-				query = query + wherePart
-				connection = server_res_partner.exchange_server.connectToServer()
-				cursor=connection.cursor()
-				cursor.execute(query)
-				for row_part in cursor.fetchall():
-					cur_obj = server_res_partner.createOrFindResPartner(row_part)
-					if (cur_obj is None):
-						#TODO Сделать логирование импорта
-						sys.stdout.write("ERROR! Not found client in system with id =" + str(row_part[0]))
-					if not(cur_obj is None) and not(row_part[45] is None): 
-						server_res_partner.insert_record(cur_obj.id, row_part[45], connection, False);
-					if (cur_obj) and (command=="UpdateCustomerData"):
-						cur_obj.iml_crm_export_id()
-				connection.commit()
-			finally:
-				if (connection):
-					connection.close()
-				if (comm_connection):
-					comm_connection.close()
+			opport = self.findObject(cr, uid, 'crm.lead', [('creating_partner','=', partner.id)])
+		if (command != "UpdatedCustomerData"):
+			server_res_partner = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["partner"])]) 
+			if not(server_res_partner):
+				sys.stdout.write("ERROR! Пожалуйста настройте таблицу для экспорта/импорта клиентов!")
+			query = server_res_partner.getQuery_partner()
+			wherePart = ""
+			if (command == "UpdateCustomerData"):
+				wherePart = " where CRM_ID=" + str(partner.id)
+			elif (command == "UpdatedUNC"):
+				if (added_var):
+					unc = added_var[var_field["External_ID"]]
+					wherePart = " where NAV_UNC = " + unc.encode(utf-8) + " and CRM_TimeStamp is null"
+			if (wherePart != ""):
+				try:
+					query = query + wherePart
+					connection = server_res_partner.exchange_server.connectToServer()
+					cursor=connection.cursor()
+					cursor.execute(query)
+					for row_part in cursor.fetchall():
+						cur_obj = server_res_partner.createOrFindResPartner(row_part)
+						if (cur_obj is None):
+							#TODO Сделать логирование импорта
+							sys.stdout.write("ERROR! Not found client in system with id =" + str(row_part[0]))
+						if not(cur_obj is None) and not(row_part[45] is None): 
+							server_res_partner.insert_record(cur_obj.id, row_part[45], connection, False);
+						if (cur_obj) and (command=="UpdateCustomerData"):
+							cur_obj.iml_crm_export_id()
+					connection.commit()
+				finally:
+					if (connection):
+						connection.close()
+					if (comm_connection):
+						comm_connection.close()
+		else:	
+			if (opport.user_id) and (opport.user_id.partner_id) and (opport.user_id.partner_id.email):
+				customer_name = ""
+				if (opport.partner_id):
+					customer_name = opport.partner_id.name
+				elif (opport.contact_name):
+					customer_name = opport.contact_name
+				params = self.pool.get('ir.config_parameter')
+				url_link = params.get_param(cr, uid, 'crm_iml_url_pattern',default='' ,context=None)
+				url = url_link + "/" + opport.hash_for_url + "?showclosed=1"
+				body = customer_name.encode("utf-8")  + u" заполнил анкету с контактной информацией: ".encode("utf-8") + url.encode("utf-8") + u" <br> Информация запрашивалась в рамках Заявки: ".encode("utf-8") + opport.name.encode("utf-8") + u"<br> Перейдите в заявку и изучите заполненные данные!".encode("utf-8")	
+				post_vars = {'subject': u"Клиент заполнил анкету",
+					'body': body,
+					'partner_ids': [(4, opport.user_id.partner_id.id)],
+					"model": "crm_lead",
+					"res_id": opport.id,} 
+				self.send_email(cr, uid, ids, post_vars)
 
+	def send_email(self,cr, uid, ids, post_vars, context=None):
+		thread_pool = self.pool.get('mail.thread')
+		thread_pool.message_post(
+			cr, uid, False,
+			type="notification",
+			subtype="mt_comment",
+			context=context,
+			**post_vars)
 
 	def addCondition(self,valueCond, stringCond, KeyValue=None, isStr=False, isDate=False):
 		#Перечисление полей, которые являются строкой 

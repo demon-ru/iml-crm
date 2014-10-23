@@ -177,7 +177,7 @@ class crm_lead(format_address, osv.osv):
 		strHash = ""
 		for opport in self.browse(cr, uid, ids, context=context):
 			strHash = opport.hash_for_url
-		url_link = url_link + "/" +  strHash
+		url_link = url_link + "/" +  strHash + "?showclosed=1"
 		url_link.encode("utf-8"),
 		return {
 				'type': 'ir.actions.act_url', 
