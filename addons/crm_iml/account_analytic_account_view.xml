@@ -40,6 +40,7 @@
                     </group>
                 </page>
                 <page name='Description' string= 'Примечания'>
+	              <separator string="Terms and Conditions" name="description"/>
                   <field name="description"/>
                 </page>
               </notebook>
