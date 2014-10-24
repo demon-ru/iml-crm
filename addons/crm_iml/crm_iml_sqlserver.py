@@ -625,12 +625,11 @@ class crm_iml_sqlserver(osv.osv):
 				params = self.pool.get('ir.config_parameter')
 				url_link = params.get_param(cr, uid, 'crm_iml_url_pattern',default='' ,context=None)
 				url = url_link + "/" + opport.hash_for_url + "?showclosed=1"
-				body = customer_name.encode("utf-8")  + u" заполнил анкету с контактной информацией: ".encode("utf-8") + url.encode("utf-8") + u" <br> Информация запрашивалась в рамках Заявки: ".encode("utf-8") + opport.name.encode("utf-8") + u"<br> Перейдите в заявку и изучите заполненные данные!".encode("utf-8")	
+				body = customer_name.encode("utf-8")  + u" заполнил анкету с контактной информацией:<br>".encode("utf-8") + url.encode("utf-8") + u" <br> Информация запрашивалась в рамках Заявки: ".encode("utf-8") + opport.name.encode("utf-8") + u"<br> Перейдите в заявку и изучите заполненные данные!".encode("utf-8")	
 				post_vars = {'subject': u"Клиент заполнил анкету",
-					'body': body,
+					"body" :body,
 					'partner_ids': [(4, opport.user_id.partner_id.id)],
-					"model": "crm_lead",
-					"res_id": opport.id,} 
+					} 
 				self.send_email(cr, uid, ids, post_vars)
 
 	def send_email(self,cr, uid, ids, post_vars, context=None):

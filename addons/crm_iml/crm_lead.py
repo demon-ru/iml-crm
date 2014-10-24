@@ -293,7 +293,9 @@ class crm_lead(format_address, osv.osv):
 		#Открываем диалог с письмом
 		URL = url_link + "/" + opport.hash_for_url
 		if (opport.data_arraved):
-			URL = u"Добрый день!<br>Прошу Вас уточнить\скорректировать следующие данные в бланке:<br>... <br> Ссылка для заполнения данных: " + URL
+			URL = u"Добрый день!<br>Прошу Вас уточнить\скорректировать следующие данные в бланке:<br>... <br> Ссылка для заполнения данных: <br>" + URL
+		else:
+			URL = u"Добрый день!<br><br>Пожалуйста, пройдите по ссылке ниже и заполните реквизиты:<br>" + URL + u"<br>Спасибо!"
 		model_data = self.pool.get("ir.model.data")
    		# Get res_partner views
 		dummy, form_view = model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')
