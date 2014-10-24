@@ -18,7 +18,7 @@
                 		<group col="4">
 							<button name="send_customers_form" string="Отправить клиенту бланк для заполнения" type="object" attrs="{'invisible': [('data_arraved','=', True)]}"/>
 							<button name="send_customers_form" string="Запросить уточнение данных" type="object" attrs="{'invisible': [('data_arraved','=', False)]}"/>
-							<button name="look_at_information" string="Посмотреть данны у клиента" type="object" attrs="{'invisible': [('data_arraved','=', False)]}"/>
+							<button name="look_at_information" string="Посмотреть данные у клиента" type="object" attrs="{'invisible': [('data_arraved','=', False)]}"/>
 							<button name="apply_data" string="Отправить данные в NAV" type="object" attrs="{'invisible': [('data_arraved','=', False)]}"/>
 						</group>
 					</xpath>

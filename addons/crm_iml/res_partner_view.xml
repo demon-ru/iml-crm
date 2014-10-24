@@ -148,6 +148,7 @@
 						<field name="logistics_respons_person" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
 						<field name="financial_resp_per" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
 						<field name="tech_questions" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
+						<field name="first_contact" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
 						<group attrs="{'invisible': [('is_company','=', False)]}">
 							<field  name="categoryClient_id"/>
 							<field string="Состояние обслуживания" name="client_in_service"/>

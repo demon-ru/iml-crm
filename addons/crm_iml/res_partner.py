@@ -229,6 +229,7 @@ class res_partner(osv.osv):
         'logistics_respons_person': fields.many2one("res.partner", "Логистическая деятельность", help="Логистическая деятельность\Вопросы доставки", domain='[("parent_id", "=", id)]'),
         'financial_resp_per': fields.many2one("res.partner", "Финансовая деятельность", domain='[("parent_id", "=", id)]'),
         'tech_questions': fields.many2one("res.partner", "Технические вопросы", domain='[("parent_id", "=", id)]'),
+        'first_contact': fields.many2one("res.partner", "Первичный контакт", domain='[("parent_id", "=", id)]'),
         'claim_count': fields.function(_claim_count, string='# Claims', type='integer'),
     }
 

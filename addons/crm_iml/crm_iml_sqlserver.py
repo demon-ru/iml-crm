@@ -28,7 +28,6 @@ from openerp import tools, api
 from openerp.tools.translate import _
 from openerp import pooler
 
-
 class crm_iml_exchangeserver_settings(osv.osv):
 	_name = "crm.iml.exchange_server_settings"
 	_description = "Settings for importing and exporting data to MySQL database"
@@ -394,7 +393,8 @@ class crm_iml_sqlserver(osv.osv):
 					"phone": row[44],
 					'parent_id': cur_obj.id
 				}
-				self.findObject(cr, uid,'res.partner', ["&",('name', 'in' ,[str(row[42].encode("utf-8"))]),"&",('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
+				contact = self.findObject(cr, uid,'res.partner', ["&",('name', 'in' ,[str(row[42].encode("utf-8"))]),"&",('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
+				cur_obj.write({"first_contact": contact.id,})
 		return cur_obj
 
 	def getQuery_partner(self):
@@ -625,7 +625,11 @@ class crm_iml_sqlserver(osv.osv):
 				params = self.pool.get('ir.config_parameter')
 				url_link = params.get_param(cr, uid, 'crm_iml_url_pattern',default='' ,context=None)
 				url = url_link + "/" + opport.hash_for_url + "?showclosed=1"
-				body = customer_name.encode("utf-8")  + u" заполнил анкету с контактной информацией:<br>".encode("utf-8") + url.encode("utf-8") + u" <br> Информация запрашивалась в рамках Заявки: ".encode("utf-8") + opport.name.encode("utf-8") + u"<br> Перейдите в заявку и изучите заполненные данные!".encode("utf-8")	
+				model_data = self.pool.get("ir.model.data")
+				dummy, form_view = model_data.get_object_reference(cr, uid, 'crm', 'crm_case_category_act_oppor11')
+				url_opport = params.get_param(cr, uid,"web.base.url").encode("utf-8") + u"/web#id=" + str(opport.id).encode("utf-8") + u"&view_type=form&model=crm.lead"
+				url_opport = url_opport + "&action=" + str(form_view)
+				body = customer_name.encode("utf-8")  + u" заполнил анкету с контактной информацией:<br>".encode("utf-8") + url.encode("utf-8") + u" <br> Информация запрашивалась в рамках Заявки: ".encode("utf-8") + opport.name.encode("utf-8") + u"(".encode("utf-8") + url_opport.encode("utf-8") + u")<br> Перейдите в заявку и изучите заполненные данные!".encode("utf-8")	
 				post_vars = {'subject': u"Клиент заполнил анкету",
 					"body" :body,
 					'partner_ids': [(4, opport.user_id.partner_id.id)],
