@@ -7,7 +7,6 @@
 			<field name="type">form</field>
 			<field name="arch" type="xml">
 				<header>
-					<button name="test_iml_crm_sql_server" string="Test connect to database" type="object"/>
 					<button name="perform_import" string="Import from database" type="object"/>
 				</header>
 				<sheet>
