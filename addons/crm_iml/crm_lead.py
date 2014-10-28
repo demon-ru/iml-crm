@@ -265,7 +265,7 @@ class crm_lead(format_address, osv.osv):
 			})
 			vals_contact = {
 				"child_ids": [(4, contact.id)],
-				"tech_questions": contact.id,
+				"first_contact": contact.id,
 			}
 			if (vals_contact != {}):
 				cur_obj.write(vals_contact)
