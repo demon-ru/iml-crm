@@ -381,3 +381,12 @@ class res_partner(osv.osv):
         return super(res_partner, self).write(cr, uid, ids, vals, context=context)
 
 
+# этот класс - справочник орг форм предприятий
+class res_partner_title(osv.osv):
+    _inherit = 'res.partner.title'
+    _columns = {
+        'ext_code': fields.integer('External code', required=True),
+    }
+    _defaults = {
+        'domain': 'partner',
+    }

@@ -3,7 +3,6 @@
     <data>
     
 	<!-- changed by Alex -->
-	<!-- need to clean up all unnecessery tags and keep only search related tags -->
        <record id="view_res_partner_filter_iml_crm1" model="ir.ui.view">
             <field name="name">view.res.partner.select.iml.crm.inherited1</field>
             <field name="model">res.partner</field>
@@ -142,7 +141,7 @@
 					</xpath>
 					<field name="function" position="after" >
 						<field  name="unk" attrs="{'invisible': [('is_company','=', False)]}"/>
-						<field  name="company_org_type" attrs="{'invisible': [('is_company','=', False)]}"/>
+						<field  name="company_org_type" attrs="{'invisible': True}"/>
 						<field  name="juridical_name" attrs="{'invisible': [('is_company','=', False)]}"/>
 						<field name="first_contact" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
 						<field name="signer" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
@@ -175,9 +174,11 @@
                         <field name="title" domain="[('domain','=','contact')]" options='{"no_open": True}' position="replace">
                         </field>
                         <field name="title" domain="[('domain','=','partner')]" context="{'default_domain': 'partner'}" position="replace">
-                            <field name="title" domain="[('domain','=','partner')]" options='{"no_open": True}' attrs="{'invisible': [('is_company','=',True)]}" context="{'default_domain': 'partner'}"/>
                         </field>
                     <!-- закончили сокрытие полей контактов для компаний -->
+                    <field name="unk" position="after">
+						<field name="title" domain="[('domain','=','partner')]" options='{"no_open": True}' attrs="{'invisible': [('is_company','=',False)]}" context="{'default_domain': 'partner'}"/>
+					</field>
 
 					<page string="Contacts" position="before">
 						<page name='address_info' string= 'Адреса' attrs="{'invisible': [('is_company','=', False)]}">
@@ -281,5 +282,39 @@
                 </data>
             </field>
         </record>
+
+        <record id="view_partner_title_tree_crm_iml_mod" model="ir.ui.view">
+            <field name="name">res.partner.title.tree.inherited1</field>
+            <field name="model">res.partner.title</field>
+			<field name="inherit_id" ref="base.view_partner_title_tree"/>
+			<field eval="20" name="priority"/>
+			<field name="arch" type="xml">
+					<tree position="replace">
+	                    <tree string="Partner Titles">
+		                    <field name="name"/>
+		                    <field name="shortcut"/>
+		                    <field name="ext_code"/>
+		                </tree>
+	                </tree>
+			</field>
+		</record>
+
+
+        <record id="view_partner_title_form_crm_iml_mod" model="ir.ui.view">
+            <field name="name">res.partner.title.form.crm.iml.mod</field>
+            <field name="model">res.partner.title</field>
+			<field name="inherit_id" ref="base.view_partner_title_form"/>
+			<field eval="20" name="priority"/>
+			<field name="arch" type="xml">
+				<data>
+                    <field name="domain" position="after">
+                    	<field name="ext_code"/>
+                    </field>
+				</data>
+			</field>
+		</record>
+
+
+
     </data>
 </openerp>
