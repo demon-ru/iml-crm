@@ -78,11 +78,11 @@ class crm_iml_sqlserver(osv.osv):
 		'name': fields.char('Name', size=128, required=True),
 		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
 		'tableName':fields.char('Table Name', size=128),
-		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands', 'Commands exchange')], 'Exchange type', required=True),
+		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands', 'Commands exchange'), ('responsible','Импорт ответственности по клиенту')], 'Exchange type', required=True),
 		'exchange_server':fields.many2one('crm.iml.exchange_server_settings', 'name'),
 	}
 
-	#Словарь полей из таблицы клиентов
+	#Поля из таблицы клиентов
 	var_res_partner_fields = [
 		"CustomerName", "NAV_UNC", "LegalName", "WebSite",
 		"Warehouse_ID", "Region_ID", "RespPerson",
@@ -425,25 +425,25 @@ class crm_iml_sqlserver(osv.osv):
 
 	def partner_import(self,cr, uid, ids, context=None):
 		conection = None
-		#try:
-		server = self.browse(cr, uid, ids[0], context=context)
-		exchange_server = server.exchange_server
-		conection = exchange_server.connectToServer()
-		cursor = conection.cursor()
-		query = server.getQuery_partner()
-		print query
-		cursor.execute(query)
-		for row in cursor.fetchall():
-			cur_obj = server.createOrFindResPartner(row)
-			if (cur_obj is None):
-				#TODO Сделать логирование импорта
-				sys.stdout.write("ERROR! Not found client in system with id =" + str(row[self.var_res_partner_fields.index("crm_id")]))
-		conection.commit()
-		#except Exception, e:
-		#	raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
-		#finally:
-		#	if conection:
-		#		conection.close();
+		try:
+			server = self.browse(cr, uid, ids[0], context=context)
+			exchange_server = server.exchange_server
+			conection = exchange_server.connectToServer()
+			cursor = conection.cursor()
+			query = server.getQuery_partner()
+			print query
+			cursor.execute(query)
+			for row in cursor.fetchall():
+				cur_obj = server.createOrFindResPartner(row)
+				if (cur_obj is None):
+					#TODO Сделать логирование импорта
+					sys.stdout.write("ERROR! Not found client in system with id =" + str(row[self.var_res_partner_fields.index("crm_id")]))
+			conection.commit()
+		except Exception, e:
+			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if conection:
+				conection.close();
 		server.write({'lastImportDate': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 	 	return True
 
@@ -455,11 +455,13 @@ class crm_iml_sqlserver(osv.osv):
 				exchange_server = server.exchange_server
 				connection = exchange_server.connectToServer()
 				cursor=connection.cursor()
-				# будем выбирать только те записи, которые созданы после предидущего импорта
-				if (server.lastImportDate):
-					wherePart = "where nav_timestamp > '" + str(server.lastImportDate) + "'"
+				#Убираем это условие посколько этот алгорим будет пока только для первичного импорт 
+				#будем выбирать только те записи, которые созданы после предидущего импорта
+				#if (server.lastImportDate):
+				#	wherePart = "where nav_timestamp > '" + str(server.lastImportDate) + "'"
 				# название столбцов до конца не известно, пока для информации
-				query = "select holding_id, holding_name from " + server.tableName + " " + wherePart
+				query = "select holding_id, holding_name from " + server.tableName 
+				#+ " " + wherePart
 				cursor.execute(query)
 				# итерируем холдинги
 				for row in cursor.fetchall():
@@ -488,16 +490,35 @@ class crm_iml_sqlserver(osv.osv):
 				connection.close();
 	 	write("ok")
 
+	def responsible_import(self, cr, uid, ids, context=None):
+		try:
+			for server in self.browse(cr, uid, ids, context=context):
+				exchange_server = server.exchange_server
+				connection = exchange_server.connectToServer()
+				cursor=connection.cursor() 
+				query = "select Client_UNK, Client_Responsible  from " + server.tableName
+				cursor.execute(query)
+				for row in cursor.fetchall():
+					partner = self.findObject(cr, uid,u'res.partner', [(u"unk", u"in", [unicode(row[0], "utf-8")])])
+					resp_user = self.findObject(cr, uid,u'res.users', [(u"nav_id", u"in", [unicode(row[1], "utf-8")])]) 
+					if (partner and resp_user):
+						partner.write({"user_id": resp_user.id})
+		except Exception, e:
+			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if connection:
+				connection.close();
+
+	var_field = {
+		"CRM_ID": 0,
+		"External_ID": 1,
+		"Source": 2,
+		"Dest" : 3,
+		"Command": 4,
+		"id": 5,
+	}
 
 	def commands_import(self, cr, uid, ids, context=None):
-		var_field = {
-			"CRM_ID": 0,
-			"External_ID": 1,
-			"Source": 2,
-			"Dest" : 3,
-			"Command": 4,
-			"id": 5,
-		}
 		partner_id = 0
 		connection = None
 		try:
@@ -508,14 +529,14 @@ class crm_iml_sqlserver(osv.osv):
 			cursor=connection.cursor()
 			cursor.execute(query)
 			for row in cursor.fetchall():
-				partner_id = row[var_field["CRM_ID"]]
+				partner_id = row[self.var_field["CRM_ID"]]
 				res_obj = self.pool.get('res.partner')
 				partn = res_obj.browse(cr, uid, partner_id)
 				if not(partn):
-					raise osv.except_osv(_("Send commands failed!"), _("Клиента с ID " + str(row[var_field["CRM_ID"]]) + " не найден в crm"))
-				command = row[var_field["Command"]]
+					raise osv.except_osv(_("Send commands failed!"), _("Клиента с ID " + str(row[self.var_field["CRM_ID"]]) + " не найден в crm"))
+				command = row[self.var_field["Command"]]
 				server.processCommand(partn, command, None, row)
-				query = "update " + server.tableName.encode("ascii") + " set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id = " + str(row[var_field["id"]])
+				query = "update " + server.tableName.encode("ascii") + " set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id = " + str(row[self.var_field["id"]])
 				cursor.execute(query)
 			connection.commit()
 		except Exception, e:
@@ -525,14 +546,6 @@ class crm_iml_sqlserver(osv.osv):
 				connection.close()
 
 	def processCommand(self, cr, uid, ids, partner, command, opport=None, added_var=None):
-		var_field = {
-			"CRM_ID": 0,
-			"External_ID": 1,
-			"Source": 2,
-			"Dest" : 3,
-			"Command": 4,
-			"id": 5,
-		}
 		connection = None
 		comm_connection = None
 		server = self.browse(cr, uid, ids[0], context=None)
@@ -548,7 +561,7 @@ class crm_iml_sqlserver(osv.osv):
 				wherePart = " where CRM_ID=" + str(partner.id)
 			elif (command == "UpdatedUNC"):
 				if (added_var):
-					unc = added_var[var_field["External_ID"]]
+					unc = added_var[self.var_field["External_ID"]]
 					wherePart = " where NAV_UNC = " + unc.encode(utf-8) + " and CRM_TimeStamp is null"
 			if (wherePart != ""):
 				try:
@@ -662,6 +675,7 @@ class crm_iml_sqlserver(osv.osv):
 				"partner" : partner_import,
 				"holdings": holdings_import,
 				"commands": commands_import,
+				"responsible": responsible_import,
 		}
 
 	# развилка в импорте, метод - роутер
