@@ -247,7 +247,7 @@ class crm_iml_sqlserver(osv.osv):
 		#Поиск организационной формы компании
 		vOrgTypeID = None
 		if (row[self.var_res_partner_fields.index("CompOrgTypeID")]): 
-			vOrgType = self.findObject(cr, uid,"crm.company_org_type", [('nav_id', "in", [str(row[self.var_res_partner_fields.index("CompOrgTypeID")].encode("utf-8"))])])
+			vOrgType = self.findObject(cr, uid,"res.partner.title", [('ext_code', "in", [str(row[self.var_res_partner_fields.index("CompOrgTypeID")].encode("utf-8"))])])
 			if (vOrgType):
 				vOrgTypeID = vOrgType.id 	
 		vals = {
@@ -288,7 +288,10 @@ class crm_iml_sqlserver(osv.osv):
 			"registration_date": vRegDate,
 			#Ссылки на объекты
 			#"type_of_counterparty": vType,
-			"company_org_type": vOrgTypeID,
+			# было раньше
+			#"company_org_type": vOrgTypeID,
+			# стало теперь
+			"title" : vOrgTypeID,
 			#Не стандартная часть адреса
 			'actual_adress_non_stand_part': row[self.var_res_partner_fields.index("FactAdrStr")],  
 			'juridical_adress_non_stand_part': row[self.var_res_partner_fields.index("JurAdrStr")],
