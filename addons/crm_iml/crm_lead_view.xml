@@ -76,6 +76,8 @@
 							<field name="description"/>
 						</page>
 					</xpath>
+					<field name="title" placeholder="Title" position="replace">
+					</field>
                 </data>
             </field>
         </record>
