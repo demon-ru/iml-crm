@@ -78,7 +78,7 @@ class crm_iml_sqlserver(osv.osv):
 		'name': fields.char('Name', size=128, required=True),
 		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
 		'tableName':fields.char('Table Name', size=128),
-		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands', 'Commands exchange'), ('responsible','Импорт ответственности по клиенту')], 'Exchange type', required=True),
+		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands', 'Commands exchange'), ('responsible','Импорт ответственности по клиенту'), ('user','Импорт пользователей')], 'Exchange type', required=True),
 		'exchange_server':fields.many2one('crm.iml.exchange_server_settings', 'name'),
 	}
 
@@ -347,9 +347,6 @@ class crm_iml_sqlserver(osv.osv):
 					"phone": row[self.var_res_partner_fields.index("Phone")],
 					'parent_id': cur_obj.id
 				}
-				print "***********************"
-				print row[self.var_res_partner_fields.index("Contact")]
-				print "***********************"
 				contact = self.findObject(cr, uid,'res.partner', ["&","&",('name', 'in' ,[row[self.var_res_partner_fields.index("Contact")]]),('parent_id', 'in', [cur_obj.id]),("is_company", '=', False)], True, vals_add_obj, True)			
 				cur_obj.write({"first_contact": contact.id,})
 		return cur_obj
@@ -508,6 +505,30 @@ class crm_iml_sqlserver(osv.osv):
 		finally:
 			if connection:
 				connection.close();
+
+	def user_import(self, cr, uid, ids, context=None):
+		try:
+			for server in self.browse(cr, uid, ids, context=context):
+				exchange_server = server.exchange_server
+				connection = exchange_server.connectToServer()
+				cursor=connection.cursor() 
+				query = "select employee_login, employee_code  from " + server.tableName
+				cursor.execute(query)
+				for row in cursor.fetchall():
+					vals = {
+						"name": row[0],
+						"login": row[0],
+						"notify_email": "always",
+					}
+					user = self.findObject(cr, uid,u'res.users', [(u"login", u"in", [unicode(row[0], "utf-8")])], True, vals) 
+					if (user):
+						user.write({"nav_id": row[1]})
+		except Exception, e:
+			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if connection:
+				connection.close();
+
 
 	var_field = {
 		"CRM_ID": 0,
@@ -676,6 +697,7 @@ class crm_iml_sqlserver(osv.osv):
 				"holdings": holdings_import,
 				"commands": commands_import,
 				"responsible": responsible_import,
+				'user': user_import,
 		}
 
 	# развилка в импорте, метод - роутер
