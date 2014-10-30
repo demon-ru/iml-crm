@@ -48,14 +48,15 @@ import werkzeug.wrappers
 class crm_lead(format_address, osv.osv):
 
 	_inherit = 'crm.lead'
-	_name = "crm.lead"
 
 	_columns = {
+		"partner_id" : fields.many2one('res.partner', 'Контакт', ondelete='set null', track_visibility='onchange',
+            select=True, help="Linked partner (optional). Usually created when converting the lead."),
 		'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'Type of opportunities'),
 		'function': fields.char('Должность'),
-		'creating_partner': fields.many2one('res.partner', 'Creating partner'),
+		'creating_partner': fields.many2one('res.partner', 'Клиент'),
 		"data_arraved" : fields.boolean("Data arraved"),
-		"hash_for_url" : fields.char("Hash", size = 250)
+		"hash_for_url" : fields.char("Hash", size = 250),
 	}
 	_defaults = {
 		"data_arraved": False,

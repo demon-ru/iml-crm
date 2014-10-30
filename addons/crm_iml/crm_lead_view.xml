@@ -24,6 +24,7 @@
 					</xpath>
                 	<xpath expr="//group/group/field[@name='categ_ids']" position="replace"/>
 		    		<field name="partner_id" position="after">
+		    			<field name="creating_partner" attrs="{'readonly': True}"/>
 						<field name="type_of_opport_id"/>
 						<field name="categ_ids"
                                widget="many2many_tags"
@@ -34,7 +35,7 @@
 						<div groups="base.group_multi_salesteams">
 							<field name="section_id"/>
 						</div>
-		    		</field> 	
+		    		</field> 
 					<field name="function" position="after">
 						<field name="phone"/>
 					</field>
