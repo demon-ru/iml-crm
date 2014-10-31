@@ -23,9 +23,6 @@
         <field name="act_window_id" ref="crm_case_company_org_type_all"/>
     </record>	
 
-    
-    <menuitem name="Org form of company" id="menu_crm_company_org_type" parent="menu_config_catalog" sequence="5"
-            action="crm_case_company_org_type_all"/>
 
 </data>
 </openerp>
