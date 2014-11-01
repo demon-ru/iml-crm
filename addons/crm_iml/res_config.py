@@ -6,12 +6,14 @@ class server_config_settings(osv.TransientModel):
     _columns = {
         'export_sql_server': fields.many2one('crm.iml.sqlserver', 'name'),
         'exchange_settings' : fields.many2one('crm.iml.exchange_server_settings', 'name'),
-        'url_pattern': fields.char("Link to cf", size=250)
+        'url_pattern': fields.char("Link to cf", size=250),
+        'path_log': fields.char("Log folder's Path", size=1000)
     }
     _defaults = {
         'export_sql_server': 0,
         'exchange_settings': 0,
         'url_pattern': '',
+        'path_log': '',
     }
 
     def set_crm_export_server(self,cr,uid,ids,context=None) :
@@ -32,16 +34,21 @@ class server_config_settings(osv.TransientModel):
         myself = self.browse(cr,uid,ids[0],context=context)
         server = 0
         url_link = ""
+        log_path = ""
         if myself.exchange_settings:
            server = myself.exchange_settings.id
         if myself.url_pattern:
             url_link = myself.url_pattern
+        if myself.path_log:
+            log_path = myself.path_log
         params.set_param(cr, uid, 'crm_iml_exchange_settings_id', server , groups=['base.group_system'], context=None)
         params.set_param(cr, uid, 'crm_iml_url_pattern', url_link , groups=['base.group_system'], context=None)
+        params.set_param(cr, uid, 'crm_iml_log_path', log_path , groups=['base.group_system'], context=None)
 
     def get_default_exchange_settings(self,cr,uid,ids,context=None) :
         params = self.pool.get('ir.config_parameter')
         serv = params.get_param(cr, uid, 'crm_iml_exchange_settings_id',default='0' ,context=context)
         url_link = params.get_param(cr, uid, 'crm_iml_url_pattern',default='' ,context=context)
-        return dict(exchange_settings=int(serv), url_pattern=url_link)
+        log_path = params.get_param(cr, uid, 'crm_iml_log_path',default='' ,context=context)
+        return dict(exchange_settings=int(serv), url_pattern=url_link, path_log=log_path)
        

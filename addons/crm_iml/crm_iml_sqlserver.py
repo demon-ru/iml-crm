@@ -22,6 +22,7 @@ import MySQLdb
 import time
 import sys
 import pyodbc
+import os.path
 
 from openerp.osv import fields,osv,orm
 from openerp import tools, api
@@ -107,6 +108,35 @@ class crm_iml_sqlserver(osv.osv):
 				db.close()
 		server.write({'lastTestDate': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 		return True
+
+	"""
+		Создает файл для лога в заданной в настройке директории
+	"""
+	def create_log_file(self, cr, uid, import_type):
+		params = self.pool.get('ir.config_parameter')
+		log_path = params.get_param(cr, uid, 'crm_iml_log_path',default='' ,context=None)
+		log_file = None
+		if not(log_path):
+			sys.stdout.write("Внимание! Не задан путь до папки с логами импорт будет произведен без логирования\n")
+		else:
+			try:
+				file_name = "log_import_" + str(import_type) + "_" + str(time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT))
+				log_path = os.path.join(log_path, file_name)
+				log_file = open(log_path, 'w')
+			except:
+				sys.stdout.write("Внимание! Не удалось создать файл с логом, возможно вы задали неверную директорию в настройках\n")	
+		return log_file
+
+	def write_log(self, cr, uid, log_file, log_msg, type_msg):
+		log_msg = u' '.join((time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT), u":", type_msg, u":", log_msg, "\n")).encode('utf-8')
+		try:
+			if (log_file):
+				log_file.write(log_msg)
+			else:
+				sys.stdout.write(u"Внимание! Не удалось записать строчку в файл лога!\n" + log_msg)  
+		except:
+			sys.stdout.write(u"Внимание! Не удалось записать строчку в файл лога!\n" + log_msg)  
+
 	"""
 		Метод экспорта клиента в промежуточную базу
 		Параметры:
@@ -205,14 +235,17 @@ class crm_iml_sqlserver(osv.osv):
 			cur_obj = self.pool.get(classObj)
 			cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=None))	 	
 		return cur_obj
-	
+
 	"""
 		Находит или создает клиента
 		Параметры:
 			row - запись из промежуточной базы 
 	"""
-	def createOrFindResPartner(self, cr, uid, row):
+	def createOrFindResPartner(self, cr, uid, row, log_file = None):
 		cur_obj = None
+		log_msg = ""
+		type_msg = ""
+		added_info = u" при загрузке клиента: " + unicode(row[self.var_res_partner_fields.index("CustomerName")], "utf-8")
 		res_obj = self.pool.get('res.partner')
 		vDateAccount = None
 		if (row[self.var_res_partner_fields.index("TRDate")]):
@@ -230,13 +263,22 @@ class crm_iml_sqlserver(osv.osv):
 		vRegion = None
 		if (row[self.var_res_partner_fields.index("Region_ID")]):
 			vRegionObj = self.findObject(cr, uid,"crm.settlement_center", [('nav_id', "in", [str(row[self.var_res_partner_fields.index("Region_ID")].encode("utf-8"))])])
-			vRegion = vRegionObj.id if vRegionObj else None
+			if vRegionObj:
+				vRegion = vRegionObj.id if vRegionObj else None
+			else:
+				type_msg = u"Предупреждение"
+				log_msg = u"Не найден регион доставки с внешним ключем " + unicode(row[self.var_res_partner_fields.index("Region_ID")], "utf-8") + added_info
+				self.write_log(cr, uid, log_file, log_msg, type_msg)
 		#Поиск склада 
 		vStorageShipID = None
 		if (row[self.var_res_partner_fields.index("Warehouse_ID")]): 
 			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", [('nav_id', "in", [str(row[self.var_res_partner_fields.index("Warehouse_ID")].encode("utf-8"))])])
 			if (vStorageShip):
 				vStorageShipID = vStorageShip.id 
+			else: 
+				type_msg = u"Предупреждение"
+				log_msg = u"Не найден  Склад отправления с внешним ключем " + unicode(row[self.var_res_partner_fields.index("Warehouse_ID")], "utf-8") + added_info
+				self.write_log(cr, uid, log_file, log_msg, type_msg)
 		#Дата доверенности
 		vDoverenostDate = None
 		if (row[self.var_res_partner_fields.index("LoA_Date")]): 
@@ -249,7 +291,12 @@ class crm_iml_sqlserver(osv.osv):
 		if (row[self.var_res_partner_fields.index("CompOrgTypeID")]): 
 			vOrgType = self.findObject(cr, uid,"res.partner.title", [('ext_code', "in", [str(row[self.var_res_partner_fields.index("CompOrgTypeID")].encode("utf-8"))])])
 			if (vOrgType):
-				vOrgTypeID = vOrgType.id 	
+				vOrgTypeID = vOrgType.id 
+			else:
+				type_msg = u"Предупреждение"
+				log_msg = u"Не найдена орг форма с внешним ключем " + unicode(row[self.var_res_partner_fields.index("CompOrgTypeID")], "utf-8") + added_info
+				self.write_log(cr, uid, log_file, log_msg, type_msg)	
+		
 		vals = {
 			#Информация о клиенте
 			"name":	row[self.var_res_partner_fields.index("CustomerName")],		
@@ -315,6 +362,10 @@ class crm_iml_sqlserver(osv.osv):
 				if (row[self.var_res_partner_fields.index("Responsible_ID")]): 
 					vRespPersObj = self.findObject(cr, uid,"res.users", [('nav_id', "in", [str(row[self.var_res_partner_fields.index("Responsible_ID")].encode("utf-8"))])])
 					vRespPers = vRespPersObj.id if vRespPersObj else None
+					if not vRespPersObj:
+						type_msg = u"Предупреждение"
+						log_msg = u"Не найдена пользователь с внешним ключем " + unicode(row[self.var_res_partner_fields.index("Responsible_ID")], "utf-8") + added_info
+						self.write_log(cr, uid, log_file, log_msg, type_msg)	
 				#Дата договора
 				if (row[self.var_res_partner_fields.index("AgreementDate")]):			
 					#Хак в случае если год в дате будет меньше 1900
@@ -414,7 +465,7 @@ class crm_iml_sqlserver(osv.osv):
 			CompOrgTypeID - company_org_type - 46
 			AgreementDate - дата договора date_start у договора- 47
 			???_ид_холдинга - идентификатор холдинга у клиента - 48
-"""
+	"""
 
 		
 	# здесь объявляем обработчики
@@ -422,8 +473,11 @@ class crm_iml_sqlserver(osv.osv):
 
 	def partner_import(self,cr, uid, ids, context=None):
 		conection = None
-		try:
-			server = self.browse(cr, uid, ids[0], context=context)
+		type_msg = ""
+		log_msg = ""
+		server = self.browse(cr, uid, ids[0], context=context)
+		try: 
+			log_file = self.create_log_file(cr, uid, server.exchange_type)
 			exchange_server = server.exchange_server
 			conection = exchange_server.connectToServer()
 			cursor = conection.cursor()
@@ -431,22 +485,28 @@ class crm_iml_sqlserver(osv.osv):
 			print query
 			cursor.execute(query)
 			for row in cursor.fetchall():
-				cur_obj = server.createOrFindResPartner(row)
+				cur_obj = server.createOrFindResPartner(row, log_file)
 				if (cur_obj is None):
-					#TODO Сделать логирование импорта
-					sys.stdout.write("ERROR! Not found client in system with id =" + str(row[self.var_res_partner_fields.index("crm_id")]))
+					log_msg = u"Клиент " + unicode(row[self.var_res_partner_fields.index("CustomerName")], "utf-8") + u" не создан в системе!"
+					type_msg = u"Ошибка"
+					self.write_log(cr, uid, log_file, log_msg, type_msg)
 			conection.commit()
 		except Exception, e:
-			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+			log_msg = tools.ustr(e)
+			type_msg = u"Ошибка"
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
 		finally:
 			if conection:
-				conection.close();
+				conection.close()
+			if log_file:
+				log_file.close()
 		server.write({'lastImportDate': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
 	 	return True
 
 
 	def holdings_import(self, cr, uid, ids, context=None):
 		try:
+			log_file = self.create_log_file(cr, uid, "holding")
 			# сперва найдем все холдинги
 			for server in self.browse(cr, uid, ids, context=context):
 				exchange_server = server.exchange_server
@@ -481,14 +541,21 @@ class crm_iml_sqlserver(osv.osv):
 					for partner in res_partner:
 						partner.parent_id = holding
 		except Exception, e:
-			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+			log_msg = tools.ustr(e)
+			type_msg = u"Ошибка"
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
 		finally:
 			if connection:
-				connection.close();
-	 	write("ok")
+				connection.close()
+			if log_file:
+				log_file.close()
+		write("ok")
 
 	def responsible_import(self, cr, uid, ids, context=None):
 		try:
+			log_file = self.create_log_file(cr, uid, "responsible")
+			log_msg = ""
+			type_msg = ""
 			for server in self.browse(cr, uid, ids, context=context):
 				exchange_server = server.exchange_server
 				connection = exchange_server.connectToServer()
@@ -500,14 +567,28 @@ class crm_iml_sqlserver(osv.osv):
 					resp_user = self.findObject(cr, uid,u'res.users', [(u"nav_id", u"in", [unicode(row[1], "utf-8")])]) 
 					if (partner and resp_user):
 						partner.write({"user_id": resp_user.id})
+					elif not(partner):
+						log_msg = u"Не найден клиент с внешним ключем " + unicode(row[0], "utf-8") 
+						type_msg = u"Ошибка"
+						self.write_log(cr, uid, log_file, log_msg, type_msg)
+					elif not(resp_user):
+						log_msg = u"Не найден пользоватьель с внешним ключем " + unicode(row[1], "utf-8") 
+						type_msg = u"Ошибка"
+						self.write_log(cr, uid, log_file, log_msg, type_msg)
+
 		except Exception, e:
-			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+			log_msg = tools.ustr(e)
+			type_msg = u"Ошибка"
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
 		finally:
 			if connection:
-				connection.close();
+				connection.close()
+			if log_file:
+				log_file.close()
 
 	def user_import(self, cr, uid, ids, context=None):
 		try:
+			log_file = self.create_log_file(cr, uid, "user")
 			for server in self.browse(cr, uid, ids, context=context):
 				exchange_server = server.exchange_server
 				connection = exchange_server.connectToServer()
@@ -523,11 +604,20 @@ class crm_iml_sqlserver(osv.osv):
 					user = self.findObject(cr, uid,u'res.users', [(u"login", u"in", [unicode(row[0], "utf-8")])], True, vals) 
 					if (user):
 						user.write({"nav_id": row[1]})
+					else:
+						log_msg = "Пользователь " + unicode(row[0], "utf-8") + u" не создан в системе!"
+						type_msg = u"Ошибка"
+						self.write_log(cr, uid, log_file, log_msg, type_msg)
 		except Exception, e:
-			raise osv.except_osv(_("Import failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+			log_msg = tools.ustr(e)
+			type_msg = u"Ошибка"
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
 		finally:
 			if connection:
-				connection.close();
+				connection.close()
+			if log_file:
+				log_file.close()
+
 
 
 	var_field = {

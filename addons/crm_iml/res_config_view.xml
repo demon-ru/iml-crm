@@ -10,6 +10,7 @@
                     <field name="exchange_settings" class="oe_inline" string="Настройка по умолчанию SQL сервера"/>
                     <field name="export_sql_server" class="oe_inline" string="Таблица по умолчанию"/>
                     <field name="url_pattern" class="oe_inline" string="URL ссылка на сайт для клиентов"/>
+                    <field name="path_log" class="oe_inline" string="Путь к папке с логами"/>
                 </group>
             </field>
         </record>
