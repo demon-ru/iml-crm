@@ -148,11 +148,11 @@
 						<field  name="unk" attrs="{'invisible': [('is_company','=', False)]}"/>
 						<field  name="company_org_type" attrs="{'invisible': True}"/>
 						<field  name="juridical_name" attrs="{'invisible': [('is_company','=', False)]}"/>
-						<field name="first_contact" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
-						<field name="signer" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
-						<field name="logistics_respons_person" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
-						<field name="financial_resp_per" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
-						<field name="tech_questions" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}"/>
+						<field name="first_contact" context="{'show_with_function': True}" options='{"always_reload": True}' attrs="{'invisible': [('is_company','=', False)]}"/>
+						<field name="signer" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}" options='{"always_reload": True}'/>
+						<field name="logistics_respons_person" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}" options='{"always_reload": True}'/>
+						<field name="financial_resp_per" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}" options='{"always_reload": True}'/>
+						<field name="tech_questions" context="{'show_with_function': True}" attrs="{'invisible': [('is_company','=', False)]}" options='{"always_reload": True}'/>
 						<group attrs="{'invisible': [('is_company','=', False)]}">
 							<field  name="categoryClient_id"/>
 							<field string="Состояние обслуживания" name="client_in_service"/>

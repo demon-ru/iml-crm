@@ -339,7 +339,7 @@ class res_partner(osv.osv):
         res = []
         for record in self.browse(cr, uid, ids, context=context):
             if record.parent_id and not(record.is_company) and context.get('show_with_function'):
-                name =  "%s %s" % (record.name, "," + record.function if record.function else "" )
+                name =  "%s%s" % (record.name, ", " + record.function if record.function else "" )
                 res.append((record.id, name))
             else:
                 res = res + (super(res_partner, self).name_get(cr, uid, [record.id], context))
