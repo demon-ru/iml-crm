@@ -231,6 +231,9 @@ class res_partner(osv.osv):
         'tech_questions': fields.many2one("res.partner", "Технические вопросы", domain='[("parent_id", "=", id)]'),
         'first_contact': fields.many2one("res.partner", "Первичный контакт", domain='[("parent_id", "=", id)]'),
         'claim_count': fields.function(_claim_count, string='# Claims', type='integer'),
+        "surname": fields.char("Фамилия", size= 255),
+        'firstname': fields.char("Имя", size = 255),
+        'patronymic': fields.char("Отчество", size = 255),
     }
 
     def _default_category_of_goods(self, cr, uid, ids):
@@ -240,7 +243,7 @@ class res_partner(osv.osv):
         res_id = res_obj.search(cr, uid, [("nav_id","=", "0")], context=None)
         if len(res_id) > 0:
             def_id = res_id[0]
-        return def_id
+        return def_id 
 
     _defaults = {
         "juridical_address_country": "Российская Федерация",
@@ -268,6 +271,20 @@ class res_partner(osv.osv):
     	if (vAdress != "" and adressField):
     		v[adressField] = vAdress.strip()
         return {'value':v}
+
+
+    def onchange_fio(self, cr, uid, ids, surname, name, patronymic):
+        v = {}
+        vName = ""
+        if (surname) and (surname.strip() != ""):
+            vName = vName + " " + surname.strip()
+        if (name) and (name.strip() != ""):
+            vName = vName + " " + name.strip()
+        if (patronymic) and (patronymic.strip() != ""):
+            vName = vName + " " + patronymic.strip()
+        if vName.strip() != "":
+            v["name"] = vName.strip()
+        return {"value": v}
 
     def iml_crm_export_id(self,cr, uid, ids, context=None):
         com_vals = {}
@@ -378,6 +395,12 @@ class res_partner(osv.osv):
                     vNonStandart = vals.get("actual_adress_non_stand_part")
                 actual_adress = self.onchange_adress(cr, uid, ids, vIndex, vCity, vStreet, vDom, vBilding, vOfice, vNonStandart, "actual_adress_full_adress")['value']
                 vals.update(actual_adress)
+            if ("firstname" in vals) or ("patronymic" in vals) or ("surname" in vals):
+                firstname = vals["firstname"] if "firstname" in vals else partn.firstname
+                surname = vals["surname"] if "surname" in vals else partn.surname
+                patronymic = vals["patronymic"] if "patronymic" in vals else partn.patronymic
+                full_name = self.onchange_fio(cr, uid, ids, surname, firstname, patronymic)["value"]
+                vals.update(full_name)
         return super(res_partner, self).write(cr, uid, ids, vals, context=context)
 
 
