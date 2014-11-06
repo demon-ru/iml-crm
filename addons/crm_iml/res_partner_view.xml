@@ -65,25 +65,6 @@
 	                            domain="[('is_company', '=', True), ('id', '!=', id)]" context="{'default_is_company': True}"
 	                            />
                     </field>
-                    <xpath expr="//page[@string='Contacts']/field[@name='child_ids']/form[@string='Contact']" position="replace"/>
-                    <xpath expr="//page[@string='Contacts']/field[@name='child_ids']" position="inside">
-						<form string="Contact">
-							<sheet>
-								<field name="image" widget='image' class="oe_avatar oe_left" options='{"preview_image": "image_medium"}'/>
-								<div class="oe_title">
-									<label for="name" class="oe_edit_only"/>
-									<h1><field name="name" style="width: 70%%"/></h1>
-									<field name="category_id" widget="many2many_tags" placeholder="Tags..." style="width: 70%%"/>
-								</div>
-								<group>
-									<field name="function" placeholder="e.g. Sales Director"/>
-									<field name="email"/>
-									<field name="phone"/>
-									<field name="mobile"/>
-								</group>
-							</sheet>
-						</form>
-					</xpath>
                 	<xpath expr="//group/group" position="replace"> 
                         <group invisible="True">
 		                        <label for="type" attrs="{'invisible': [('parent_id','=', False)]}"/>
@@ -113,11 +94,6 @@
                         <group>
 		                    <field name="website" widget="url" placeholder="e.g. www.odoo.com" invisible="1"/>
 		                </group>
-            		</xpath>
-            		<xpath expr="//page[@string='Contacts']/field[@name='child_ids']/kanban/templates/t[@t-name='kanban-box']/div/div/div[@class='oe_module_desc']/div/table/tr/td/h4" position="after">
-            			<i><div><button name="redirectToContact" type="object">
-            				<div>Перейти в карточку</div> </button>
-            			</div></i>
             		</xpath>
 					<xpath expr="//page[@name='sales_purchases']" position="replace"/>
 					<xpath expr="//page[@name='internal_notes']" position="after">
@@ -184,7 +160,98 @@
                     <field name="unk" position="after">
 						<field name="title" domain="[('domain','=','partner')]" options='{"no_open": True}' attrs="{'invisible': [('is_company','=',False)]}" context="{'default_domain': 'partner'}"/>
 					</field>
-
+					<xpath expr="//page[@string='Contacts']" position="replace"/>
+					<xpath expr="//notebook/page[@name='internal_notes']" position="before">
+						<page string="Contacts" attrs="{'invisible': [('is_company','=',False)]}">
+							<field name="child_ids"  widget="many2many_kanban" domain="[('is_company', '=', False),('parent_id','=', False)]" context="{'default_parent_id': active_id, 'default_street': street, 'default_street2': street2, 'default_city': city, 'default_state_id': state_id, 'default_zip': zip, 'default_country_id': country_id, 'default_supplier': supplier, 'default_customer': customer, 'default_use_parent_address': True}">
+								<kanban>
+								    <field name="color"/>
+								    <field name="name"/>
+								    <field name="title"/>
+								    <field name="email"/>
+								    <field name="parent_id"/>
+								    <field name="is_company"/>
+								    <field name="function"/>
+								    <field name="phone"/>
+								    <field name="street"/>
+								    <field name="street2"/>
+								    <field name="zip"/>
+								    <field name="city"/>
+								    <field name="country_id"/>
+								    <field name="mobile"/>
+								    <field name="fax"/>
+								    <field name="state_id"/>
+								    <field name="has_image"/>
+								    <templates>
+								        <t t-name="kanban-box">
+								            <t t-set="color" t-value="kanban_color(record.color.raw_value)"/>
+								            <div t-att-class="color + (record.title.raw_value == 1 ? ' oe_kanban_color_alert' : '')" style="position: relative">
+								                <a t-if="! read_only_mode" type="delete" style="position: absolute; right: 0; padding: 4px; diplay: inline-block">X</a>
+								                <div class="oe_module_vignette">
+								                <a type="open">
+								                    <t t-if="record.has_image.raw_value === true">
+								                        <img t-att-src="kanban_image('res.partner', 'image', record.id.value, {'preview_image': 'image_small'})" class="oe_avatar oe_kanban_avatar_smallbox"/>
+								                    </t>
+								                    <t t-if="record.image and record.image.raw_value !== false">
+								                        <img t-att-src="'data:image/png;base64,'+record.image.raw_value" class="oe_avatar oe_kanban_avatar_smallbox"/>
+								                    </t>
+								                    <t t-if="record.has_image.raw_value === false and (!record.image or record.image.raw_value === false)">
+								                        <t t-if="record.is_company.raw_value === true">
+								                            <img t-att-src='_s + "/base/static/src/img/company_image.png"' class="oe_kanban_image oe_kanban_avatar_smallbox"/>
+								                        </t>
+								                        <t t-if="record.is_company.raw_value === false">
+								                            <img t-att-src='_s + "/base/static/src/img/avatar.png"' class="oe_kanban_image oe_kanban_avatar_smallbox"/>
+								                        </t>
+								                    </t>
+								                </a>
+								                    <div class="oe_module_desc">
+								                        <div class="oe_kanban_box_content oe_kanban_color_bglight oe_kanban_color_border">
+								                            <table class="oe_kanban_table">
+								                                <tr>
+								                                    <td class="oe_kanban_title1" align="left" valign="middle">
+								                                        <h4>
+								                                        	<a type="open"><field name="name"/></a>
+								                                        </h4>
+								                                        <i><div><button name="redirectToContact" type="object">
+        																<div>Перейти в карточку</div> </button>
+        																</div></i>
+								                                        <i><div t-if="record.function.raw_value">
+								                                            <field name="function"/></div></i>
+								                                        <div><a t-if="record.email.raw_value" title="Mail" t-att-href="'mailto:'+record.email.value">
+								                                            <field name="email"/>
+								                                        </a></div>
+								                                        <div t-if="record.phone.raw_value">Phone: <field name="phone"/></div>
+								                                        <div t-if="record.mobile.raw_value">Mobile: <field name="mobile"/></div>
+								                                        <div t-if="record.fax.raw_value">Fax: <field name="fax"/></div>
+								                                    </td>
+								                                </tr>
+								                            </table>
+								                        </div>
+								                    </div>
+								                </div>
+								            </div>
+								        </t>
+								    </templates>
+								</kanban>
+								<form string="Contact">
+									<sheet>
+										<field name="image" widget='image' class="oe_avatar oe_left" options='{"preview_image": "image_medium"}'/>
+										<div class="oe_title">
+											<label for="name" class="oe_edit_only"/>
+											<h1><field name="name" style="width: 70%%"/></h1>
+											<field name="category_id" widget="many2many_tags" placeholder="Tags..." style="width: 70%%"/>
+										</div>
+										<group>
+											<field name="function" placeholder="e.g. Sales Director"/>
+											<field name="email"/>
+											<field name="phone"/>
+											<field name="mobile"/>
+										</group>
+									</sheet>
+								</form>
+							</field>
+						</page>
+					</xpath>
 					<page string="Contacts" position="before">
 						<page name='address_info' string= 'Адреса' attrs="{'invisible': [('is_company','=', False)]}">
 							<group name="juridical_address" String="Юридический адрес">
