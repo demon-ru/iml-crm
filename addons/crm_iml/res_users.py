@@ -25,4 +25,7 @@ class res_users(osv.osv):
 	_inherit = 'res.users'
 	_columns = {
 		"nav_id": fields.char("External code", size=100),
+		# два поля хранящие отношения подчинения  
+		'manager_id': fields.many2one('res.users', 'Manager'),
+		'subordinates': fields.one2many("res.users", "manager_id", "Users subordinates"),
 	}

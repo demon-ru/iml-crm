@@ -32,3 +32,4 @@ import account_analytic_account
 import crm_settlement_center
 import res_users
 import crm_claim
+import sales_team
