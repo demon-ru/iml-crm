@@ -42,7 +42,7 @@ class crm_iml_exchangeserver_settings(osv.osv):
 
 	}
 	_sql_constraints = [
-        ('name_unique_constrait', 'unique(name)', "Config with this name alredy exists. Name must be unique."),
+		('name_unique_constrait', 'unique(name)', "Config with this name alredy exists. Name must be unique."),
     ]
 
 	"""
@@ -79,7 +79,7 @@ class crm_iml_sqlserver(osv.osv):
 		'name': fields.char('Name', size=128, required=True),
 		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
 		'tableName':fields.char('Table Name', size=128),
-		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands', 'Commands exchange'), ('responsible','Импорт ответственности по клиенту'), ('user','Импорт пользователей')], 'Exchange type', required=True),
+		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands_nav', 'Commands exchange with NAV'), ('responsible','Импорт ответственности по клиенту'), ('user','Импорт пользователей')], 'Exchange type', required=True),
 		'exchange_server':fields.many2one('crm.iml.exchange_server_settings', 'name'),
 	}
 
@@ -605,7 +605,7 @@ class crm_iml_sqlserver(osv.osv):
 					if (user):
 						user.write({"nav_id": row[1]})
 					else:
-						log_msg = "Пользователь " + unicode(row[0], "utf-8") + u" не создан в системе!"
+						log_msg = u"Пользователь " + unicode(row[0], "utf-8") + u" не создан в системе!"
 						type_msg = u"Ошибка"
 						self.write_log(cr, uid, log_file, log_msg, type_msg)
 		except Exception, e:
@@ -622,20 +622,43 @@ class crm_iml_sqlserver(osv.osv):
 
 	var_field = {
 		"CRM_ID": 0,
-		"External_ID": 1,
+		"nav_UNC": 1,
 		"Source": 2,
 		"Dest" : 3,
 		"Command": 4,
 		"id": 5,
 	}
 
-	def commands_import(self, cr, uid, ids, context=None):
+	def UpdateUNC(self, cr, uid, ids, partner, command_var, log_file):
+		result = True
+		partner.write({"unk": unicode(str(command_var[self.var_field["nav_UNC"]]), "utf-8")})
+		return result
+
+	var_com_method = {
+		"UpdatedUNC": UpdateUNC,
+	}
+
+	def processCommand_nav(self, cr, uid, ids, partner, command_var, log_file):
+		Command = command_var[self.var_field["Command"]]
+		result = False
+		if (Command in self.var_com_method):
+			result = self.var_com_method[Command](self, cr, uid, ids, partner, command_var, log_file)
+		else:
+			type_msg = u"Ошибка"
+			log_msg = u"Не найден обработчик для команды :" + Command
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
+		return result	
+
+
+
+	def commands_import_from_nav(self, cr, uid, ids, context=None):
 		partner_id = 0
 		connection = None
+		log_file = self.create_log_file(cr, uid, "exchange with NAV")
 		try:
 			server = self.browse(cr, uid, ids[0], context=context)
-			vFieldParam = "CRM_ID, External_ID, Source, Dest, Command, id"
-			query = "select  " + vFieldParam + " from " + server.tableName.encode("ascii") + " where DoneTime is null and Dest = 'crm'"
+			vFieldParam = "CRM_ID, nav_UNC, Source, Dest, Command, id"
+			query = "select  " + vFieldParam + " from crm_commands where DoneTime is null and Dest = 'crm'"
 			connection = server.exchange_server.connectToServer()
 			cursor=connection.cursor()
 			cursor.execute(query)
@@ -644,19 +667,26 @@ class crm_iml_sqlserver(osv.osv):
 				res_obj = self.pool.get('res.partner')
 				partn = res_obj.browse(cr, uid, partner_id)
 				if not(partn):
-					raise osv.except_osv(_("Send commands failed!"), _("Клиента с ID " + str(row[self.var_field["CRM_ID"]]) + " не найден в crm"))
-				command = row[self.var_field["Command"]]
-				server.processCommand(partn, command, None, row)
-				query = "update " + server.tableName.encode("ascii") + " set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id = " + str(row[self.var_field["id"]])
+					type_msg = u"Ошибка"
+					log_msg = u"Клиента с ID " + unicode(str(row[self.var_field["CRM_ID"]]), "utf-8") + u" не найден в crm, при выполнении команды: " + unicode(row[self.var_field["Command"]], "utf-8")
+					self.write_log(cr, uid, log_file, log_msg, type_msg)
+				else:
+					command = row[self.var_field["Command"]]
+					result = server.processCommand_nav(partn, row, log_file)
+				query = "update crm_commands set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id = " + str(row[self.var_field["id"]])
 				cursor.execute(query)
 			connection.commit()
 		except Exception, e:
-			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+			log_msg = tools.ustr(e)
+			type_msg = u"Ошибка"
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
 		finally:
 			if connection:
 				connection.close()
+			if log_file:
+				log_file.close()
 
-	def processCommand(self, cr, uid, ids, partner, command, opport=None, added_var=None):
+	def processCommand_cf(self, cr, uid, ids, partner, command, opport=None, added_var=None):
 		connection = None
 		comm_connection = None
 		server = self.browse(cr, uid, ids[0], context=None)
@@ -672,7 +702,7 @@ class crm_iml_sqlserver(osv.osv):
 				wherePart = " where CRM_ID=" + str(partner.id)
 			elif (command == "UpdatedUNC"):
 				if (added_var):
-					unc = added_var[self.var_field["External_ID"]]
+					unc = added_var[self.var_field["nav_UNC"]]
 					wherePart = " where NAV_UNC = " + unc.encode(utf-8) + " and CRM_TimeStamp is null"
 			if (wherePart != ""):
 				try:
@@ -727,7 +757,7 @@ class crm_iml_sqlserver(osv.osv):
 		#Перечисление полей, которые являются строкой 
 		#TODO сделать как в экспорте бул параметр это строка
 		vStrFields = {
-			"External_ID": True,
+			"nav_UNC": True,
 			"Source": True,
 			"Dest":  True,
 			"Command": True,
@@ -745,7 +775,7 @@ class crm_iml_sqlserver(osv.osv):
 			stringCond = stringCond + valueCond
 		return stringCond
 
-	#Обмен командами с системой
+	#Обмен командами
 	def commands_exchange(self, cr, uid, ids, vals, needExportCl, partner=None):
 		connection = None
 		try:
@@ -785,7 +815,7 @@ class crm_iml_sqlserver(osv.osv):
 	exchange_types = { 
 				"partner" : partner_import,
 				"holdings": holdings_import,
-				"commands": commands_import,
+				"commands_nav": commands_import_from_nav,
 				"responsible": responsible_import,
 				'user': user_import,
 		}
