@@ -126,10 +126,10 @@ class crm_lead(format_address, osv.osv):
 				    'phone': vPhone,
 				    'email': vEmail}
 		if vName != '':	 
-			partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'name', vName, vals_obj)
+			partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'email', vEmail, vals_obj)
 		vType = ""
 		if 'type' in aObj:
-			vType = aObj['type']
+			vType = aObj['type'].replace(" ", "")
 		vUser = 0
 		vSection = 0
 		vTypeID = 0

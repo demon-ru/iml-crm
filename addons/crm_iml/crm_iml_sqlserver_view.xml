@@ -18,7 +18,7 @@
 						<field name="lastImportDate"/>	
 					</group>
 					<group col="2" string="Server Information">		
-						<field name="tableName"/>	
+						<field name="tableName" attrs="{'invisible': [('exchange_type','=', 'commands_nav')]}"/>	
 						<field name="exchange_type"/>
 						<field name="exchange_server"/>
 					</group>

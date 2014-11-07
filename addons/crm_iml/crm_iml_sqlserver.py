@@ -306,23 +306,8 @@ class crm_iml_sqlserver(osv.osv):
 			"juridical_name": row[self.var_res_partner_fields.index("LegalName")],
 			"website": row[self.var_res_partner_fields.index("WebSite")], 
 			"active": True,
-			#Вкладка Основная
-			#'category_of_goods': row[5],
 			#Юридический адрес
 			"juridical_address_index": row[self.var_res_partner_fields.index("AddrZIP")],
-			#Если это только первичный импорт, то это часть не нужна
-			#"juridical_address_city_name": row[15],
-			#"juridical_address_street_name": row[16],
-			#"juridical_address_dom": row[17],
-			#"juridical_address_building": row[18],
-			#"juridical_address_office": row[19],
-			#Фактический адрес
-			#"actual_address_index": row[self.var_res_partner_fields.index("LocAddrZIP")],
-			#"actual_address_city_name": row[21],
-			#"actual_address_street_name": row[22],
-			#"actual_address_dom": row[23],
-			#"actual_address_building": row[24],
-			#"actual_address_office": row[25],
 			#Коды
 			"inn": row[self.var_res_partner_fields.index("ITN")],
 			"registration_reason_code": row[self.var_res_partner_fields.index("TRRC")],
@@ -333,15 +318,11 @@ class crm_iml_sqlserver(osv.osv):
 			#Даты
 			"date_of_accounting": vDateAccount,
 			"registration_date": vRegDate,
-			#Ссылки на объекты
-			#"type_of_counterparty": vType,
-			# было раньше
-			#"company_org_type": vOrgTypeID,
-			# стало теперь
 			"title" : vOrgTypeID,
 			#Не стандартная часть адреса
 			'actual_adress_non_stand_part': row[self.var_res_partner_fields.index("FactAdrStr")],  
 			'juridical_adress_non_stand_part': row[self.var_res_partner_fields.index("JurAdrStr")],
+			#ID холдинга
 			'nav_holdingId' : row[self.var_res_partner_fields.index("Holding_Id")], 
 			}
 		cur_obj = self.pool.get('res.partner')
@@ -629,20 +610,57 @@ class crm_iml_sqlserver(osv.osv):
 		"id": 5,
 	}
 
-	def UpdateUNC(self, cr, uid, ids, partner, command_var, log_file):
+	#Обновляем unk клиента - unk приходит из NAV
+	def UpdateUNC(self, cr, uid, ids, partner, command_var, log_file, connection):
 		result = True
 		partner.write({"unk": unicode(str(command_var[self.var_field["nav_UNC"]]), "utf-8")})
 		return result
 
+	#Обновляем контактных лиц
+	def UpdateContactPersons(self, cr, uid, ids, partner, command_var, log_file, connection):
+		var_role = {
+			'1': 'first_contact',
+			'2': 'signer',
+			'3': 'logistics_respons_person',
+			'4': 'financial_resp_per',
+			'5': 'tech_questions',
+		}
+		result = True
+		idCommand = command_var[self.var_field["id"]]
+		unk = str(command_var[self.var_field["nav_UNC"]])
+		query = "select Role, Contact, Email, Phone, Fax from ContactPersons where idCommand = " + str(idCommand)
+		cursor = connection.cursor()
+		cursor.execute(query)
+		for row in cursor.fetchall():
+			vals_add_obj = {
+				"name":  row[1],
+				"email": row[2],
+				"phone": row[3],
+				'fax': row[4],
+				'parent_id': partner.id,
+			}
+			contact = self.findObject(cr, uid,'res.partner', ["&","&",('name', 'in' ,[row[1]]),('parent_id', 'in', [partner.id]),("is_company", '=', False)], True, vals_add_obj, True)
+			if (row[0]) and (row[0] != ""):
+				if (row[0] in var_role):
+					partner.write({str(var_role[row[0]]): contact.id,})
+				else:
+					log_msg = u"Не найдена роль КЛ с внешним ключем =" + unicode(row[0], "utf-8") + u"при загрузке КЛ " + unicode(row[1])
+					type_msg = u"Предупреждение"
+					self.write_log(cr, uid, log_file, log_msg, type_msg)
+
+
+	#Справочник методов обработчиков команд
 	var_com_method = {
 		"UpdatedUNC": UpdateUNC,
+		"UpdatedContactPersons": UpdateContactPersons,
 	}
 
-	def processCommand_nav(self, cr, uid, ids, partner, command_var, log_file):
+	#Метод который определяет, что это за команда и вызывает соответсвующий обработчик
+	def processCommand_nav(self, cr, uid, ids, partner, command_var, log_file, connection):
 		Command = command_var[self.var_field["Command"]]
 		result = False
 		if (Command in self.var_com_method):
-			result = self.var_com_method[Command](self, cr, uid, ids, partner, command_var, log_file)
+			result = self.var_com_method[Command](self, cr, uid, ids, partner, command_var, log_file, connection)
 		else:
 			type_msg = u"Ошибка"
 			log_msg = u"Не найден обработчик для команды :" + Command
@@ -663,16 +681,19 @@ class crm_iml_sqlserver(osv.osv):
 			cursor=connection.cursor()
 			cursor.execute(query)
 			for row in cursor.fetchall():
-				partner_id = row[self.var_field["CRM_ID"]]
-				res_obj = self.pool.get('res.partner')
-				partn = res_obj.browse(cr, uid, partner_id)
+				if (row[self.var_field["CRM_ID"]]): 
+					partner_id = row[self.var_field["CRM_ID"]]
+					res_obj = self.pool.get('res.partner')
+					partn = res_obj.browse(cr, uid, partner_id)
+				elif (row[self.var_field["nav_UNC"]]):
+					partn = server.findObject('res.partner', [("unk", 'in', [unicode(row[self.var_field["nav_UNC"]], "utf-8")])])
 				if not(partn):
 					type_msg = u"Ошибка"
 					log_msg = u"Клиента с ID " + unicode(str(row[self.var_field["CRM_ID"]]), "utf-8") + u" не найден в crm, при выполнении команды: " + unicode(row[self.var_field["Command"]], "utf-8")
 					self.write_log(cr, uid, log_file, log_msg, type_msg)
 				else:
 					command = row[self.var_field["Command"]]
-					result = server.processCommand_nav(partn, row, log_file)
+					result = server.processCommand_nav(partn, row, log_file, connection)
 				query = "update crm_commands set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id = " + str(row[self.var_field["id"]])
 				cursor.execute(query)
 			connection.commit()
