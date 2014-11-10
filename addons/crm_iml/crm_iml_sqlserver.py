@@ -463,7 +463,6 @@ class crm_iml_sqlserver(osv.osv):
 			conection = exchange_server.connectToServer()
 			cursor = conection.cursor()
 			query = server.getQuery_partner()
-			print query
 			cursor.execute(query)
 			for row in cursor.fetchall():
 				cur_obj = server.createOrFindResPartner(row, log_file)
@@ -485,52 +484,54 @@ class crm_iml_sqlserver(osv.osv):
 	 	return True
 
 
-	def holdings_import(self, cr, uid, ids, context=None):
+	def holdings_import(self, cr, uid, ids, context=None, query = None, connection = None, log_file = None, NeedCloseConnect = True):
 		try:
-			log_file = self.create_log_file(cr, uid, "holding")
+			if not(log_file):
+				log_file = self.create_log_file(cr, uid, "holding")
 			# сперва найдем все холдинги
-			for server in self.browse(cr, uid, ids, context=context):
+			if not(connection):
+				server = self.browse(cr, uid, ids[0], context=context)
 				exchange_server = server.exchange_server
 				connection = exchange_server.connectToServer()
-				cursor=connection.cursor()
-				#Убираем это условие посколько этот алгорим будет пока только для первичного импорт 
-				#будем выбирать только те записи, которые созданы после предидущего импорта
-				#if (server.lastImportDate):
-				#	wherePart = "where nav_timestamp > '" + str(server.lastImportDate) + "'"
-				# название столбцов до конца не известно, пока для информации
-				query = "select holding_id, holding_name from " + server.tableName 
-				#+ " " + wherePart
-				cursor.execute(query)
-				# итерируем холдинги
-				for row in cursor.fetchall():
-					# находим или создаем холдинг
-					# подготавливаем данные для создаваемого (в случае чего, холдинга)
-					vals_add_obj = {
-						#Информация о клиенте
-						"name":	row[1],		
-						"short_name": row[1],
-						"is_company": True,
-						# аттрибут холдинга
-						"holdingId" : row[48],
-					}
-					holding = self.findObject(cr, uid,'res.partner', ["&",('holdingId', 'in' ,[row[48]]),("is_company", '=', True)], True, vals_add_obj, False)
-					# находим клиентов, у которых nav_holdingId = ид холдинга
-					res_partner_obj = self.pool.get('res.partner')
-					res_partner_ids = res_partner_obj.search(cr, uid, [('nav_holdingId', 'in', holding.holdingId)], context=context)
-					res_partner = res_partner_obj.browse(cr, uid, res_partner_ids)
-		            # итерируем отобранных клиентов и устанавливаем им в качестве parent_id id холдинга
-					for partner in res_partner:
-						partner.parent_id = holding
+			cursor=connection.cursor()
+			#Убираем это условие посколько этот алгорим будет пока только для первичного импорт 
+			#будем выбирать только те записи, которые созданы после предидущего импорта
+			#if (server.lastImportDate):
+			#	wherePart = "where nav_timestamp > '" + str(server.lastImportDate) + "'"
+			# название столбцов до конца не известно, пока для информации
+			if not(query):
+				query = u"select holding_id, holding_name from " + unicode(server.tableName, "utf-8") 
+			#+ " " + wherePart
+			cursor.execute(query)
+			# итерируем холдинги
+			for row in cursor.fetchall():
+				# находим или создаем холдинг
+				# подготавливаем данные для создаваемого (в случае чего, холдинга)
+				vals_add_obj = {
+					#Информация о клиенте
+					"name":	row[1],		
+					"short_name": row[1],
+					"is_company": True,
+					# аттрибут холдинга
+					"holdingId" : row[0],
+				}
+				holding = self.findObject(cr, uid,'res.partner', ["&",('holdingId', 'in' ,[unicode(row[0], "utf-8")]),("is_company", '=', True)], True, vals_add_obj, False)
+				# находим клиентов, у которых nav_holdingId = ид холдинга
+				res_partner_obj = self.pool.get('res.partner')
+				res_partner_ids = res_partner_obj.search(cr, uid, [('nav_holdingId', 'in', [holding.holdingId])], context=context)
+				res_partner = res_partner_obj.browse(cr, uid, res_partner_ids)
+	            # итерируем отобранных клиентов и устанавливаем им в качестве parent_id id холдинга
+				for partner in res_partner:
+					partner.parent_id = holding.id
 		except Exception, e:
 			log_msg = tools.ustr(e)
 			type_msg = u"Ошибка"
 			self.write_log(cr, uid, log_file, log_msg, type_msg)
 		finally:
-			if connection:
+			if connection and NeedCloseConnect:
 				connection.close()
-			if log_file:
+			if log_file and NeedCloseConnect:
 				log_file.close()
-		write("ok")
 
 	def responsible_import(self, cr, uid, ids, context=None):
 		try:
@@ -648,19 +649,25 @@ class crm_iml_sqlserver(osv.osv):
 					type_msg = u"Предупреждение"
 					self.write_log(cr, uid, log_file, log_msg, type_msg)
 
+	#Обновляем холдинги
+	def UpadeteHolding(self, cr, uid, ids, partner, command_var, log_file, connection):
+		idCommand = command_var[self.var_field["id"]]
+		query = u"select Holding_ID, Holding_Name from Holding where idCommand= " + str(idCommand)
+		self.holdings_import(cr, uid, ids, None, query, connection, log_file, False)
 
 	#Справочник методов обработчиков команд
 	var_com_method = {
 		"UpdatedUNC": UpdateUNC,
 		"UpdatedContactPersons": UpdateContactPersons,
+		"UpdatedHolding": UpadeteHolding,
 	}
 
 	#Метод который определяет, что это за команда и вызывает соответсвующий обработчик
 	def processCommand_nav(self, cr, uid, ids, partner, command_var, log_file, connection):
 		Command = command_var[self.var_field["Command"]]
 		result = False
-		if (Command in self.var_com_method):
-			result = self.var_com_method[Command](self, cr, uid, ids, partner, command_var, log_file, connection)
+		if (Command.strip() in self.var_com_method):
+			result = self.var_com_method[Command.strip()](self, cr, uid, ids, partner, command_var, log_file, connection)
 		else:
 			type_msg = u"Ошибка"
 			log_msg = u"Не найден обработчик для команды :" + Command
@@ -687,7 +694,8 @@ class crm_iml_sqlserver(osv.osv):
 					partn = res_obj.browse(cr, uid, partner_id)
 				elif (row[self.var_field["nav_UNC"]]):
 					partn = server.findObject('res.partner', [("unk", 'in', [unicode(row[self.var_field["nav_UNC"]], "utf-8")])])
-				if not(partn):
+				command = row[self.var_field["Command"]]
+				if not(partn) and (command.strip() != "UpdatedHolding"):
 					type_msg = u"Ошибка"
 					log_msg = u"Клиента с ID " + unicode(str(row[self.var_field["CRM_ID"]]), "utf-8") + u" не найден в crm, при выполнении команды: " + unicode(row[self.var_field["Command"]], "utf-8")
 					self.write_log(cr, uid, log_file, log_msg, type_msg)
