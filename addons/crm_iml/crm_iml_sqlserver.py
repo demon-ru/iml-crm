@@ -522,7 +522,7 @@ class crm_iml_sqlserver(osv.osv):
 				res_partner = res_partner_obj.browse(cr, uid, res_partner_ids)
 	            # итерируем отобранных клиентов и устанавливаем им в качестве parent_id id холдинга
 				for partner in res_partner:
-					partner.parent_id = holding.id
+					partner.write({"parent_id": holding.id})
 		except Exception, e:
 			log_msg = tools.ustr(e)
 			type_msg = u"Ошибка"
@@ -655,11 +655,34 @@ class crm_iml_sqlserver(osv.osv):
 		query = u"select Holding_ID, Holding_Name from Holding where idCommand= " + str(idCommand)
 		self.holdings_import(cr, uid, ids, None, query, connection, log_file, False)
 
+	#Обновляем клиента
+	def UpdateClient(self, cr, uid, ids, partner, command_var, log_file, connection):
+		idCommand = command_var[self.var_field["id"]]
+		query = "select Holding_Id from Clients where idCommand = " + str(idCommand) 
+		cursor = connection.cursor()
+		cursor.execute(query)
+		row = cursor.fetchone()
+		if (row[0]):
+			partner.write({"nav_holdingId":row[0]})
+			holding = self.findObject(cr, uid,'res.partner', ["&",('holdingId', 'in' ,[unicode(row[0], "utf-8")]),("is_company", '=', True)])
+			if (holding):
+				partner.write({"parent_id": holding.id})
+			else: 
+				log_msg = u"Не найден холдинг с внешним ключем = " + unicode(row[0], "utf-8")
+				type_msg = u"Предупреждение"
+				self.write_log(cr, uid, log_file, log_msg, type_msg)
+		else:
+			log_msg = u"Не найден внешний ключ при обновлении холдинга клиента - " + unicode(partner.name, "utf-8")
+			type_msg = u"Ошибка"
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
+
+
 	#Справочник методов обработчиков команд
 	var_com_method = {
 		"UpdatedUNC": UpdateUNC,
 		"UpdatedContactPersons": UpdateContactPersons,
 		"UpdatedHolding": UpadeteHolding,
+		"UpdatedClient": UpdateClient,
 	}
 
 	#Метод который определяет, что это за команда и вызывает соответсвующий обработчик
@@ -683,7 +706,7 @@ class crm_iml_sqlserver(osv.osv):
 		try:
 			server = self.browse(cr, uid, ids[0], context=context)
 			vFieldParam = "CRM_ID, nav_UNC, Source, Dest, Command, id"
-			query = "select  " + vFieldParam + " from crm_commands where DoneTime is null and Dest = 'crm'"
+			query = "select  " + vFieldParam + " from crm_commands where DoneTime is null and Dest = 'crm' Order by id"
 			connection = server.exchange_server.connectToServer()
 			cursor=connection.cursor()
 			cursor.execute(query)
