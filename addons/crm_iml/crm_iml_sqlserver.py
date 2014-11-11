@@ -603,7 +603,16 @@ class crm_iml_sqlserver(osv.osv):
 	#Обновляем unk клиента - unk приходит из NAV
 	def UpdateUNC(self, cr, uid, ids, partner, command_var, log_file, connection):
 		result = True
-		partner.write({"unk": unicode(str(command_var[self.var_field["nav_UNC"]]), "utf-8")})
+		unk = command_var[self.var_field["nav_UNC"]]
+		partner.write({"unk": unicode(unk, "utf-8")})
+		if (partner.user_id) and (partner.user_id.email):
+			msg_subject = u"Клиенту присвоен УНК"
+			msg_body = u"Клиенту " + partner.name + u" присвоен УНК " + unicode(unk, "utf-8") + u"<br>Можно приступать к созданию договора и согласования его условий с клиентом."
+			post_vars = {
+				"partner_ids":[4,partner.user_id.partner_id.id],
+				"body": msg_body,
+				"subject": msg_subject,}
+			self.send_email(cr, uid, ids, post_vars, None, partner, "res.partner")
 		return result
 
 	#Обновляем контактных лиц
@@ -798,10 +807,10 @@ class crm_iml_sqlserver(osv.osv):
 					} 
 				self.send_email(cr, uid, ids, post_vars)
 
-	def send_email(self,cr, uid, ids, post_vars, context=None):
-		thread_pool = self.pool.get('mail.thread')
+	def send_email(self,cr, uid, ids, post_vars, context=None, thread = False, model='mail.thread'):
+		thread_pool = self.pool.get(model)
 		thread_pool.message_post(
-			cr, uid, False,
+			cr, uid, thread.id,
 			type="notification",
 			subtype="mt_comment",
 			context=context,
