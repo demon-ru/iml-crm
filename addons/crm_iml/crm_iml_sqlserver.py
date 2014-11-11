@@ -236,6 +236,17 @@ class crm_iml_sqlserver(osv.osv):
 			cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=None))	 	
 		return cur_obj
 
+	#Проверяет есть ли эта дата, пытается привести ее к определенному фомату, если не удалось возвращает None
+	def getDate(self, date):
+		res = None
+		if (date):
+			#Хак в случае если год в дате будет меньше 1900
+			try:
+				res = date.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
+			except ValueError:
+				vRegDate = None
+		return res
+
 	"""
 		Находит или создает клиента
 		Параметры:
@@ -247,45 +258,8 @@ class crm_iml_sqlserver(osv.osv):
 		type_msg = ""
 		added_info = u" при загрузке клиента: " + unicode(row[self.var_res_partner_fields.index("CustomerName")], "utf-8")
 		res_obj = self.pool.get('res.partner')
-		vDateAccount = None
-		if (row[self.var_res_partner_fields.index("TRDate")]):
-			#Хак в случае если год в дате будет меньше 1900
-			try:
-				vDateAccount = row[self.var_res_partner_fields.index("TRDate")].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
-			except ValueError:
-				vDateAccount = None
-		vRegDate = None
-		if (row[self.var_res_partner_fields.index("RegistrationDate")]):
-			try:
-				vRegDate = row[self.var_res_partner_fields.index("RegistrationDate")].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
-			except ValueError:
-				vRegDate = None
-		vRegion = None
-		if (row[self.var_res_partner_fields.index("Region_ID")]):
-			vRegionObj = self.findObject(cr, uid,"crm.settlement_center", [('nav_id', "in", [str(row[self.var_res_partner_fields.index("Region_ID")].encode("utf-8"))])])
-			if vRegionObj:
-				vRegion = vRegionObj.id if vRegionObj else None
-			else:
-				type_msg = u"Предупреждение"
-				log_msg = u"Не найден регион доставки с внешним ключем " + unicode(row[self.var_res_partner_fields.index("Region_ID")], "utf-8") + added_info
-				self.write_log(cr, uid, log_file, log_msg, type_msg)
-		#Поиск склада 
-		vStorageShipID = None
-		if (row[self.var_res_partner_fields.index("Warehouse_ID")]): 
-			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", [('nav_id', "in", [str(row[self.var_res_partner_fields.index("Warehouse_ID")].encode("utf-8"))])])
-			if (vStorageShip):
-				vStorageShipID = vStorageShip.id 
-			else: 
-				type_msg = u"Предупреждение"
-				log_msg = u"Не найден  Склад отправления с внешним ключем " + unicode(row[self.var_res_partner_fields.index("Warehouse_ID")], "utf-8") + added_info
-				self.write_log(cr, uid, log_file, log_msg, type_msg)
-		#Дата доверенности
-		vDoverenostDate = None
-		if (row[self.var_res_partner_fields.index("LoA_Date")]): 
-			try:
-				vDoverenostDate = row[self.var_res_partner_fields.index("LoA_Date")].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
-			except ValueError:
-				vDoverenostDate = None
+		vDateAccount = self.getDate(row[self.var_res_partner_fields.index("TRDate")])
+		vRegDate = self.getDate(row[self.var_res_partner_fields.index("RegistrationDate")])
 		#Поиск организационной формы компании
 		vOrgTypeID = None
 		if (row[self.var_res_partner_fields.index("CompOrgTypeID")]): 
@@ -330,48 +304,7 @@ class crm_iml_sqlserver(osv.osv):
 		#Если мы нашли или создали компанию - то пытаемся создать договор и контактное лицо
 		if cur_obj:
 			if row[self.var_res_partner_fields.index("AgreementNo")]: 
-				vStartDate = None
-				if (row[self.var_res_partner_fields.index("AgreementStartDate")]): 
-					#Хак в случае если год в дате будет меньше 1900
-					try:
-						vStartDate = row[self.var_res_partner_fields.index("AgreementStartDate")].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
-					except ValueError:
-						vStartDate = None
-				vAgreementDate = None
-				vRespPers = None
-				# Ответственны по договору
-				if (row[self.var_res_partner_fields.index("Responsible_ID")]): 
-					vRespPersObj = self.findObject(cr, uid,"res.users", [('nav_id', "in", [str(row[self.var_res_partner_fields.index("Responsible_ID")].encode("utf-8"))])])
-					vRespPers = vRespPersObj.id if vRespPersObj else None
-					if not vRespPersObj:
-						type_msg = u"Предупреждение"
-						log_msg = u"Не найдена пользователь с внешним ключем " + unicode(row[self.var_res_partner_fields.index("Responsible_ID")], "utf-8") + added_info
-						self.write_log(cr, uid, log_file, log_msg, type_msg)	
-				#Дата договора
-				if (row[self.var_res_partner_fields.index("AgreementDate")]):			
-					#Хак в случае если год в дате будет меньше 1900
-					try:
-						vAgreementDate = row[self.var_res_partner_fields.index("AgreementDate")].strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)
-					except ValueError:
-						vAgreementDate = None		
-				#Атрибуты договора
-				vals_add_obj = {
-					'name': row[self.var_res_partner_fields.index("AgreementNo")],
-					'crm_number': row[self.var_res_partner_fields.index("AgreementName")],
-					'partner_id': cur_obj.id,
-					"fio_authorized person_nominative_case": row[self.var_res_partner_fields.index("RespPerson")], 
-					"fio_authorized person_genitive_case": row[self.var_res_partner_fields.index("RespPersonWhom")],
-					"authorized_person_position_nominative_case": row[self.var_res_partner_fields.index("RespPersonPosition")], 
-					"authorized_person_position_genetive_case": row[self.var_res_partner_fields.index("RespPersonPositionWhom")],
-					'region_of_delivery': vRegion,
-					"storage_of_shipping": vStorageShipID,
-					"number_of_powerOfattorney": row[self.var_res_partner_fields.index("LoA_Number")], 
-					"date_of_powerOfattorney": vDoverenostDate,
-					"date_start": vStartDate,
-					"dateOfContracts": vAgreementDate,
-					"manager_id": vRespPers, 
-				}
-				self.findObject(cr, uid,"account.analytic.account", ['&',('crm_number',"in", [str(row[self.var_res_partner_fields.index("AgreementNo")].encode("utf-8"))]),('partner_id', 'in',[cur_obj.id])], True, vals_add_obj, True)			
+				self.createContracts(cr, uid, row, self.var_res_partner_fields, cur_obj, log_file) 			
 			if row[self.var_res_partner_fields.index("Contact")]:			
 				vals_add_obj = {
 					"name":  row[self.var_res_partner_fields.index("Contact")],
@@ -383,12 +316,68 @@ class crm_iml_sqlserver(osv.osv):
 				cur_obj.write({"first_contact": contact.id,})
 		return cur_obj
 
-	def getQuery_partner(self):
+	def createContracts(self, cr, uid, row, var_field, cur_obj, log_file = None):
+		log_msg = ""
+		type_msg = ""
+		added_info = u" при загрузке клиента: " + unicode(cur_obj.name)
+		#Дата доверенности
+		vDoverenostDate = self.getDate(row[var_field.index("LoA_Date")])
+		vRegion = None
+		if (row[var_field.index("Region_ID")]):
+			vRegionObj = self.findObject(cr, uid,"crm.settlement_center", [('nav_id', "in", [str(row[var_field.index("Region_ID")].encode("utf-8"))])])
+			if vRegionObj:
+				vRegion = vRegionObj.id if vRegionObj else None
+			else:
+				type_msg = u"Предупреждение"
+				log_msg = u"Не найден регион доставки с внешним ключем " + unicode(row[var_field.index("Region_ID")], "utf-8") + added_info
+				self.write_log(cr, uid, log_file, log_msg, type_msg)
+		#Поиск склада 
+		vStorageShipID = None
+		if (row[var_field.index("Warehouse_ID")]): 
+			vStorageShip = self.findObject(cr, uid,"crm.shipping_storage", [('nav_id', "in", [str(row[var_field.index("Warehouse_ID")].encode("utf-8"))])])
+			if (vStorageShip):
+				vStorageShipID = vStorageShip.id 
+			else: 
+				type_msg = u"Предупреждение"
+				log_msg = u"Не найден  Склад отправления с внешним ключем " + unicode(row[var_field.index("Warehouse_ID")], "utf-8") + added_info
+				self.write_log(cr, uid, log_file, log_msg, type_msg)
+		vStartDate = self.getDate(row[var_field.index("AgreementStartDate")])
+		vAgreementDate = self.getDate(row[var_field.index("AgreementDate")])
+		vRespPers = None
+		# Ответственны по договору
+		if (row[var_field.index("Responsible_ID")]): 
+			vRespPersObj = self.findObject(cr, uid,"res.users", [('nav_id', "in", [str(row[var_field.index("Responsible_ID")].encode("utf-8"))])])
+			vRespPers = vRespPersObj.id if vRespPersObj else None
+			if not vRespPersObj:
+				type_msg = u"Предупреждение"
+				log_msg = u"Не найдена пользователь с внешним ключем " + unicode(row[var_field.index("Responsible_ID")], "utf-8") + added_info
+				self.write_log(cr, uid, log_file, log_msg, type_msg)		
+		#Атрибуты договора
+		vals_add_obj = {
+			'name': row[var_field.index("AgreementName")],
+			'crm_number': row[var_field.index("AgreementNo")],
+			'partner_id': cur_obj.id,
+			"fio_authorized person_nominative_case": row[var_field.index("RespPerson")], 
+			"fio_authorized person_genitive_case": row[var_field.index("RespPersonWhom")],
+			"authorized_person_position_nominative_case": row[var_field.index("RespPersonPosition")], 
+			"authorized_person_position_genetive_case": row[var_field.index("RespPersonPositionWhom")],
+			'region_of_delivery': vRegion,
+			"storage_of_shipping": vStorageShipID,
+			"number_of_powerOfattorney": row[var_field.index("LoA_Number")], 
+			"date_of_powerOfattorney": vDoverenostDate,
+			"date_start": vStartDate,
+			"dateOfContracts": vAgreementDate,
+			"manager_id": vRespPers, 
+		}
+		self.findObject(cr, uid,"account.analytic.account", ['&',('crm_number',"in", [unicode(row[var_field.index("AgreementNo")], "utf-8")]),('partner_id', 'in',[cur_obj.id])], True, vals_add_obj, True)
+
+
+	def getQuery_partner(self, var_field, tableName):
 		vFields = ""
-		for elem in self.var_res_partner_fields:
+		for elem in var_field:
 			vFields = vFields +  "," if vFields != "" else "" 
 			vFields = vFields + elem
-		query = "select " + vFields + " from " + self.tableName
+		query = "select " + vFields + " from " + tableName
 		return query
 
 	"""	
@@ -445,7 +434,7 @@ class crm_iml_sqlserver(osv.osv):
 			idimport - уникальный ключ для поиска записи импорта - 45
 			CompOrgTypeID - company_org_type - 46
 			AgreementDate - дата договора date_start у договора- 47
-			???_ид_холдинга - идентификатор холдинга у клиента - 48
+			nav_holdingId - идентификатор холдинга у клиента - 48
 	"""
 
 		
@@ -462,7 +451,7 @@ class crm_iml_sqlserver(osv.osv):
 			exchange_server = server.exchange_server
 			conection = exchange_server.connectToServer()
 			cursor = conection.cursor()
-			query = server.getQuery_partner()
+			query = server.getQuery_partner(self.var_res_partner_fields, server.tableName)
 			cursor.execute(query)
 			for row in cursor.fetchall():
 				cur_obj = server.createOrFindResPartner(row, log_file)
@@ -676,6 +665,18 @@ class crm_iml_sqlserver(osv.osv):
 			type_msg = u"Ошибка"
 			self.write_log(cr, uid, log_file, log_msg, type_msg)
 
+	def UpdateContracts(self, cr, uid, ids, partner, command_var, log_file, connection):
+		idCommand = command_var[self.var_field["id"]]
+		field_account = ["AgreementNo", "AgreementName", 
+			"RespPerson", "RespPersonWhom", "RespPersonPosition",
+			"RespPersonPositionWhom", "Warehouse_ID", "Region_ID",
+			"LoA_Number", "LoA_Date", "AgreementDate", "AgreementStartDate", "Responsible_ID"]
+		query = self.getQuery_partner(field_account, "Contracts") + u" where idCommand = " + str(idCommand)
+		cursor = connection.cursor()
+		cursor.execute(query)
+		for row in cursor.fetchall():
+			self.createContracts(cr, uid, row, field_account, partner, log_file)
+
 
 	#Справочник методов обработчиков команд
 	var_com_method = {
@@ -683,6 +684,7 @@ class crm_iml_sqlserver(osv.osv):
 		"UpdatedContactPersons": UpdateContactPersons,
 		"UpdatedHolding": UpadeteHolding,
 		"UpdatedClient": UpdateClient,
+		"UpdatedContracts": UpdateContracts,
 	}
 
 	#Метод который определяет, что это за команда и вызывает соответсвующий обработчик
@@ -748,7 +750,7 @@ class crm_iml_sqlserver(osv.osv):
 			server_res_partner = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["partner"])]) 
 			if not(server_res_partner):
 				sys.stdout.write("ERROR! Пожалуйста настройте таблицу для экспорта/импорта клиентов!")
-			query = server_res_partner.getQuery_partner()
+			query = server_res_partner.getQuery_partner(self.var_res_partner_fields, server_res_partner.tableName)
 			wherePart = ""
 			if (command == "UpdateCustomerData"):
 				wherePart = " where CRM_ID=" + str(partner.id)
