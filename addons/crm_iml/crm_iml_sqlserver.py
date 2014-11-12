@@ -138,82 +138,6 @@ class crm_iml_sqlserver(osv.osv):
 			sys.stdout.write(u"Внимание! Не удалось записать строчку в файл лога!\n" + log_msg)  
 
 	"""
-		Метод экспорта клиента в промежуточную базу
-		Параметры:
-			partner - экспортируемый партнер
-	"""
-	def export_res_partner(self, partner):
-		export_params = {
-			"id": {"Field": "crm_id", "IsStr": False},
-			"name": {"Field": "CustomerName", "IsStr": True},
-			"juridical_name" : {"Field": "ShopName", "IsStr": True},
-			"website" : {"Field": "WebSite", "IsStr": True},
-			"category_of_goods.nav_id" : {"Field": "GoodsCategory", "IsStr": True},
-			"juridical_address_index" : {"Field": "AddrZIP", "IsStr": True},
-			"juridical_address_city_name" : {"Field": "AddrSity", "IsStr": True},
-			"juridical_address_street_name" : {"Field": "AddrStreet", "IsStr": True},
-			"juridical_address_dom" : {"Field": "AddrBuilding", "IsStr": True},
-			"juridical_address_building" : {"Field": "AddrBuilding2", "IsStr": True},
-			"juridical_address_office" : {"Field": "AddrOffice", "IsStr": True},
-			"actual_address_index" : {"Field": "LocAddrZIP", "IsStr": True},
-			"actual_address_city_name" : {"Field": "LocAddrSity", "IsStr": True},
-			"actual_address_street_name" : {"Field": "LocAddrStreet", "IsStr": True},
-			"actual_address_dom" : {"Field": "LocAddrBuilding", "IsStr": True},
-			"actual_address_building" : {"Field": "LocAddrBuilding2", "IsStr": True},
-			"actual_address_office" : {"Field": "LocAddrOffice", "IsStr": True},
-			"account_number" : {"Field": "AccountNo", "IsStr": True},
-			"inn" : {"Field": "ITN", "IsStr": True},
-			"registration_reason_code" : {"Field": "TRRC", "IsStr": True},
-			"date_of_accounting" : {"Field": "TRDate", "IsStr": True, "IsDate": True},
-			"OGRN_OGRNIP" : {"Field": "OGRN", "IsStr": True},
-			"registration_date" : {"Field": "RegistrationDate", "IsStr": True, "IsDate": True},
-			"OKVED" : {"Field": "OCVED", "IsStr": True},
-			"OKPO" : {"Field": "OCPO", "IsStr": True},
-			"OKATO" : {"Field": "OCATO", "IsStr": True},
-			"actual_adress_non_stand_part" : {"Field": "FactAdrStr", "IsStr": True},
-			"juridical_adress_non_stand_part" : {"Field": "JurAdrStr", "IsStr": True},
-			"tech_questions.name" : {"Field": "Contact", "IsStr": True},
-			"tech_questions.email": {"Field": "Email", "IsStr": True},
-			"tech_questions.phone": {"Field": "Phone", "IsStr": True}, 
-		}
-		connection = None
-		try:
-			vSetParams = ""
-			vSetValues = ""
-			vParam = {}
-			for key in export_params:
-				vParam = export_params[key]
-				vArrayOfAtr = key.split('.')
-				value = ""
-				var = None
-				if (len(vArrayOfAtr) > 1):
-					vObj = getattr(partner, vArrayOfAtr[0])
-					if vObj:
-						var = getattr(vObj, vArrayOfAtr[1])
-				else:
-					var = getattr(partner, vArrayOfAtr[0])
-				if var:
-					if (vParam["IsStr"]):
-						value = var.encode("utf-8")
-					else:
-						value = str(var)
-				if (value != ""):
-					vSetParams = self.addCondition(vParam["Field"].encode("utf-8"), vSetParams)
-					vSetValues = self.addCondition(value , vSetValues, None, vParam['IsStr'], "IsDate" in vParam)
-			vSetParams = self.addCondition("CRM_TimeStamp", vSetParams)
-			vSetValues = self.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, None, True)
-			query = "insert into " + self.tableName.encode("ascii") + " (" + vSetParams + ") values(" + vSetValues + ")"
-			connection = self.exchange_server.connectToServer()
-			cursor = connection.cursor()	
-			cursor.execute(query)
-			connection.commit()	
-		except Exception, e:
-			raise osv.except_osv(_("Export failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
-		finally:
-			if connection:
-				connection.close()
-
-	"""
 		Находит или создает объект заданного класса
 		Параметры:
 			classObj - класс искомого объекта
@@ -838,39 +762,123 @@ class crm_iml_sqlserver(osv.osv):
 			stringCond = stringCond + valueCond
 		return stringCond
 
+	"""
+		Метод экспорта клиента в промежуточную базу
+		Параметры:
+			partner - экспортируемый партнер
+	"""
+	def export_res_partner(self, partner, rec_id=False, name_field_id = "", cursor = None, NeedCommit=True):
+		export_params = {
+			"name": {"Field": "CustomerName", "IsStr": True},
+			"website" : {"Field": "WebSite", "IsStr": True},
+			"category_of_goods.nav_id" : {"Field": "GoodsCategory", "IsStr": True},
+			"juridical_address_index" : {"Field": "AddrZIP", "IsStr": True},
+			"juridical_address_city_name" : {"Field": "AddrSity", "IsStr": True},
+			"actual_address_index" : {"Field": "LocAddrZIP", "IsStr": True},
+			"juridical_address_street_name,juridical_address_dom,juridical_address_building,juridical_address_office,juridical_adress_non_stand_part" : {"Field": "JurAdrStr", "IsStr": True},
+			"actual_adress_full_adress" : {"Field": "FactAdrStr", "IsStr": True},
+			"inn" : {"Field": "ITN", "IsStr": True},
+			"registration_reason_code" : {"Field": "TRRC", "IsStr": True},
+			"date_of_accounting" : {"Field": "TRDate", "IsStr": True, "IsDate": True},
+			"OGRN_OGRNIP" : {"Field": "OGRN", "IsStr": True},
+			"registration_date" : {"Field": "RegistrationDate", "IsStr": True, "IsDate": True},
+			"OKVED" : {"Field": "OCVED", "IsStr": True},
+			"OKPO" : {"Field": "OCPO", "IsStr": True},
+			"OKATO" : {"Field": "OCATO", "IsStr": True},
+			"title.ext_code": {"Field":"CompOrgTypeID", "IsStr": True},
+			"category_of_goods.nav_id": {"Field": "GoodsCategory", "IsStr": True},
+		}
+		connection = None
+		#try:
+		vSetParams = ""
+		vSetValues = ""
+		vParam = {}
+		for key in export_params:
+			vParam = export_params[key]
+			vArrayOfAtr = key.split('.')
+			value = ""
+			var = None
+			if (len(vArrayOfAtr) > 1):
+				vObj = getattr(partner, vArrayOfAtr[0])
+				if vObj:
+					var = getattr(vObj, vArrayOfAtr[1])
+			else:
+				#Если поля отделены запятой то мы суммируем эти поля
+				vArrayOfSum = key.split(',')
+				if len(vArrayOfSum) > 1:
+					var = ""
+					for field in vArrayOfSum:
+						print "****************"
+						print field
+						print "****************"
+						pre_var =  getattr(partner, field)
+						var = pre_var if not(var) else var + " " + pre_var
+				else:	
+					var = getattr(partner, vArrayOfAtr[0])
+			if var:
+				if (vParam["IsStr"]):
+					value = var.encode("utf-8")
+				else:
+					value = str(var)
+			if (value != ""):
+				vSetParams = self.addCondition(vParam["Field"].encode("utf-8"), vSetParams)
+				vSetValues = self.addCondition(value , vSetValues, None, vParam['IsStr'], "IsDate" in vParam)
+		if (name_field_id) and (rec_id):
+			vSetParams = self.addCondition(name_field_id.encode("utf-8"), vSetParams)
+			vSetValues = self.addCondition(str(rec_id) , vSetValues, None, False, False)
+		query = "insert into Clients (" + vSetParams + ") values(" + vSetValues + ")"
+		print "**************************"
+		print query
+		print "**************************"
+		if not (cursor):
+			connection = self.exchange_server.connectToServer()
+			cursor = connection.cursor()
+		print "****************"
+		print cursor
+		print "*****************"
+		cursor.execute(query)
+		if connection and NeedCommit:
+			connection.commit()	
+		#except Exception, e:
+		#	raise osv.except_osv(_("Export failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		#finally:
+		#	if connection and NeedCommit:
+		#		connection.close()
+
 	#Обмен командами
 	def commands_exchange(self, cr, uid, ids, vals, needExportCl, partner=None):
 		connection = None
-		try:
-			server = self.browse(cr, uid, ids[0], context=None)
-			vSetParams = ""
-			vSetValues = ""
-			for key in vals:
-				if (vals[key]) and (vals[key] != ""):
-					vSetParams = server.addCondition(key, vSetParams)
-					vSetValues = server.addCondition(str(vals[key]), vSetValues, key)
-			if not("CreateTime" in vals):
-				vSetParams = server.addCondition("CreateTime", vSetParams)
-				vSetValues = server.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, "CreateTime")
-			query = "insert into " + server.tableName + " (" + vSetParams + ") values(" + vSetValues + ")"
-			exchange_server = server.exchange_server
-			connection = exchange_server.connectToServer()	
-			cursor = connection.cursor()	
-			cursor.execute(query)
-			connection.commit()	
-			export_server = None
-			if (needExportCl and "CRM_ID" in vals):
-				export_server = server.findObject("crm.iml.sqlserver", [('exchange_type',"=", "partner")])
-				if not(partner):
-					partner = server.findObject("res.partner", [('id',"in", [int(vals["CRM_ID"])])])
-				if not export_server:
-					raise osv.except_osv(_("Send commands failed!"), _("Не задан сервер для импорта клиентов! Обратитесь к администратору."))
-				export_server.export_res_partner(partner)				
-		except Exception, e:
-			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
-		finally:
-			if connection:
-				connection.close()
+		#try:
+		server = self.browse(cr, uid, ids[0], context=None)
+		vSetParams = ""
+		vSetValues = ""
+		for key in vals:
+			if (vals[key]) and (vals[key] != ""):
+				vSetParams = server.addCondition(key, vSetParams)
+				vSetValues = server.addCondition(vals[key].encode("utf-8"), vSetValues, key)
+		if not("CreateTime" in vals):
+			vSetParams = server.addCondition("CreateTime", vSetParams)
+			vSetValues = server.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, "CreateTime")
+		query = "insert into crm_commands(" + vSetParams + ") values(" + vSetValues + ")"
+		exchange_server = server.exchange_server
+		connection = exchange_server.connectToServer()	
+		cursor = connection.cursor()	
+		cursor.execute(query)
+		query = r"SELECT @@IDENTITY AS 'Identity'"
+		cursor.execute(query)
+		row = cursor.fetchone()
+		id_command = row[0]
+		if (needExportCl):
+			if not(partner):
+				res_obj = self.pool.get("res.partner")
+				partner = res_obj.browse(cr, uid, int(vals["CRM_ID"]))
+			server.export_res_partner(partner, id_command, "idCommand", cursor, False)	
+		connection.commit()				
+		#except Exception, e:
+		#	raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		#finally:
+		#	if connection:
+		#		connection.close()
 		
 
  

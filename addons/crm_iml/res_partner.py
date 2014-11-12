@@ -313,6 +313,29 @@ class res_partner(osv.osv):
             partn.write({'exportDateToNAV': time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)})
         return True
 
+    def form_command_update_cl(self,cr, uid, ids, context=None):
+        com_vals = {}
+        for partn in self.browse(cr, uid, ids, context=context):
+            if not(partn.unk):
+                raise osv.except_osv(_("Нельзя отправить команду!"), _("Нельзя выгрузить эту команду, пока клиенту не присвоен УНК!"))     
+            my_unk = partn.unk
+            com_vals = {
+                "Source": "CRM",
+                "Dest": "NAV",
+                "Command": "UpdatedClient",
+                "CRM_ID": unicode(str(partn.id), "utf-8"),
+                "nav_UNC": my_unk,
+            }
+            res_obj = self.pool.get("crm.iml.sqlserver")
+            res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["commands_nav"])], context=context)
+            server = None
+            if len(res_id) > 0:
+                server = res_obj.browse(cr, uid, res_id[0])
+            else:
+                raise osv.except_osv(_("Нельзя отправить команду!"), _("Не задана таблица для обмена команд. Обратитесь к администратору."))
+            server.commands_exchange(com_vals, True, partn)
+        return True
+
     def redirectToContact(self,cr,uid,ids,context=None): 
         partn = self.browse(cr, uid, ids[0], context=context)
         model_data = self.pool.get("ir.model.data")
