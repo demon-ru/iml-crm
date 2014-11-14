@@ -641,7 +641,7 @@ class crm_iml_sqlserver(osv.osv):
 		try:
 			server = self.browse(cr, uid, ids[0], context=context)
 			vFieldParam = "CRM_ID, nav_UNC, Source, Dest, Command, id"
-			query = "select  " + vFieldParam + " from crm_commands where DoneTime is null and Dest = 'crm' Order by id"
+			query = "select  " + vFieldParam + " from crm_commands where DoneTime is null and upper(Dest) = 'CRM' Order by CreateTime, id"
 			connection = server.exchange_server.connectToServer()
 			cursor=connection.cursor()
 			cursor.execute(query)
@@ -769,7 +769,9 @@ class crm_iml_sqlserver(osv.osv):
 	"""
 	def export_res_partner(self, partner, rec_id=False, name_field_id = "", cursor = None, NeedCommit=True):
 		export_params = {
+			"unk": {"Field": "NAV_UNC", "IsStr": True}, 
 			"name": {"Field": "CustomerName", "IsStr": True},
+			'juridical_name': {"Field": "LegalName", "IsStr": True},
 			"website" : {"Field": "WebSite", "IsStr": True},
 			"category_of_goods.nav_id" : {"Field": "GoodsCategory", "IsStr": True},
 			"juridical_address_index" : {"Field": "AddrZIP", "IsStr": True},

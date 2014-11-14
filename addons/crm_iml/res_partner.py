@@ -407,25 +407,23 @@ class res_partner(osv.osv):
     def form_command_update_cl(self,cr, uid, ids, context=None):
         com_vals = {}
         for partn in self.browse(cr, uid, ids, context=context):
-            if not(partn.unk):
-                raise osv.except_osv(_("Нельзя отправить команду!"), _("Нельзя выгрузить эту команду, пока клиенту не присвоен УНК!"))     
-            my_unk = partn.unk
-            com_vals = {
-                "Source": "CRM",
-                "Dest": "NAV",
-                "Command": "UpdatedClient",
-                "CRM_ID": unicode(str(partn.id), "utf-8"),
-                "nav_UNC": my_unk,
-            }
-            res_obj = self.pool.get("crm.iml.sqlserver")
-            res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["commands_nav"])], context=context)
-            server = None
-            if len(res_id) > 0:
-                server = res_obj.browse(cr, uid, res_id[0])
-            else:
-                raise osv.except_osv(_("Нельзя отправить команду!"), _("Не задана таблица для обмена команд. Обратитесь к администратору."))
-            server.commands_exchange(com_vals, True, partn)
-        return True
+            if (partn.unk):
+                my_unk = partn.unk
+                com_vals = {
+                    "Source": "CRM",
+                    "Dest": "NAV",
+                    "Command": "UpdatedClient",
+                    "CRM_ID": str(partn.id),
+                    "nav_UNC": my_unk,
+                }
+                res_obj = self.pool.get("crm.iml.sqlserver")
+                res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["commands_nav"])], context=context)
+                server = None
+                if len(res_id) > 0:
+                    server = res_obj.browse(cr, uid, res_id[0])
+                else:
+                    sys.stdout.write("Не задана таблица для обмена команд. Обратитесь к администратору.")
+                server.commands_exchange(com_vals, True, partn)
 
     def redirectToContact(self,cr,uid,ids,context=None): 
         partn = self.browse(cr, uid, ids[0], context=context)
@@ -515,9 +513,13 @@ class res_partner(osv.osv):
                 patronymic = vals["patronymic"] if "patronymic" in vals else partn.patronymic
                 full_name = self.onchange_fio(cr, uid, ids, surname, firstname, patronymic)["value"]
                 vals.update(full_name)
-            if self.getNeedSendCommand(cr, uid, ids, vals):
+            needlog = self.getNeedSendCommand(cr, uid, ids, vals)
+            if needlog:
                 self.form_log_message(cr, uid, ids, vals)
-        return super(res_partner, self).write(cr, uid, ids, vals, context=context)
+            res = super(res_partner, self).write(cr, uid, ids, vals, context=context) 
+            if needlog:
+                self.form_command_update_cl(cr, uid, ids)
+        return res
 
 
 # этот класс - справочник орг форм предприятий
