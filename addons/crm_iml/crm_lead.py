@@ -130,9 +130,9 @@ class crm_lead(format_address, osv.osv):
 		vType = ""
 		if 'type' in aObj:
 			vType = aObj['type'].replace(" ", "")
-		vUser = 0
-		vSection = 0
-		vTypeID = 0
+		vUser = None
+		vSection = None
+		vTypeID = None
 		if (vType != ""):
 			vals_obj = {'name': vType}
 			vTypeObj = self.findOrCreateObject(cr, uid, context, 'crm.iml.opportunities.type', 'name', vType, vals_obj)	

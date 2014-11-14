@@ -236,6 +236,97 @@ class res_partner(osv.osv):
         'patronymic': fields.char("Отчество", size = 255),
     }
 
+    #Поля, изменения которых нужно описывать в логе.
+    control_var_translate ={"name": u"Грузоотправитель",
+        "website": u"Сайт",
+        "title": u"Орг.форма",
+        "category_of_goods": u"Категория товара",
+        "juridical_address_index": u"Юридический адрес: Индекс",
+        "juridical_address_city_name": u"Юридический адрес: Город",
+        "juridical_address_street_name": u"Юридический адрес: Улица",
+        "juridical_address_dom": u"Юридический адрес: Дом",
+        "juridical_address_building": u"Юридический адрес: Строение",
+        "juridical_address_office": u"Юридический адрес: Офис",
+        "juridical_adress_non_stand_part": u"Юридический адрес: Доп. часть",
+        "actual_address_index": u"Фактический адрес: Индекс", 
+        'actual_address_city_name': u"Фактический адрес: Город",
+        'actual_address_street_name': u"Фактический адрес: Улица", 
+        'actual_address_dom': u"Фактический адрес: Дом", 
+        'actual_address_building': u"Фактический адрес: Строение", 
+        'actual_address_office': u"Фактический адрес: Офис",
+        'actual_adress_non_stand_part': u"Фактический адрес: Доп. часть",
+        "inn": u"ИНН", 
+        "registration_reason_code": u"КПП", 
+        "date_of_accounting": u"Дата постановки на учет",
+        "OGRN_OGRNIP": u"ОГРН/ОГРНИП", 
+        "registration_date": u"Дата регистрации",
+        "OKVED": u"ОКВЕД",
+        "OKPO": u"ОКПО",
+        "OKATO": u"ОКАТО",}
+
+    control_var = ["name", "website", "title", "category_of_goods",
+        "juridical_address_index", "juridical_address_city_name",
+        "juridical_address_street_name", "juridical_address_dom",
+        "juridical_address_building", "juridical_address_office",
+        "juridical_adress_non_stand_part", "actual_address_index",
+        "actual_address_city_name", "actual_address_street_name",
+        "actual_address_dom", "actual_address_building", 
+        "actual_address_office", "actual_adress_non_stand_part",
+        "inn", "registration_reason_code", "date_of_accounting",
+        "OGRN_OGRNIP", "registration_date", "OKVED", "OKPO", "OKATO"]     
+
+    def get_value_text(self, cr, uid, ids, field_obj, value):
+        if field_obj._type == 'many2one':
+            #return the modifications on a many2one field as its value returned by name_get()
+            if (type(value) == int):
+                name = field_obj._obj
+                res_obj = self.pool.get(name)
+                value = res_obj.browse(cr, uid, value)
+            if (value):
+                res = value.name_get()[0][1]
+            else:
+                res = ""
+        else:
+            res = value
+        return res
+
+    def form_log_message(self, cr, uid, ids, val):
+    # извлекаешь текущий объект 
+        resource_pool = self.pool.get("res.partner")
+        partner = self.browse(cr, uid, ids[0])
+        log_msg = u"Изменение объекта :"
+        for key in self.control_var:
+            if key in val:
+                # получаешь объект колонки
+                field_obj = (resource_pool._all_columns.get(key)).column
+                # значение колонки у данного объекта
+                value = getattr(partner, key)
+                var = self.get_value_text(cr, uid, ids, field_obj, value)
+                oldvalue = var if var else " "
+                var = self.get_value_text(cr, uid, ids, field_obj, val[key])
+                newvalue = var if var else " "
+                log_msg = (log_msg + u"<br>") if log_msg else log_msg
+                field_name = self.control_var_translate[key]
+                log_msg = log_msg + field_name + ": " + oldvalue + " -> " + newvalue
+        post_vars = {
+            "body": log_msg.encode("utf-8")
+        }
+        self.message_post(
+            cr, uid, partner.id,
+            type="notification",
+            subtype="mt_comment",
+            context=None,
+            **post_vars)
+
+    def getNeedSendCommand(self, cr, uid, ids, val_log):
+        res = False
+        for elem in self.control_var:
+            if elem in val_log:
+                res = True
+                break
+        return res
+
+
     def _default_category_of_goods(self, cr, uid, ids):
         def_id = 0
         res_obj = self.pool.get("crm.goodscategory")
@@ -424,6 +515,8 @@ class res_partner(osv.osv):
                 patronymic = vals["patronymic"] if "patronymic" in vals else partn.patronymic
                 full_name = self.onchange_fio(cr, uid, ids, surname, firstname, patronymic)["value"]
                 vals.update(full_name)
+            if self.getNeedSendCommand(cr, uid, ids, vals):
+                self.form_log_message(cr, uid, ids, vals)
         return super(res_partner, self).write(cr, uid, ids, vals, context=context)
 
 

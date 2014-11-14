@@ -789,96 +789,87 @@ class crm_iml_sqlserver(osv.osv):
 			"category_of_goods.nav_id": {"Field": "GoodsCategory", "IsStr": True},
 		}
 		connection = None
-		#try:
-		vSetParams = ""
-		vSetValues = ""
-		vParam = {}
-		for key in export_params:
-			vParam = export_params[key]
-			vArrayOfAtr = key.split('.')
-			value = ""
-			var = None
-			if (len(vArrayOfAtr) > 1):
-				vObj = getattr(partner, vArrayOfAtr[0])
-				if vObj:
-					var = getattr(vObj, vArrayOfAtr[1])
-			else:
-				#Если поля отделены запятой то мы суммируем эти поля
-				vArrayOfSum = key.split(',')
-				if len(vArrayOfSum) > 1:
-					var = ""
-					for field in vArrayOfSum:
-						print "****************"
-						print field
-						print "****************"
-						pre_var =  getattr(partner, field)
-						var = pre_var if not(var) else var + " " + pre_var
-				else:	
-					var = getattr(partner, vArrayOfAtr[0])
-			if var:
-				if (vParam["IsStr"]):
-					value = var.encode("utf-8")
+		try:
+			vSetParams = ""
+			vSetValues = ""
+			vParam = {}
+			for key in export_params:
+				vParam = export_params[key]
+				vArrayOfAtr = key.split('.')
+				value = ""
+				var = None
+				if (len(vArrayOfAtr) > 1):
+					vObj = getattr(partner, vArrayOfAtr[0])
+					if vObj:
+						var = getattr(vObj, vArrayOfAtr[1])
 				else:
-					value = str(var)
-			if (value != ""):
-				vSetParams = self.addCondition(vParam["Field"].encode("utf-8"), vSetParams)
-				vSetValues = self.addCondition(value , vSetValues, None, vParam['IsStr'], "IsDate" in vParam)
-		if (name_field_id) and (rec_id):
-			vSetParams = self.addCondition(name_field_id.encode("utf-8"), vSetParams)
-			vSetValues = self.addCondition(str(rec_id) , vSetValues, None, False, False)
-		query = "insert into Clients (" + vSetParams + ") values(" + vSetValues + ")"
-		print "**************************"
-		print query
-		print "**************************"
-		if not (cursor):
-			connection = self.exchange_server.connectToServer()
-			cursor = connection.cursor()
-		print "****************"
-		print cursor
-		print "*****************"
-		cursor.execute(query)
-		if connection and NeedCommit:
-			connection.commit()	
-		#except Exception, e:
-		#	raise osv.except_osv(_("Export failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
-		#finally:
-		#	if connection and NeedCommit:
-		#		connection.close()
+					#Если поля отделены запятой то мы суммируем эти поля
+					vArrayOfSum = key.split(',')
+					if len(vArrayOfSum) > 1:
+						var = ""
+						for field in vArrayOfSum:
+							pre_var =  getattr(partner, field)
+							var = pre_var if not(var) else var + " " + pre_var
+					else:	
+						var = getattr(partner, vArrayOfAtr[0])
+				if var:
+					if (vParam["IsStr"]):
+						value = var.encode("utf-8")
+					else:
+						value = str(var)
+				if (value != ""):
+					vSetParams = self.addCondition(vParam["Field"].encode("utf-8"), vSetParams)
+					vSetValues = self.addCondition(value , vSetValues, None, vParam['IsStr'], "IsDate" in vParam)
+			if (name_field_id) and (rec_id):
+				vSetParams = self.addCondition(name_field_id.encode("utf-8"), vSetParams)
+				vSetValues = self.addCondition(str(rec_id) , vSetValues, None, False, False)
+			query = "insert into Clients (" + vSetParams + ") values(" + vSetValues + ")"
+			if not (cursor):
+				connection = self.exchange_server.connectToServer()
+				cursor = connection.cursor()
+			cursor.execute(query)
+			if connection and NeedCommit:
+				connection.commit()	
+		except Exception, e:
+			raise osv.except_osv(_("Export failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if connection and NeedCommit:
+				connection.close()
 
 	#Обмен командами
 	def commands_exchange(self, cr, uid, ids, vals, needExportCl, partner=None):
 		connection = None
-		#try:
-		server = self.browse(cr, uid, ids[0], context=None)
-		vSetParams = ""
-		vSetValues = ""
-		for key in vals:
-			if (vals[key]) and (vals[key] != ""):
-				vSetParams = server.addCondition(key, vSetParams)
-				vSetValues = server.addCondition(vals[key].encode("utf-8"), vSetValues, key)
-		if not("CreateTime" in vals):
-			vSetParams = server.addCondition("CreateTime", vSetParams)
-			vSetValues = server.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, "CreateTime")
-		query = "insert into crm_commands(" + vSetParams + ") values(" + vSetValues + ")"
-		exchange_server = server.exchange_server
-		connection = exchange_server.connectToServer()	
-		cursor = connection.cursor()	
-		cursor.execute(query)
-		query = r"SELECT @@IDENTITY AS 'Identity'"
-		cursor.execute(query)
-		row = cursor.fetchone()
-		id_command = row[0]
-		if (needExportCl):
-			if not(partner):
-				res_obj = self.pool.get("res.partner")
-				partner = res_obj.browse(cr, uid, int(vals["CRM_ID"]))
-			server.export_res_partner(partner, id_command, "idCommand", cursor, False)	
-		connection.commit()				
-		#except Exception, e:
-		#	raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
-		#finally:
-		#	if connection:
-		#		connection.close()
+		try:
+			server = self.browse(cr, uid, ids[0], context=None)
+			vSetParams = ""
+			vSetValues = ""
+			for key in vals:
+				if (vals[key]) and (vals[key] != ""):
+					vSetParams = server.addCondition(key, vSetParams)
+					vSetValues = server.addCondition(vals[key].encode("utf-8"), vSetValues, key)
+			if not("CreateTime" in vals):
+				vSetParams = server.addCondition("CreateTime", vSetParams)
+				vSetValues = server.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, "CreateTime")
+			query = "insert into crm_commands(" + vSetParams + ") values(" + vSetValues + ")"
+			exchange_server = server.exchange_server
+			connection = exchange_server.connectToServer()	
+			cursor = connection.cursor()	
+			cursor.execute(query)
+			query = r"SELECT @@IDENTITY AS 'Identity'"
+			cursor.execute(query)
+			row = cursor.fetchone()
+			id_command = row[0]
+			if (needExportCl):
+				if not(partner):
+					res_obj = self.pool.get("res.partner")
+					partner = res_obj.browse(cr, uid, int(vals["CRM_ID"]))
+				server.export_res_partner(partner, id_command, "idCommand", cursor, False)	
+			connection.commit()				
+		except Exception, e:
+			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
+		finally:
+			if connection:
+				connection.close()
 		
 
  
