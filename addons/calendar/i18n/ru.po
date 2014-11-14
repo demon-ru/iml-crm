@@ -732,7 +732,7 @@ msgstr "Пусть событие автоматически повторяет�
 #. module: base_calendar
 #: model:ir.ui.menu,name:base_calendar.mail_menu_calendar
 msgid "Calendar"
-msgstr ""
+msgstr "Календарь"
 
 #. module: base_calendar
 #: field:calendar.attendee,cn:0
