@@ -38,5 +38,16 @@
 				</group>
 			</field>
 		</record>
+
+		<record id="ir_cron_mail_gateway_action" model="ir.cron">
+			<field name="name">Считывание команд из NAV</field>
+			<field name="interval_number">5</field>
+			<field name="interval_type">minutes</field>
+			<field name="numbercall">-1</field>
+			<field name="doall" eval="False"/>
+			<field name="model">crm.iml.sqlserver</field>
+			<field name="function">_import_command</field>
+			<field name="args">()</field>
+		</record>
 	</data>
 </openerp>

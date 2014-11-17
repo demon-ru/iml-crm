@@ -884,6 +884,12 @@ class crm_iml_sqlserver(osv.osv):
 				'user': user_import,
 		}
 
+	#Метод для планировщика - считывание команд из NAV
+	def _import_command(self, cr, uid, ids=False, context=None):
+		server = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["commands_nav"])])
+		if (server):
+			server.perform_import()
+
 	# развилка в импорте, метод - роутер
 	# в данном методе принимаем решение, какой импорт дальше запускать
 	# 
