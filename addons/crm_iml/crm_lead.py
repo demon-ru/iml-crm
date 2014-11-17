@@ -49,6 +49,17 @@ class crm_lead(format_address, osv.osv):
 
 	_inherit = 'crm.lead'
 
+	def on_change_user(self, cr, uid, ids, user_id, context=None):
+		""" When changing the user, also set a section_id or restrict section id
+			to the ones user_id is member of. """
+		#section_id = self._get_default_section_id(cr, uid, context=context) or False
+		#if user_id and not section_id:
+		section_id = None
+		section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
+		if section_ids:
+			section_id = section_ids[0]
+		return {'value': {'section_id': section_id}}
+
 	_columns = {
 		"partner_id" : fields.many2one('res.partner', 'Контакт', ondelete='set null', track_visibility='onchange',
             select=True, help="Linked partner (optional). Usually created when converting the lead."),
@@ -102,7 +113,7 @@ class crm_lead(format_address, osv.osv):
 		text = text.replace('&raquo', '&#8221')
 		text = text.replace('&#8221', '&quot')
 		return text
-
+		
 	def message_new(self, cr, uid, msg, custom_values=None, context=None):
 		""" Overrides mail_thread message_new that is called by the mailgateway
 			through message_process.
