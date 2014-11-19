@@ -62,7 +62,7 @@ class crm_lead(format_address, osv.osv):
 
 	_columns = {
 		"partner_id" : fields.many2one('res.partner', 'Контакт', ondelete='set null', track_visibility='onchange',
-            select=True, help="Linked partner (optional). Usually created when converting the lead."),
+			select=True, help="Linked partner (optional). Usually created when converting the lead."),
 		'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'Type of opportunities'),
 		'function': fields.char('Должность'),
 		'creating_partner': fields.many2one('res.partner', 'Клиент'),
@@ -85,9 +85,9 @@ class crm_lead(format_address, osv.osv):
 		if (indexBeginJSON > -1 and indexEndJSON > -1):         
 			strJSON = stringText[indexBeginJSON : indexEndJSON + 1]
 		if strJSON != '':
-	   	     aObj = json.loads(strJSON)
+			 aObj = json.loads(strJSON)
 		return aObj
-    
+	
 	def findOrCreateObject(self, cr, uid, context, classObj, searchField, searchVal, vals):
 		res_obj = self.pool.get(classObj)
 		res_id = res_obj.search(cr, uid, [(searchField, 'in', [searchVal])], context=context)
@@ -113,6 +113,21 @@ class crm_lead(format_address, osv.osv):
 		text = text.replace('&raquo', '&#8221')
 		text = text.replace('&#8221', '&quot')
 		return text
+
+		# переопределил метод из модуля crm для того, что бы значение date_closed
+		# очищалось при изменение стадии из мертвый и выигранный
+	def onchange_stage_id(self, cr, uid, ids, stage_id, context=None):
+		if not stage_id:
+			return {'value': {}}
+		stage = self.pool.get('crm.case.stage').browse(cr, uid, stage_id, context=context)
+		if not stage.on_change:
+			return {'value': {}}
+		vals = {'probability': stage.probability}
+		if stage.probability >= 100 or (stage.probability == 0 and stage.sequence > 1):
+				vals['date_closed'] = fields.datetime.now()
+		else:
+			vals['date_closed'] = None
+		return {'value': vals}
 		
 	def message_new(self, cr, uid, msg, custom_values=None, context=None):
 		""" Overrides mail_thread message_new that is called by the mailgateway
@@ -134,8 +149,8 @@ class crm_lead(format_address, osv.osv):
 			vEmail = aObj['email'].replace(" ", "")
 		vName = aObj['name']
 		vals_obj = {'name': vName,
-				    'phone': vPhone,
-				    'email': vEmail}
+					'phone': vPhone,
+					'email': vEmail}
 		if vName != '':	 
 			partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'email', vEmail, vals_obj)
 		vType = ""
@@ -215,7 +230,7 @@ class crm_lead(format_address, osv.osv):
 				'type': 'ir.actions.act_url', 
 				'url': url_link.encode("utf-8"),
 				'target': 'new',
-        	}
+			}
 
 	def send_customers_form(self,cr, uid, ids, context=None):
 		vals = {}
@@ -229,7 +244,7 @@ class crm_lead(format_address, osv.osv):
 		opport = self.browse(cr, uid, ids[0], context=context)
 		if not(url_link):
 			raise osv.except_osv(_("Нельзя отправить бланк клиенту!"), _("Не задан сайт для клиентов. Обратитесь к администратору"))
-	    #Если нет почты неизвестно куда посылать бланк, прерываем процесс
+		#Если нет почты неизвестно куда посылать бланк, прерываем процесс
 		if not(opport.email_from):
 			raise osv.except_osv(_("Нельзя отправить бланк клиенту!"), _("Не задана электронная почта заказчика"))
 		if not(opport.data_arraved):
@@ -237,7 +252,7 @@ class crm_lead(format_address, osv.osv):
 			vNeedExport = True
 			if opport.creating_partner:
 				vNeedExport = False
-		    # Ищем таблицу для обмена команд, если не находим прерываем процесс
+			# Ищем таблицу для обмена команд, если не находим прерываем процесс
 			res_obj = self.pool.get("crm.iml.sqlserver")
 			res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["commands"])], context=context)
 			server = None
@@ -309,7 +324,7 @@ class crm_lead(format_address, osv.osv):
 		else:
 			URL = u"Добрый день!<br><br>Пожалуйста, пройдите по ссылке ниже и заполните реквизиты:<br>" + URL + u"<br>Спасибо!"
 		model_data = self.pool.get("ir.model.data")
-   		# Get res_partner views
+		# Get res_partner views
 		dummy, form_view = model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')
 		vals_mess = {
 			"subject": "Карточка клиента",
