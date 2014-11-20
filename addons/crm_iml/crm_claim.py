@@ -32,3 +32,31 @@ class crm_claim(osv.osv):
 				" mail gateway."),
 		'date_deadline': fields.date('Крайний срок'),
 	}
+
+	# переопределил метод из модуля crm для того, что бы значение date_closed
+	# очищалось при изменение стадии из терминальной стадии
+	def onchange_stage_id(self, cr, uid, ids, stage_id, context=None):
+		if not stage_id:
+			return {'value': {}}
+		stage = self.pool.get('crm.claim.stage').browse(cr, uid, stage_id, context=context)
+		vals = {}
+		if stage.is_terminate:
+				vals['date_closed'] = fields.datetime.now()
+		else:
+			vals['date_closed'] = None
+		return {'value': vals}
+
+	def write(self, cr, uid, ids, vals, context=None):
+		if vals.get('stage_id'):
+			onchange_stage_values = self.onchange_stage_id(cr, uid, ids, vals.get('stage_id'), context=context)['value']
+			vals.update(onchange_stage_values)
+		return super(crm_claim, self).write(cr, uid, ids, vals, context=context)
+
+
+class crm_claim_stage(osv.osv):
+	_inherit = 'crm.claim.stage'
+
+	_columns = {
+		'is_terminate': fields.boolean('Terminate stage',
+						help="Determines whether this stage is terminate or not"),
+	}
