@@ -374,7 +374,7 @@ class res_partner(osv.osv):
         if (patronymic) and (patronymic.strip() != ""):
             vName = vName + " " + patronymic.strip()
         if vName.strip() != "":
-            v["name"] = vName.strip()
+            v["name"] = vName.strip().encode("utf-8")
         return {"value": v}
 
     def iml_crm_export_id(self,cr, uid, ids, context=None):
@@ -521,6 +521,62 @@ class res_partner(osv.osv):
                 self.form_command_update_cl(cr, uid, ids)
         return res
 
+    def create(self, cr, uid, vals, context=None):
+        if ('juridical_address_city_name' in vals or 'juridical_address_index' in vals or 'juridical_address_street_name' in vals or 'juridical_address_dom' in vals or 'juridical_address_building' in vals or 'juridical_address_office' in vals or 'juridical_adress_non_stand_part' in vals):
+            vCity = None
+            if ('juridical_address_city_name' in vals):
+                vCity = vals.get('juridical_address_city_name')
+            vIndex = None
+            if ('juridical_address_index' in vals):
+                vIndex = vals.get("juridical_address_index")
+            vStreet = None
+            if ("juridical_address_street_name" in vals):
+                vStreet = vals.get("juridical_address_street_name")
+            vDom = None
+            if ("juridical_address_dom" in vals):
+                vDom = vals.get("juridical_address_dom")
+            vBilding = None
+            if ("juridical_address_building" in vals):
+                vBilding = vals.get("juridical_address_building")
+            vOfice = None
+            if ("juridical_address_office" in vals):
+                vOfice = vals.get("juridical_address_office")
+            vNonStandart = None
+            if ("juridical_adress_non_stand_part" in vals):
+                vNonStandart = vals.get("juridical_adress_non_stand_part")
+            jur_adress = self.onchange_adress(cr, uid, None, vIndex, vCity, vStreet, vDom, vBilding, vOfice, vNonStandart, "juridical_adress_full_adress")['value']
+            vals.update(jur_adress)
+        if ('actual_address_city_name' in vals or 'actual_address_index' in vals or 'actual_address_street_name' in vals or 'actual_address_dom' in vals or 'actual_address_building' in vals or 'actual_address_office' in vals or 'actual_adress_non_stand_part' in vals):
+            vCity = None
+            if ('actual_address_city_name' in vals):
+                vCity = vals.get('actual_address_city_name')
+            vIndex = None
+            if ('actual_address_index' in vals):
+                vIndex = vals.get("actual_address_index")
+            vStreet = None
+            if ("actual_address_street_name" in vals):
+                vStreet = vals.get("actual_address_street_name")
+            vDom = None
+            if ("actual_address_dom" in vals):
+                vDom = vals.get("actual_address_dom")
+            vBilding = None
+            if ("actual_address_building" in vals):
+                vBilding = vals.get("actual_address_building")
+            vOfice = None
+            if ("jactual_address_office" in vals):
+                vOfice = vals.get("actual_address_office")
+            vNonStandart = None
+            if ("actual_adress_non_stand_part" in vals):
+                vNonStandart = vals.get("actual_adress_non_stand_part")
+            actual_adress = self.onchange_adress(cr, uid, None, vIndex, vCity, vStreet, vDom, vBilding, vOfice, vNonStandart, "actual_adress_full_adress")['value']
+            vals.update(actual_adress)
+        if ("firstname" in vals) or ("patronymic" in vals) or ("surname" in vals):
+            firstname = vals["firstname"] if "firstname" in vals else None
+            surname = vals["surname"] if "surname" in vals else None
+            patronymic = vals["patronymic"] if "patronymic" in vals else None
+            full_name = self.onchange_fio(cr, uid, None, surname, firstname, patronymic)["value"]
+            vals.update(full_name)
+        return super(res_partner, self).create(cr, uid, vals, context=context)
 
 # этот класс - справочник орг форм предприятий
 class res_partner_title(osv.osv):

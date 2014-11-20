@@ -26,6 +26,7 @@ import json
 from crm_iml_html import html2plaintextWithoutLinks  
 from datetime import datetime
 from operator import itemgetter
+import time
 
 import openerp
 from openerp import SUPERUSER_ID
@@ -62,7 +63,7 @@ class crm_lead(format_address, osv.osv):
 
 	_columns = {
 		"partner_id" : fields.many2one('res.partner', 'Контакт', ondelete='set null', track_visibility='onchange',
-            select=True, help="Linked partner (optional). Usually created when converting the lead."),
+			select=True, help="Linked partner (optional). Usually created when converting the lead."),
 		'type_of_opport_id' : fields.many2one('crm.iml.opportunities.type', 'Type of opportunities'),
 		'function': fields.char('Должность'),
 		'creating_partner': fields.many2one('res.partner', 'Клиент'),
@@ -85,7 +86,7 @@ class crm_lead(format_address, osv.osv):
 		if (indexBeginJSON > -1 and indexEndJSON > -1):         
 			strJSON = stringText[indexBeginJSON : indexEndJSON + 1]
 		if strJSON != '':
-	   	     aObj = json.loads(strJSON)
+			aObj = json.loads(strJSON)
 		return aObj
     
 	def findOrCreateObject(self, cr, uid, context, classObj, searchField, searchVal, vals):
@@ -134,8 +135,8 @@ class crm_lead(format_address, osv.osv):
 			vEmail = aObj['email'].replace(" ", "")
 		vName = aObj['name']
 		vals_obj = {'name': vName,
-				    'phone': vPhone,
-				    'email': vEmail}
+					'phone': vPhone,
+					'email': vEmail}
 		if vName != '':	 
 			partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'email', vEmail, vals_obj)
 		vType = ""
@@ -215,7 +216,7 @@ class crm_lead(format_address, osv.osv):
 				'type': 'ir.actions.act_url', 
 				'url': url_link.encode("utf-8"),
 				'target': 'new',
-        	}
+			}
 
 	def send_customers_form(self,cr, uid, ids, context=None):
 		vals = {}
@@ -229,87 +230,50 @@ class crm_lead(format_address, osv.osv):
 		opport = self.browse(cr, uid, ids[0], context=context)
 		if not(url_link):
 			raise osv.except_osv(_("Нельзя отправить бланк клиенту!"), _("Не задан сайт для клиентов. Обратитесь к администратору"))
-	    #Если нет почты неизвестно куда посылать бланк, прерываем процесс
+		#Если нет почты неизвестно куда посылать бланк, прерываем процесс
 		if not(opport.email_from):
 			raise osv.except_osv(_("Нельзя отправить бланк клиенту!"), _("Не задана электронная почта заказчика"))
-		if not(opport.data_arraved):
-			# Если не задан созданный по заявке клиент, то мы выгружаем строчку в промежуточную БД
-			vNeedExport = True
-			if opport.creating_partner:
-				vNeedExport = False
-		    # Ищем таблицу для обмена команд, если не находим прерываем процесс
-			res_obj = self.pool.get("crm.iml.sqlserver")
-			res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["commands"])], context=context)
-			server = None
-			if len(res_id) > 0:
-				server = res_obj.browse(cr, uid, res_id[0])
-			else:
-				raise osv.except_osv(_("Нельзя отправить бланк клиенту!"), _("Не задана таблица для обмена команд. Обратитесь к администратору."))
-			#Генерация клиента, пока фиктивного и неактивного
-			if (opport.partner_name):
-				vals = {
-					'name': opport.partner_name,
-				}
-			else:
-				vals = {
-					'name': unicode("Заявка от ", "utf-8") + opport.contact_name or _(opport.email_from),
-				}
-			vals.update({"active": False, "is_company": True,})
+		# Ищем таблицу для обмена команд, если не находим прерываем процесс
+		res_obj = self.pool.get("crm.iml.sqlserver")
+		res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["commands_cf"])], context=context)
+		server = None
+		if len(res_id) > 0:
+			server = res_obj.browse(cr, uid, res_id[0])
+		else:
+			raise osv.except_osv(_("Нельзя отправить бланк клиенту!"), _("Не задана таблица для обмена команд. Обратитесь к администратору."))
+		#Создаем контактное лицо, если оно еще не создано
+		vals_contact = {}
+		contact = None
+		if (opport.partner_id):
+			contact = opport.partner_id
+		else:
 			res_obj = self.pool.get("res.partner")
-			if not(opport.creating_partner):
-				cur_obj = self.pool.get("res.partner")
-				cur_obj = res_obj.browse(cr, uid, cur_obj.create(cr, uid, vals, context=None))
-			else:
-				cur_obj = opport.creating_partner
-			#Создаем контактное лицо, если оно еще не создано
-			vals_contact = {}
-			contact = None
-			if (opport.partner_id):
-				contact = opport.partner_id
-			else:
-				contact = self.pool.get("res.partner")
-				contact = res_obj.browse(cr, uid, contact.create(cr, uid, {"name": opport.contact_name  or _(opport.email_from)}, context=None))
-			contact.write({"email": opport.email_from,
-				"phone": opport.phone,
-				"function": opport.function,
-				"mobile": opport.mobile,
-				"fax": opport.fax,
-			})
-			vals_contact = {
-				"child_ids": [(4, contact.id)],
-				"first_contact": contact.id,
-			}
-			if (vals_contact != {}):
-				cur_obj.write(vals_contact)
-			#Генерим хэш
-			m = hashlib.md5(str(cur_obj.id))
-			my_hash = m.hexdigest();
-			opport.write({"partner_id" : contact.id,
-				"creating_partner": cur_obj.id, 
-				"hash_for_url": my_hash})
-			#Создаем команду для записи
-			vals = {}
-			vals = {
-				"Source": "crm",
-				"Dest": "cf",
-				"Command": "UpdateCustomerData",
-				"CRM_ID": unicode(str(cur_obj.id), "utf-8"),
-				"External_ID": unicode(my_hash, "utf-8"),
-			}
-			server.commands_exchange(vals, vNeedExport, cur_obj)
-		else:
-			if (opport.partner_id):
-				contact = opport.partner_id
-			else:
-				raise osv.except_osv(_("Нельзя отправить бланк клиенту!"), _("Не задано контактное лицо"))
+			contact = self.pool.get("res.partner")
+			contact = res_obj.browse(cr, uid, contact.create(cr, uid, {"name": opport.contact_name  or _(opport.email_from)}, context=None))
+		contact.write({"email": opport.email_from,
+			"phone": opport.phone,
+			"function": opport.function,
+			"mobile": opport.mobile,
+			"fax": opport.fax,
+		})
+		#Генерим хэш
+		m = hashlib.md5(opport.email_from + str(time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)))
+		my_hash = m.hexdigest();
+		opport.write({"partner_id" : contact.id, 
+			"hash_for_url": my_hash})
+		#Создаем команду для записи
+		vals = {}
+		vals = {
+			"Dest": "cf",
+			"Command": "UpdateCustomerData",
+			"hash": unicode(my_hash, "utf-8"),
+		}
+		server.commands_exchange(vals, False, contact, None, True, True)
 		#Открываем диалог с письмом
-		URL = url_link + "/" + opport.hash_for_url
-		if (opport.data_arraved):
-			URL = u"Добрый день!<br>Прошу Вас уточнить\скорректировать следующие данные в бланке:<br>... <br> Ссылка для заполнения данных: <br>" + URL
-		else:
-			URL = u"Добрый день!<br><br>Пожалуйста, пройдите по ссылке ниже и заполните реквизиты:<br>" + URL + u"<br>Спасибо!"
+		URL = url_link + opport.hash_for_url
+		URL = u"Добрый день!<br><br>Пожалуйста, пройдите по ссылке ниже и заполните реквизиты:<br>" + URL + u"<br>Спасибо!"
 		model_data = self.pool.get("ir.model.data")
-   		# Get res_partner views
+		# Get res_partner views
 		dummy, form_view = model_data.get_object_reference(cr, uid, 'mail', 'email_compose_message_wizard_form')
 		vals_mess = {
 			"subject": "Карточка клиента",

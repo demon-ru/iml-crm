@@ -15,11 +15,8 @@
                 	<xpath expr="//group/group/div[@groups='base.group_multi_salesteams']" position="replace"/>
                 	<xpath expr="//group" position="inside">
                 		<field name="data_arraved" invisible="True"/>
-                		<group col="4">
+                		<group>
 							<button name="send_customers_form" string="Отправить клиенту бланк для заполнения" type="object" attrs="{'invisible': [('data_arraved','=', True)]}"/>
-							<button name="send_customers_form" string="Запросить уточнение данных" type="object" attrs="{'invisible': [('data_arraved','=', False)]}"/>
-							<button name="look_at_information" string="Посмотреть данные у клиента" type="object" attrs="{'invisible': [('data_arraved','=', False)]}"/>
-							<button name="apply_data" string="Отправить данные в NAV" type="object" attrs="{'invisible': [('data_arraved','=', False)]}"/>
 						</group>
 					</xpath>
                 	<xpath expr="//group/group/field[@name='categ_ids']" position="replace"/>

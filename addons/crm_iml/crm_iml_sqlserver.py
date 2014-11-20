@@ -79,11 +79,13 @@ class crm_iml_sqlserver(osv.osv):
 		'name': fields.char('Name', size=128, required=True),
 		'lastTestDate': fields.datetime('Date last successful test connect' , readonly=True),
 		'tableName':fields.char('Table Name', size=128),
-		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands_nav', 'Commands exchange with NAV'), ('responsible','Импорт ответственности по клиенту'), ('user','Импорт пользователей')], 'Exchange type', required=True),
+		'exchange_type':fields.selection([('partner', 'Partner exchange'), ('holdings', 'Holdings exchange'), ('commands_nav', 'Обмен командами с NAV'), ('commands_cf', 'Обмен командами с CF'), ('responsible','Импорт ответственности по клиенту'), ('user','Импорт пользователей')], 'Exchange type', required=True),
 		'exchange_server':fields.many2one('crm.iml.exchange_server_settings', 'name'),
 	}
 
-	#Поля из таблицы клиентов
+	#******************************** Вспомогательные структуры *********************************
+
+	#Поля для запроса таблицы Client из бд NAV
 	var_res_partner_fields = [
 		"CustomerName", "NAV_UNC", "LegalName", "WebSite",
 		"Warehouse_ID", "Region_ID", "RespPerson",
@@ -94,7 +96,153 @@ class crm_iml_sqlserver(osv.osv):
 		"AgreementNo", "FactAdrStr", "JurAdrStr", "Contact", "Email", "Phone",
 		"idimport", "CompOrgTypeID", "AgreementDate", "AgreementStartDate",
 		"Holding_Id", "Responsible_ID", "AgreementName"]
-			
+
+	#Поля для запросов из таблицы ClientCard, как в БД NAV так и в CF
+	var_cf_cl = ["ID", "Name", "OrgName", "OrgType", "Location",
+		"Scheme", "CalculationType", "FIO_IP", "FIO_RP", "Post_IP", 
+		"Post_RP", "ProxyNo", "ProxyDate", "INN", "KPP", "StatementDate",
+		"OGRN", "RegistrationDate", "RegistrationDate", "OKPO", "OKATO", "OKVED",
+		"AddressUr", "AddressFact", "BankName", "BankBIK", "BankNoRC",
+		"BankNoKC", "Site", "GoodsCategory", "NalPostRus", "Pack",
+		"OrdersCountSeason", "OrdersCountNoSeason", "IndexUr",
+		"IndexFact", "HoldingName"]
+	#Поля для запросов из таблицы ClientContact, как в БД NAV так и в CF
+	var_cf_con_pers = ["ID","Surname","FirstName","MiddleName","Phone",
+		"Fax","Email","Post","Main"]
+
+	#Поля для команд из БД NAV
+	var_field = {
+		"CRM_ID": 0,
+		"nav_UNC": 1,
+		"Source": 2,
+		"Dest" : 3,
+		"Command": 4,
+		"id": 5,
+	}
+	#Поля для команд из БД Cf
+	var_field_cf = {
+		"id_client": 1,
+		"hash": 2,
+		"Dest" : 3,
+		"Command": 4,
+	}
+	#Структура полей для выгрузки клиента из CRM в NAV
+	export_params_partner = {
+		"unk": {"Field": "NAV_UNC", "IsStr": True}, 
+		"name": {"Field": "CustomerName", "IsStr": True},
+		'juridical_name': {"Field": "LegalName", "IsStr": True},
+		"website" : {"Field": "WebSite", "IsStr": True},
+		"category_of_goods.nav_id" : {"Field": "GoodsCategory", "IsStr": True},
+		"juridical_address_index" : {"Field": "AddrZIP", "IsStr": True},
+		"juridical_address_city_name" : {"Field": "AddrSity", "IsStr": True},
+		"actual_address_index" : {"Field": "LocAddrZIP", "IsStr": True},
+		"juridical_address_street_name,juridical_address_dom,juridical_address_building,juridical_address_office,juridical_adress_non_stand_part" : {"Field": "JurAdrStr", "IsStr": True},
+		"actual_adress_full_adress" : {"Field": "FactAdrStr", "IsStr": True},
+		"inn" : {"Field": "ITN", "IsStr": True},
+		"registration_reason_code" : {"Field": "TRRC", "IsStr": True},
+		"date_of_accounting" : {"Field": "TRDate", "IsStr": True, "IsDate": True},
+		"OGRN_OGRNIP" : {"Field": "OGRN", "IsStr": True},
+		"registration_date" : {"Field": "RegistrationDate", "IsStr": True, "IsDate": True},
+		"OKVED" : {"Field": "OCVED", "IsStr": True},
+		"OKPO" : {"Field": "OCPO", "IsStr": True},
+		"OKATO" : {"Field": "OCATO", "IsStr": True},
+		"title.ext_code": {"Field":"CompOrgTypeID", "IsStr": True},
+		"category_of_goods.nav_id": {"Field": "GoodsCategory", "IsStr": True},
+	}
+	#Структура полей для выгрузки клиента из CF в NAV
+	export_params_row = {
+		"Name": {"Field": "Name", "IsStr": True},
+		'OrgName': {"Field": "OrgName", "IsStr": True},
+		"OrgType" : {"Field": "OrgType", "IsStr": False},
+		"Location" : {"Field": "Location", "IsStr": True},
+		"Scheme" : {"Field": "Scheme", "IsStr": False},
+		"CalculationType" : {"Field": "CalculationType", "IsStr": False},
+		"FIO_IP" : {"Field": "FIO_IP", "IsStr": True},
+		"FIO_RP" : {"Field": "FIO_RP", "IsStr": True},
+		"Post_IP" : {"Field": "Post_IP", "IsStr": True},
+		"Post_RP" : {"Field": "Post_RP", "IsStr": True},
+		"ProxyNo" : {"Field": "ProxyNo", "IsStr": True},
+		"ProxyDate" : {"Field": "ProxyDate", "IsStr": True, "IsDate": True},
+		"INN" : {"Field": "INN", "IsStr": True},
+		"KPP" : {"Field": "KPP", "IsStr": True},
+		"StatementDate" : {"Field": "StatementDate", "IsStr": True, "IsDate": True},
+		"OGRN" : {"Field": "OGRN", "IsStr": True},
+		"RegistrationDate" : {"Field": "RegistrationDate", "IsStr": True, "IsDate": True},
+		"OKVED": {"Field":"OKVED", "IsStr": True},
+		"OKPO": {"Field": "OKPO", "IsStr": True},
+		"OKATO" : {"Field": "OKATO", "IsStr": True},
+		"AddressUr" : {"Field": "AddressUr", "IsStr": True},
+		"AddressFact": {"Field":"AddressFact", "IsStr": True},
+		"BankName": {"Field": "BankName", "IsStr": True},
+		"BankBIK" : {"Field": "BankBIK", "IsStr": True},
+		"BankNoRC" : {"Field": "BankNoRC", "IsStr": True},
+		"BankNoKC": {"Field":"BankNoKC", "IsStr": True},
+		"Site": {"Field": "Site", "IsStr": True},
+		"GoodsCategory" : {"Field": "GoodsCategory", "IsStr": True},
+		"NalPostRus" : {"Field": "NalPostRus", "IsStr": False, "IsBool": True},
+		"Pack": {"Field":"Pack", "IsStr": False, "IsBool": True},
+		"OrdersCountSeason": {"Field": "OrdersCountSeason", "IsStr": False},
+		"IndexUr" : {"Field": "IndexUr", "IsStr": True},
+		"OrdersCountNoSeason" : {"Field": "OrdersCountNoSeason", "IsStr": False},
+		"IndexFact": {"Field":"IndexFact", "IsStr": True},
+		"HoldingName": {"Field": "HoldingName", "IsStr": True},
+	}
+	#Структура для выгрузки КЛ из CRM
+	export_param_obj_cont_pers = {
+		"surname": {"Field": "Surname", "IsStr": True},
+		"firstname": {"Field": 'FirstName', "IsStr": True},
+		"patronymic": {"Field": "MiddleName", "IsStr": True},
+		"phone": {"Field": "Phone", "IsStr": True},
+		"fax": {"Field": "Fax", "IsStr": True},
+		"email": {"Field": "Email", "IsStr": True},
+		"function": {"Field": "Post", "IsStr": True},
+	}
+
+	#Структура полей для выгрузки контактного лиц из CF в NAV
+	export_params_cont_pers = {
+		"FirstName": {"Field": "FirstName", "IsStr": True},
+		'Surname': {"Field": "Surname", "IsStr": True},
+		"MiddleName" : {"Field": "MiddleName", "IsStr": True},
+		"Phone" : {"Field": "Phone", "IsStr": True},
+		"Fax" : {"Field": "Fax", "IsStr": True},
+		"Email" : {"Field": "Email", "IsStr": True},
+		"Post" : {"Field": "Post", "IsStr": True},
+		"Main" : {"Field": "Main","IsStr": False, "IsBool": True},
+	}
+	#Структура для загрузки клиента из таблицы ClientCard 
+	import_param_row = {
+		"Name": {"Field": "name", "IsStr": True},
+		'OrgName': {"Field": "juridical_name", "IsStr": True},
+		"OrgType" : {"Field": "title", "IsStr": False},
+		"INN": {"Field": "inn", "IsStr": True},
+		"KPP": {"Field": "registration_reason_code", "IsStr": True},
+		"StatementDate": {"Field": "date_of_accounting", "IsDate": True, "IsStr": True},
+		"OGRN": {"Field": "OGRN_OGRNIP", "IsStr": True},
+		"RegistrationDate": {"Field": "registration_date", "IsDate": True, "IsStr": True},
+		"OKVED": {"Field": "OKVED", "IsStr": True},
+		"OKPO": {"Field": "OKPO", "IsStr": True},
+		"OKATO": {"Field": "OKATO", "IsStr": True},
+		"AddressUr": {"Field": "juridical_adress_non_stand_part", "IsStr": True},
+		"AddressFact": {"Field": "actual_adress_non_stand_part", "IsStr": True},
+		"Site": {"Field": "website", "IsStr": True},
+		"IndexUr": {"Field": "juridical_address_index", "IsStr": True},
+		"IndexFact": {"Field": "actual_address_index", "IsStr": True}
+	}
+	#Структура для загрузки клиента из таблицы ClientContact 
+	import_param_row_cont_pers = {
+		"Surname": {"Field": "surname", "IsStr": True},
+		'FirstName': {"Field": "firstname", "IsStr": True},
+		"MiddleName" : {"Field": "patronymic", "IsStr": True},
+		"Phone": {"Field": "phone", "IsStr": True},
+		"Fax": {"Field": "fax", "IsStr": True},
+		"Email": {"Field": "email", "IsStr": True},
+		"Post": {"Field": "function", "IsStr": True},
+	}
+	#*************************************************************************
+
+
+	#******************************** Методы *********************************
+
 	"""	
 		Teстовое подключение  к БД
 	"""
@@ -133,9 +281,9 @@ class crm_iml_sqlserver(osv.osv):
 			if (log_file):
 				log_file.write(log_msg)
 			else:
-				sys.stdout.write(u"Внимание! Не удалось записать строчку в файл лога!\n" + log_msg)  
+				sys.stdout.write(u"Внимание! Не удалось записать строчку в файл лога!\n" + unicode(log_msg, "utf-8"))
 		except:
-			sys.stdout.write(u"Внимание! Не удалось записать строчку в файл лога!\n" + log_msg)  
+			sys.stdout.write(u"Внимание! Не удалось записать строчку в файл лога!\n" + unicode(log_msg, "utf-8"))
 
 	"""
 		Находит или создает объект заданного класса
@@ -170,6 +318,27 @@ class crm_iml_sqlserver(osv.osv):
 			except ValueError:
 				vRegDate = None
 		return res
+
+	def form_vars_for_write(self,cr, uid, ids, row, fields_struct, array_fields):
+		var_obj = {}
+		for key in fields_struct:
+			vParam = fields_struct[key]
+			index = array_fields.index(key)
+			var = row[index]
+			if "IsDate" in vParam:
+				var = self.getDate(var)
+			#Захадкорил получение ссылки на объект, пока не придумал другой более удачный вариант
+			if key == "OrgType" and var:
+				vOrgType = self.findObject(cr, uid,"res.partner.title", [('ext_code', "in", [str(var)])])
+				if vOrgType:
+					var = vOrgType.id
+				else:
+					var = None
+			if var and (vParam["IsStr"]) and not("IsDate" in vParam):
+				var = unicode(var, "utf-8")
+			var_obj.update({vParam["Field"]: var})
+		return var_obj
+
 
 	"""
 		Находит или создает клиента
@@ -304,66 +473,6 @@ class crm_iml_sqlserver(osv.osv):
 		query = "select " + vFields + " from " + tableName
 		return query
 
-	"""	
-		Первичный импорт
-	"""
-	"""
-		Структура:
-			CustomerName - name - 1
-			NAV_UNC - unk - 2
-			ShopName - internet_shop_name - juridical_name - 3
-			WebSite - 4 - website
-			GoodsCategory - category_of_goods - 5
-			Warehouse_ID - storage_of_shipping - 6
-			Region_ID - region_of_delivery - 7
-			RespPerson - fio_authorized person_nominative_case - 8
-			RespPersonWhom - fio_authorized person_genitive_case - 9
-			RespPersonPosition - authorized_person_position_nominative_case - 10
-			RespPersonPositionWhom - authorized_person_position_genetive_case - 11
-			LoA_Number - Номер доверенности - 12
-			LoA_Date - date_of_powerOfattorney - 13 
-			AddrZIP - juridical_address_index - 14
-			AddrSity - juridical_address_city_name - 15
-			AddrStreet - juridical_address_street_name - 16
-			AddrBuilding - juridical_address_dom - 17
-			AddrBuilding2 - juridical_address_building - 18
-			AddrOffice - juridical_address_office - 19
-			LocAddrZIP - actual_address_index - 20
-			LocAddrSity - actual_address_city_name - 21
-			LocAddrStreet - actual_address_street_name - 22
-			LocAddrBuilding - actual_address_dom - 23
-			LocAddrBuilding2 - actual_address_building - 24
-			LocAddrOffice - actual_address_office - 25
-			AccountNo - account_number - 26
-			--Не грузим -------------
-			BIC - BIN - 27
-			BankName - bank_name - 28
-			CorrAccountNo - correspondent_account_number - 29
-			PartnerType - type_of_counterparty - 30
-			------------------------------------------
-			ITN - inn - 31
-			TRRC - registration_reason_code - 32
-			TRDate - date_of_accounting - 33
-			OGRN - OGRN_OGRNIP - 34
-			RegistrationDate -  registration_date - 35
-			OCVED - OKVED - 36
-			OCPO - OKPO - 37
-			OCATO - OKATO - 38
-			AgreementNo - name in account.analytic.account - 39
-			FactAdrStr - actual_adress_non_stand_part - фактически адрес строкой - 40 
-			JurAdrStr - juridical_adress_non_stand_part - юридический адрес строкой - 41
-			Contact - ФИО контактого лица - 42
-			Email - email - 43
-			Phone - phone - 44
-			idimport - уникальный ключ для поиска записи импорта - 45
-			CompOrgTypeID - company_org_type - 46
-			AgreementDate - дата договора date_start у договора- 47
-			nav_holdingId - идентификатор холдинга у клиента - 48
-	"""
-
-		
-	# здесь объявляем обработчики
-
 
 	def partner_import(self,cr, uid, ids, context=None):
 		conection = None
@@ -407,14 +516,8 @@ class crm_iml_sqlserver(osv.osv):
 				exchange_server = server.exchange_server
 				connection = exchange_server.connectToServer()
 			cursor=connection.cursor()
-			#Убираем это условие посколько этот алгорим будет пока только для первичного импорт 
-			#будем выбирать только те записи, которые созданы после предидущего импорта
-			#if (server.lastImportDate):
-			#	wherePart = "where nav_timestamp > '" + str(server.lastImportDate) + "'"
-			# название столбцов до конца не известно, пока для информации
 			if not(query):
 				query = u"select holding_id, holding_name from " + unicode(server.tableName, "utf-8") 
-			#+ " " + wherePart
 			cursor.execute(query)
 			# итерируем холдинги
 			for row in cursor.fetchall():
@@ -433,7 +536,7 @@ class crm_iml_sqlserver(osv.osv):
 				res_partner_obj = self.pool.get('res.partner')
 				res_partner_ids = res_partner_obj.search(cr, uid, [('nav_holdingId', 'in', [holding.holdingId])], context=context)
 				res_partner = res_partner_obj.browse(cr, uid, res_partner_ids)
-	            # итерируем отобранных клиентов и устанавливаем им в качестве parent_id id холдинга
+				# итерируем отобранных клиентов и устанавливаем им в качестве parent_id id холдинга
 				for partner in res_partner:
 					partner.write({"parent_id": holding.id})
 		except Exception, e:
@@ -512,17 +615,6 @@ class crm_iml_sqlserver(osv.osv):
 				connection.close()
 			if log_file:
 				log_file.close()
-
-
-
-	var_field = {
-		"CRM_ID": 0,
-		"nav_UNC": 1,
-		"Source": 2,
-		"Dest" : 3,
-		"Command": 4,
-		"id": 5,
-	}
 
 	#Обновляем unk клиента - unk приходит из NAV
 	def UpdateUNC(self, cr, uid, ids, partner, command_var, log_file, connection):
@@ -610,6 +702,71 @@ class crm_iml_sqlserver(osv.osv):
 		for row in cursor.fetchall():
 			self.createContracts(cr, uid, row, field_account, partner, log_file)
 
+	def UpdateCustomerData(self, cr, uid, ids, partner, command_var, log_file, connection):
+		nav_server = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["commands_nav"])])
+		if not(nav_server):
+			log_msg = u"Не задан сервер для обмена командами с NAV, данные не будут выгруженны в NAV"
+			type_msg = u"Предупреждение"
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
+		vIdCl = command_var[self.var_field_cf["id_client"]]
+		cl_hash = command_var[self.var_field_cf["hash"]]
+		vWhere = " where id = " + str(vIdCl)
+		query = self.getQuery_partner(self.var_cf_cl, "ClientCard") + vWhere
+		cursor = connection.cursor()
+		cursor.execute(query)
+		try:
+			connection_nav = nav_server.exchange_server.connectToServer()
+			cursor_nav = connection_nav.cursor()
+			row = cursor.fetchone()
+			if (row):
+				# Формируем поля которые нужно обновить у клиента
+				var = self.form_vars_for_write(cr, uid, ids, row, self.import_param_row, self.var_cf_cl)
+				var.update({"is_company": True,
+					"active": True,})
+				opport = self.findObject(cr, uid, "crm.lead", [("hash_for_url", "in", [cl_hash])])
+				partner = None
+				#Ищем или создаем клиента
+				if (opport and opport.creating_partner):
+					opport.creating_partner.write(var)
+					partner = opport.creating_partner
+				else:
+					res_obj = self.pool.get("res.partner")
+					partner = self.pool.get("res.partner")
+					partner = res_obj.browse(cr, uid, partner.create(cr, uid, var, context=None))
+					if (opport):
+						opport.write({"creating_partner": partner.id})
+						if (opport.partner_id):
+							opport.partner_id.write({"parent_id":partner.id})
+				#Формируем команду GetUNC
+				com_vals = {
+					"Source": "CRM",
+					"Dest": "NAV",
+					"Command": "GetUNC",
+					"CRM_ID": str(partner.id),
+				}
+				id_command = self.commands_exchange(cr, uid, ids, com_vals, False, None, cursor_nav, False)
+				#Выгружаем клиента в БД NAV
+				self.export_res_partner(row, id_command, "idCommand", cursor_nav, False, True, self.var_cf_cl, "ClientCard")
+				query = r"SELECT @@IDENTITY AS 'Identity'"
+				cursor_nav.execute(query)
+				new_cl_id = cursor_nav.fetchone()[0]
+				vWhere = " where ClientID = " + str(vIdCl)
+				#Теперь считываем всех контактные лица и сохраняем их в CRM и копируем запись в бд NAV
+				query = self.getQuery_partner(self.var_cf_con_pers, "ClientContact") + vWhere
+				cursor.execute(query)
+				for cont in cursor.fetchall():
+					name = cont[self.var_cf_con_pers.index("FirstName")]
+					middleName = cont[self.var_cf_con_pers.index("MiddleName")]
+					surname = cont[self.var_cf_con_pers.index("Surname")]
+					var = self.form_vars_for_write(cr, uid, ids, cont, self.import_param_row_cont_pers, self.var_cf_con_pers)
+					var.update({"name": "12", "parent_id":partner.id})
+					condition = ["&","&","&",("parent_id", "in", [partner.id]),("firstname", "in", [name]),("surname", "in", [surname]), ("patronymic", "in", [middleName])]
+					self.findObject(cr, uid, "res.partner", condition, True, var, True)
+					self.export_res_partner(cont, new_cl_id, "id_client", cursor_nav, False, True, self.var_cf_con_pers, "ClientContact", self.export_params_cont_pers)
+				connection_nav.commit()
+		finally:
+			if connection_nav:
+				connection_nav.close()
 
 	#Справочник методов обработчиков команд
 	var_com_method = {
@@ -618,10 +775,11 @@ class crm_iml_sqlserver(osv.osv):
 		"UpdatedHolding": UpadeteHolding,
 		"UpdatedClient": UpdateClient,
 		"UpdatedContracts": UpdateContracts,
+		"UpdatedCustomerData": UpdateCustomerData,
 	}
 
 	#Метод который определяет, что это за команда и вызывает соответсвующий обработчик
-	def processCommand_nav(self, cr, uid, ids, partner, command_var, log_file, connection):
+	def processCommand(self, cr, uid, ids, partner, command_var, log_file, connection):
 		Command = command_var[self.var_field["Command"]]
 		result = False
 		if (Command.strip() in self.var_com_method):
@@ -630,9 +788,7 @@ class crm_iml_sqlserver(osv.osv):
 			type_msg = u"Ошибка"
 			log_msg = u"Не найден обработчик для команды :" + Command
 			self.write_log(cr, uid, log_file, log_msg, type_msg)
-		return result	
-
-
+		return result
 
 	def commands_import_from_nav(self, cr, uid, ids, context=None):
 		partner_id = 0
@@ -645,7 +801,8 @@ class crm_iml_sqlserver(osv.osv):
 			connection = server.exchange_server.connectToServer()
 			cursor=connection.cursor()
 			cursor.execute(query)
-			for row in cursor.fetchall():
+			rows = cursor.fetchall()
+			for row in rows:
 				if (row[self.var_field["CRM_ID"]]): 
 					partner_id = row[self.var_field["CRM_ID"]]
 					res_obj = self.pool.get('res.partner')
@@ -659,7 +816,7 @@ class crm_iml_sqlserver(osv.osv):
 					self.write_log(cr, uid, log_file, log_msg, type_msg)
 				else:
 					command = row[self.var_field["Command"]]
-					result = server.processCommand_nav(partn, row, log_file, connection)
+					result = server.processCommand(partn, row, log_file, connection)
 				query = "update crm_commands set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id = " + str(row[self.var_field["id"]])
 				cursor.execute(query)
 			connection.commit()
@@ -673,63 +830,37 @@ class crm_iml_sqlserver(osv.osv):
 			if log_file:
 				log_file.close()
 
-	def processCommand_cf(self, cr, uid, ids, partner, command, opport=None, added_var=None):
-		connection = None
+	def commands_import_from_cf(self, cr, uid, ids, context=None):
 		comm_connection = None
 		server = self.browse(cr, uid, ids[0], context=None)
-		if not(opport):
-			opport = self.findObject(cr, uid, 'crm.lead', [('creating_partner','=', partner.id)])
-		if (command != "UpdatedCustomerData"):
-			server_res_partner = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["partner"])]) 
-			if not(server_res_partner):
-				sys.stdout.write("ERROR! Пожалуйста настройте таблицу для экспорта/импорта клиентов!")
-			query = server_res_partner.getQuery_partner(self.var_res_partner_fields, server_res_partner.tableName)
-			wherePart = ""
-			if (command == "UpdateCustomerData"):
-				wherePart = " where CRM_ID=" + str(partner.id)
-			elif (command == "UpdatedUNC"):
-				if (added_var):
-					unc = added_var[self.var_field["nav_UNC"]]
-					wherePart = " where NAV_UNC = " + unc.encode(utf-8) + " and CRM_TimeStamp is null"
-			if (wherePart != ""):
-				try:
-					query = query + wherePart
-					connection = server_res_partner.exchange_server.connectToServer()
-					cursor=connection.cursor()
-					cursor.execute(query)
-					for row_part in cursor.fetchall():
-						cur_obj = server_res_partner.createOrFindResPartner(row_part)
-						if (cur_obj is None):
-							#TODO Сделать логирование импорта
-							sys.stdout.write("ERROR! Not found client in system with id =" + str(row_part[0]))
-						if (cur_obj) and (command=="UpdateCustomerData"):
-							cur_obj.iml_crm_export_id()
-					connection.commit()
-				finally:
-					if (connection):
-						connection.close()
-					if (comm_connection):
-						comm_connection.close()
-		else:	
-			if (opport) and (opport.user_id) and (opport.user_id.partner_id) and (opport.user_id.partner_id.email):
-				customer_name = ""
-				if (opport.partner_id):
-					customer_name = opport.partner_id.name
-				elif (opport.contact_name):
-					customer_name = opport.contact_name
-				params = self.pool.get('ir.config_parameter')
-				url_link = params.get_param(cr, uid, 'crm_iml_url_pattern',default='' ,context=None)
-				url = url_link + "/" + opport.hash_for_url + "?showclosed=1"
-				model_data = self.pool.get("ir.model.data")
-				dummy, form_view = model_data.get_object_reference(cr, uid, 'crm', 'crm_case_category_act_oppor11')
-				url_opport = params.get_param(cr, uid,"web.base.url").encode("utf-8") + u"/web#id=" + str(opport.id).encode("utf-8") + u"&view_type=form&model=crm.lead"
-				url_opport = url_opport + "&action=" + str(form_view)
-				body = customer_name.encode("utf-8")  + u" заполнил анкету с контактной информацией:<br>".encode("utf-8") + url.encode("utf-8") + u" <br> Информация запрашивалась в рамках Заявки: ".encode("utf-8") + opport.name.encode("utf-8") + u"(".encode("utf-8") + url_opport.encode("utf-8") + u")<br> Перейдите в заявку и изучите заполненные данные!".encode("utf-8")	
-				post_vars = {'subject': u"Клиент заполнил анкету",
-					"body" :body,
-					'partner_ids': [(4, opport.user_id.partner_id.id)],
-					} 
-				self.send_email(cr, uid, ids, post_vars)
+		partner_id = 0
+		opport_id = 0
+		connection = None
+		log_file = self.create_log_file(cr, uid, "exchange with CF")
+		try:
+			server = self.browse(cr, uid, ids[0], context=None)
+			vFieldParam = "0, id_client, hash, Dest, Command"
+			query = "select  " + vFieldParam + " from crm_commands where DoneTime is null and upper(Dest) = 'CRM' Order by id_client"
+			connection = server.exchange_server.connectToServer()
+			cursor=connection.cursor()
+			cursor.execute(query)
+			rows = cursor.fetchall() 
+			for row in rows:
+				result = server.processCommand(None, row, log_file, connection)
+				query = "update crm_commands set DoneTime = '" + time.strftime('%Y-%m-%d %H:%M:%S') + "' where id_client = " + str(row[self.var_field_cf["id_client"]])
+				cursor.execute(query)
+			connection.commit()
+		except Exception, e:
+			log_msg = tools.ustr(e)
+			type_msg = u"Ошибка"
+			self.write_log(cr, uid, log_file, log_msg, type_msg)
+		finally:
+			if connection:
+				connection.close()
+			if log_file:
+				log_file.close()
+
+
 
 	def send_email(self,cr, uid, ids, post_vars, context=None, thread = False, model='mail.thread'):
 		thread_pool = self.pool.get(model)
@@ -750,6 +881,7 @@ class crm_iml_sqlserver(osv.osv):
 			"Command": True,
 			"TextMessage": True,
 			"CreateTime": True,
+			"hash": True,
 		}
 		if (isDate):
 			date_object = valueCond
@@ -757,7 +889,7 @@ class crm_iml_sqlserver(osv.osv):
 		if (stringCond) and (stringCond != ""):
 			stringCond = stringCond + ", "
 		if ((KeyValue) and (KeyValue in vStrFields)) or (isStr):
-			stringCond = stringCond + "'".encode("ascii") + valueCond + "'".encode("ascii")
+			stringCond = stringCond + "'" + valueCond + "'"
 		else:
 			stringCond = stringCond + valueCond
 		return stringCond
@@ -767,30 +899,12 @@ class crm_iml_sqlserver(osv.osv):
 		Параметры:
 			partner - экспортируемый партнер
 	"""
-	def export_res_partner(self, partner, rec_id=False, name_field_id = "", cursor = None, NeedCommit=True):
-		export_params = {
-			"unk": {"Field": "NAV_UNC", "IsStr": True}, 
-			"name": {"Field": "CustomerName", "IsStr": True},
-			'juridical_name': {"Field": "LegalName", "IsStr": True},
-			"website" : {"Field": "WebSite", "IsStr": True},
-			"category_of_goods.nav_id" : {"Field": "GoodsCategory", "IsStr": True},
-			"juridical_address_index" : {"Field": "AddrZIP", "IsStr": True},
-			"juridical_address_city_name" : {"Field": "AddrSity", "IsStr": True},
-			"actual_address_index" : {"Field": "LocAddrZIP", "IsStr": True},
-			"juridical_address_street_name,juridical_address_dom,juridical_address_building,juridical_address_office,juridical_adress_non_stand_part" : {"Field": "JurAdrStr", "IsStr": True},
-			"actual_adress_full_adress" : {"Field": "FactAdrStr", "IsStr": True},
-			"inn" : {"Field": "ITN", "IsStr": True},
-			"registration_reason_code" : {"Field": "TRRC", "IsStr": True},
-			"date_of_accounting" : {"Field": "TRDate", "IsStr": True, "IsDate": True},
-			"OGRN_OGRNIP" : {"Field": "OGRN", "IsStr": True},
-			"registration_date" : {"Field": "RegistrationDate", "IsStr": True, "IsDate": True},
-			"OKVED" : {"Field": "OCVED", "IsStr": True},
-			"OKPO" : {"Field": "OCPO", "IsStr": True},
-			"OKATO" : {"Field": "OCATO", "IsStr": True},
-			"title.ext_code": {"Field":"CompOrgTypeID", "IsStr": True},
-			"category_of_goods.nav_id": {"Field": "GoodsCategory", "IsStr": True},
-		}
+	def export_res_partner(self, partner, rec_id=False, name_field_id = "", cursor = None, NeedCommit=True, isRow=False, var_field = [], tableName='Clients', export_params={}):
 		connection = None
+		if isRow and export_params == {}:
+			export_params = self.export_params_row
+		elif export_params == {}:
+			export_params = self.export_params_partner
 		try:
 			vSetParams = ""
 			vSetValues = ""
@@ -800,32 +914,40 @@ class crm_iml_sqlserver(osv.osv):
 				vArrayOfAtr = key.split('.')
 				value = ""
 				var = None
-				if (len(vArrayOfAtr) > 1):
-					vObj = getattr(partner, vArrayOfAtr[0])
-					if vObj:
-						var = getattr(vObj, vArrayOfAtr[1])
+				#Получаем значение параметра в первом случае как из массива во 2-ом как из объекта
+				if (isRow):
+					index = var_field.index(key)
+					var = partner[index]
 				else:
-					#Если поля отделены запятой то мы суммируем эти поля
-					vArrayOfSum = key.split(',')
-					if len(vArrayOfSum) > 1:
-						var = ""
-						for field in vArrayOfSum:
-							pre_var =  getattr(partner, field)
-							var = pre_var if not(var) else var + " " + pre_var
-					else:	
-						var = getattr(partner, vArrayOfAtr[0])
+					if (len(vArrayOfAtr) > 1):
+						vObj = getattr(partner, vArrayOfAtr[0])
+						if vObj:
+							var = getattr(vObj, vArrayOfAtr[1])
+					else:
+						#Если поля отделены запятой то мы суммируем эти поля
+						vArrayOfSum = key.split(',')
+						if len(vArrayOfSum) > 1:
+							var = ""
+							for field in vArrayOfSum:
+								pre_var =  getattr(partner, field)
+								var = pre_var if not(var) else var + " " + pre_var
+						else:	
+							var = getattr(partner, vArrayOfAtr[0])
 				if var:
 					if (vParam["IsStr"]):
-						value = var.encode("utf-8")
+						if (isRow):
+							value = var
+						else:
+							value = var.encode("utf-8")
 					else:
 						value = str(var)
 				if (value != ""):
 					vSetParams = self.addCondition(vParam["Field"].encode("utf-8"), vSetParams)
-					vSetValues = self.addCondition(value , vSetValues, None, vParam['IsStr'], "IsDate" in vParam)
+					vSetValues = self.addCondition(value , vSetValues, None, ((vParam['IsStr']) or ("IsBool" in vParam)), "IsDate" in vParam)
 			if (name_field_id) and (rec_id):
 				vSetParams = self.addCondition(name_field_id.encode("utf-8"), vSetParams)
 				vSetValues = self.addCondition(str(rec_id) , vSetValues, None, False, False)
-			query = "insert into Clients (" + vSetParams + ") values(" + vSetValues + ")"
+			query = "insert into " + tableName + " (" + vSetParams + ") values(" + vSetValues + ")"
 			if not (cursor):
 				connection = self.exchange_server.connectToServer()
 				cursor = connection.cursor()
@@ -838,24 +960,32 @@ class crm_iml_sqlserver(osv.osv):
 			if connection and NeedCommit:
 				connection.close()
 
-	#Обмен командами
-	def commands_exchange(self, cr, uid, ids, vals, needExportCl, partner=None):
+	#Обмен командами c NAV и CF
+	def commands_exchange(self, cr, uid, ids, vals, needExportCl, partner=None, cursor=None, NeedCommit=True, IsCF=False):
 		connection = None
+		id_command = None
 		try:
 			server = self.browse(cr, uid, ids[0], context=None)
 			vSetParams = ""
 			vSetValues = ""
+			id_cl = None
+			if not(cursor):
+				exchange_server = server.exchange_server
+				connection = exchange_server.connectToServer()
+				cursor = connection.cursor()
+			if (IsCF):
+				id_cl = self.form_query(cr, uid, ids, cursor)
 			for key in vals:
 				if (vals[key]) and (vals[key] != ""):
 					vSetParams = server.addCondition(key, vSetParams)
 					vSetValues = server.addCondition(vals[key].encode("utf-8"), vSetValues, key)
-			if not("CreateTime" in vals):
+			if not("CreateTime" in vals) and not (IsCF):
 				vSetParams = server.addCondition("CreateTime", vSetParams)
 				vSetValues = server.addCondition(time.strftime('%Y-%m-%d %H:%M:%S'), vSetValues, "CreateTime")
+			if (IsCF):
+				vSetParams = server.addCondition("id_client", vSetParams)
+				vSetValues = server.addCondition(str(id_cl), vSetValues, "id_client")
 			query = "insert into crm_commands(" + vSetParams + ") values(" + vSetValues + ")"
-			exchange_server = server.exchange_server
-			connection = exchange_server.connectToServer()	
-			cursor = connection.cursor()	
 			cursor.execute(query)
 			query = r"SELECT @@IDENTITY AS 'Identity'"
 			cursor.execute(query)
@@ -865,34 +995,51 @@ class crm_iml_sqlserver(osv.osv):
 				if not(partner):
 					res_obj = self.pool.get("res.partner")
 					partner = res_obj.browse(cr, uid, int(vals["CRM_ID"]))
-				server.export_res_partner(partner, id_command, "idCommand", cursor, False)	
-			connection.commit()				
+				server.export_res_partner(partner, id_command, "idCommand", cursor, False)
+			if IsCF and partner:
+				param = self.export_param_obj_cont_pers
+				#Если не задано ФИО мы должны выгрузить name объекта в фамилию, вот такая блин херня
+				if not(partner.firstname) and not(partner.surname) and not(partner.patronymic):
+					param.pop("surname") 
+					param.pop("firstname")
+					param.pop("patronymic")
+					param.update({"name":{"Field": "Surname", "IsStr": True},})
+				self.export_res_partner(partner, id_cl, "ClientID", cursor, False, False, [], "ClientContact", param)
+			if NeedCommit:
+				connection.commit()
 		except Exception, e:
 			raise osv.except_osv(_("Send commands failed!"), _("Here is what we got instead:\n %s.") %tools.ustr(e))
 		finally:
-			if connection:
+			if connection and NeedCommit:
 				connection.close()
+			return id_command
+
+	#Формируем пустую строку клиента, что бы связать команду и контактное лица
+	def form_query(self, cr, uid, ids,cursor):
+		query = "insert into ClientCard (Name) values (NULL)"
+		cursor.execute(query)
+		query = r"SELECT @@IDENTITY AS 'Identity'"
+		id_client = cursor.execute(query).fetchone()[0]
+		return id_client
 		
-
- 
-	# словарь, где хранится соответсвие тип обмена - обработчик
-	exchange_types = { 
-				"partner" : partner_import,
-				"holdings": holdings_import,
-				"commands_nav": commands_import_from_nav,
-				"responsible": responsible_import,
-				'user': user_import,
-		}
-
 	#Метод для планировщика - считывание команд из NAV
 	def _import_command(self, cr, uid, ids=False, context=None):
 		server = self.findObject(cr, uid, "crm.iml.sqlserver", [("exchange_type", 'in', ["commands_nav"])])
 		if (server):
 			server.perform_import()
 
+	# словарь, где хранится соответсвие тип обмена - обработчик
+	exchange_types = { 
+				"partner" : partner_import,
+				"holdings": holdings_import,
+				"commands_nav": commands_import_from_nav,
+				"commands_cf": commands_import_from_cf,
+				"responsible": responsible_import,
+				'user': user_import,
+	}
+
 	# развилка в импорте, метод - роутер
 	# в данном методе принимаем решение, какой импорт дальше запускать
-	# 
 	def perform_import(self, cr, uid, ids, context=None):
 		for exchange_proc in self.browse(cr, uid, ids, context=context):
 			self.exchange_types[exchange_proc.exchange_type](self, cr, uid, ids, context);
