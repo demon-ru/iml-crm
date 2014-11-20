@@ -171,6 +171,19 @@ class crm_lead(format_address, osv.osv):
 		defaults.update(custom_values)
 		return super(crm_lead, self).message_new(cr, uid, msg, custom_values=defaults, context=context)	
 
+	def onchange_stage_id(self, cr, uid, ids, stage_id, context=None):
+		if not stage_id:
+			return {'value': {}}
+		stage = self.pool.get('crm.case.stage').browse(cr, uid, stage_id, context=context)
+		if not stage.on_change:
+			return {'value': {}}
+		vals = {'probability': stage.probability}
+		if stage.probability >= 100 or (stage.probability == 0 and stage.sequence > 1):
+			vals['date_closed'] = fields.datetime.now()
+		else:
+			vals['date_closed'] = None
+		return {'value': vals}
+
 	def apply_data(self,cr, uid, ids, context=None):
 		res_obj = self.pool.get("crm.iml.sqlserver")
 		res_id = res_obj.search(cr, uid, [("exchange_type", 'in', ["commands"])], context=context)
