@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+		<record id="view_crm_iml_section_kanban" model="ir.ui.view">
+			<field name="name">view.kanban.iml.crm.section.inherited1</field>
+			<field name="model">crm.case.section</field>
+			<field name="inherit_id" ref="sales_team.crm_case_section_salesteams_view_kanban"/>
+			<field name="arch" type="xml">
+				<xpath expr="//templates/t/div/div/ul[@class='oe_dropdown_menu']" position="replace"/>
+				<xpath expr="//templates/t/div/div/span[@class='oe_e']" position="after">
+					<ul class="oe_dropdown_menu">
+						<li t-if="widget.view.is_action_enabled('edit')"><a type="edit">Настроить подразделение</a></li>
+						<li t-if="widget.view.is_action_enabled('delete')"><a type="delete">Удалить подразделение</a></li>
+						<li t-if="widget.view.is_action_enabled('edit')"><ul class="oe_kanban_colorpicker" data-field="color"/></li>
+					</ul>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="view_crm_iml_section_form" model="ir.ui.view">
+			<field name="name">view.form.iml.crm.section.inherited1</field>
+			<field name="model">crm.case.section</field>
+			<field name="inherit_id" ref="crm.sales_team_form_view_in_crm"/>
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='options_active']/field[@name='use_leads']" position="replace"/>
+				<xpath expr="//div[@name='options_active']/label[@for='use_leads']" position="replace"/>
+				<xpath expr="//group/label[@for='alias_name']" position="replace"/>
+				<xpath expr="//group/div[@name='alias_def']" position="replace"/>
+				<xpath expr="//group/field[@name='alias_contact']" position="replace"/>
+			</field>
+		</record>
+
+		<record id="view_crm_iml_section_form2" model="ir.ui.view">
+			<field name="name">view.form.iml.crm.section.inherited2</field>
+			<field name="model">crm.case.section</field>
+			<field name="inherit_id" ref="sales_team.crm_case_section_view_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//group[@name='left']/field[@name='parent_id']" position="after">
+					<label for="alias_name" string="Email" attrs="{'invisible': [('alias_domain', '=', False)]}"/>
+					<div name="alias_def" attrs="{'invisible': [('alias_domain', '=', False)]}">
+						<field name="alias_id" class="oe_read_only oe_inline" string="Email" required="0"/>
+						<div class="oe_edit_only oe_inline" name="edit_alias" style="display: inline;" >
+							<field name="alias_name" class="oe_inline"/>@<field name="alias_domain" class="oe_inline" readonly="1"/>
+						</div>
+					</div>
+				</xpath>
+				<xpath expr="//group[@name='left']/field[@name='change_responsible']" position="replace"/>
+				<xpath expr="//div[@class='oe_title']/label[@for='name']" position="replace"/>
+				<xpath expr="//div[@class='oe_title']/h1" position="before">
+					<label for="name" class="oe_edit_only" string="Наименование подразделения"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="view_crm_iml_section_kanban2" model="ir.ui.view">
+			<field name="name">view.kanban.iml.crm.section.inherited2</field>
+			<field name="model">crm.case.section</field>
+			<field name="inherit_id" ref="crm.crm_case_section_salesteams_view_kanban"/>
+			<field name="arch" type="xml">
+				<xpath expr="//a[@name='%(crm.crm_case_form_view_salesteams_opportunity)d']" position="replace"/>
+				<xpath expr="//a[@name='%(crm.action_report_crm_opportunity_salesteam)d']" position="before">
+					<a name="%(crm.crm_case_form_view_salesteams_opportunity)d" type="action">Заявки</a>
+				</xpath>
+			</field>
+		</record>
+
+	</data>
+</openerp>

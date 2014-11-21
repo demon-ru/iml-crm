@@ -25,6 +25,16 @@ import collections
 class crm_case_section(osv.osv):
 	_inherit = 'crm.case.section'
 
+	_columns = {
+		'name': fields.char('Наименование подразделения', size=64, required=True, translate=True),
+		'use_opportunities': fields.boolean('Заявки', help="Отметьте этот checkBox, если этот отдел работает с заявками."),
+	}
+
+	_defaults = {
+		'use_leads': False,
+		'alias_contact': 'everyone',
+		'change_responsible': False,
+	}
 
 	def write(self, cr, uid, ids, vals, context=None):
 		# вообще, следует рассмотреть три случая:

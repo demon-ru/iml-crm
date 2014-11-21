@@ -34,6 +34,7 @@
 	'analytic',
 	'account',
     'crm_claim',
+    'sales_team',
     ],
     'data': [
 
@@ -75,6 +76,7 @@
 		"res_users_view.xml",
         "crm_claim_view.xml",
         "crm_iml_exchange_settings_menu.xml",
+        "sales_team_view.xml",
 
     ],
     
