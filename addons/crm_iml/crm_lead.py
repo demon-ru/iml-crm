@@ -61,6 +61,9 @@ class crm_lead(format_address, osv.osv):
 			section_id = section_ids[0]
 		return {'value': {'section_id': section_id}}
 
+	def _get_default_section_id(self, cr, uid, context=None):
+		return None
+
 	_columns = {
 		"partner_id" : fields.many2one('res.partner', 'Контакт', ondelete='set null', track_visibility='onchange',
 			select=True, help="Linked partner (optional). Usually created when converting the lead."),

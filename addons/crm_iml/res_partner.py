@@ -262,9 +262,10 @@ class res_partner(osv.osv):
         "registration_date": u"Дата регистрации",
         "OKVED": u"ОКВЕД",
         "OKPO": u"ОКПО",
-        "OKATO": u"ОКАТО",}
+        "OKATO": u"ОКАТО",
+        "juridical_name": u"Юридическое название организации"}
 
-    control_var = ["name", "website", "title", "category_of_goods",
+    control_var = ["name","juridical_name", "website", "title", "category_of_goods",
         "juridical_address_index", "juridical_address_city_name",
         "juridical_address_street_name", "juridical_address_dom",
         "juridical_address_building", "juridical_address_office",
@@ -276,6 +277,7 @@ class res_partner(osv.osv):
         "OGRN_OGRNIP", "registration_date", "OKVED", "OKPO", "OKATO"]     
 
     def get_value_text(self, cr, uid, ids, field_obj, value):
+    	res = None
         if field_obj._type == 'many2one':
             #return the modifications on a many2one field as its value returned by name_get()
             if (type(value) == int):
@@ -283,7 +285,8 @@ class res_partner(osv.osv):
                 res_obj = self.pool.get(name)
                 value = res_obj.browse(cr, uid, value)
             if (value):
-                res = value.name_get()[0][1]
+                #res = _(value.name_get()[0][1])
+                res = _(value.name)
             else:
                 res = ""
         else:
@@ -458,6 +461,7 @@ class res_partner(osv.osv):
         return res
 
     def write(self, cr, uid, ids, vals, context=None):
+    	res = None
         for partn in self.browse(cr, uid, ids, context=context):
             if ('juridical_address_city_name' in vals or 'juridical_address_index' in vals or 'juridical_address_street_name' in vals or 'juridical_address_dom' in vals or 'juridical_address_building' in vals or 'juridical_address_office' in vals or 'juridical_adress_non_stand_part' in vals):
                 vCity = partn.juridical_address_city_name
