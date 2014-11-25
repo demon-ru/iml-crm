@@ -31,6 +31,7 @@ class crm_claim(osv.osv):
 				" Define Responsible user and Email account for"\
 				" mail gateway."),
 		'date_deadline': fields.date('Крайний срок'),
+		'color': fields.integer('Color Index'),
 	}
 
 	# переопределил метод из модуля crm для того, что бы значение date_closed
@@ -51,6 +52,38 @@ class crm_claim(osv.osv):
 			onchange_stage_values = self.onchange_stage_id(cr, uid, ids, vals.get('stage_id'), context=context)['value']
 			vals.update(onchange_stage_values)
 		return super(crm_claim, self).write(cr, uid, ids, vals, context=context)
+
+	def _resolve_section_id_from_context(self, cr, uid, context=None):
+		if context is None:
+			context = {}
+		if type(context.get('default_section_id')) in (int, long):
+			return context.get('default_section_id')
+		return None
+
+	def _read_group_stage_ids(self, cr, uid, ids, domain, read_group_order=None, access_rights_uid=None, context=None):
+		access_rights_uid = access_rights_uid or uid
+		stage_obj = self.pool.get('crm.claim.stage')
+		order = stage_obj._order
+		if read_group_order == 'stage_id desc':
+			order = "%s desc" % order
+		search_domain = []
+		section_id = self._resolve_section_id_from_context(cr, uid, context=context)
+		if section_id:
+			search_domain += ['|', ('section_ids', '=', section_id)]
+			search_domain += [('id', 'in', ids)]
+		else:
+			search_domain += ['|', ('id', 'in', ids), ('case_default', '=', True)]
+		# perform search
+		stage_ids = stage_obj._search(cr, uid, search_domain, order=order, access_rights_uid=access_rights_uid, context=context)
+		result = stage_obj.name_get(cr, access_rights_uid, stage_ids, context=context)
+		# restore order of the search
+		result.sort(lambda x, y: cmp(stage_ids.index(x[0]), stage_ids.index(y[0])))
+		fold = {}
+		for stage in stage_obj.browse(cr, access_rights_uid, stage_ids, context=context):
+			fold[stage.id] = False
+		return result, fold
+
+	_group_by_full = { 'stage_id': _read_group_stage_ids}
 
 
 class crm_claim_stage(osv.osv):
