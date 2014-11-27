@@ -27,6 +27,11 @@ from datetime import datetime
 from openerp import tools
 from openerp.tools.safe_eval import safe_eval
 
+# для переназначаемых моделей
+from openerp.osv import fields,osv
+import string
+# для crm.lead
+from openerp.addons.base.res.res_partner import format_address
 
 def _models_get(self, cr, uid, context=None):
 	obj = self.pool.get('ir.model')
@@ -83,6 +88,85 @@ class super_calendar_configurator(orm.Model):
 			if line.user_field_id and \
 			   record[line.user_field_id.name] and \
 			   record[line.user_field_id.name]._name != 'res.users':
+				raise orm.except_orm(
+					_('Error'),
+					_("The 'User' field of record %s (%s) "
+					  "does not refer to res.users")
+					% (record[line.description_field_id.name],
+					   line.name.model))
+
+			if (((line.description_field_id and
+				  record[line.description_field_id.name]) or
+					line.description_code) and
+					record[line.date_start_field_id.name]):
+				duration = False
+				if (not line.duration_field_id and
+						line.date_stop_field_id and
+						record[line.date_start_field_id.name] and
+						record[line.date_stop_field_id.name]):
+					date_start = datetime.strptime(
+						record[line.date_start_field_id.name],
+						tools.DEFAULT_SERVER_DATETIME_FORMAT
+					)
+					date_stop = datetime.strptime(
+						record[line.date_stop_field_id.name],
+						tools.DEFAULT_SERVER_DATETIME_FORMAT
+					)
+					duration = (date_stop - date_start).total_seconds() / 3600
+				elif line.duration_field_id:
+					duration = record[line.duration_field_id.name]
+				if line.description_type != 'code':
+					name = record[line.description_field_id.name]
+				else:
+					parse_dict = {'o': record}
+					mytemplate = Template(line.description_code)
+					name = mytemplate.render(**parse_dict)
+				super_calendar_values = {
+					'name': name,
+					'model_description': line.description,
+					'date_start': record[line.date_start_field_id.name],
+					'duration': duration,
+					'user_id': (
+						line.user_field_id and
+						record[line.user_field_id.name] and
+						record[line.user_field_id.name].id or
+						False
+					),
+					'configurator_id': configurator.id,
+					'res_id': line.name.model+','+str(record['id']),
+					'model_id': line.name.id,
+					}
+				# грязный хак
+				super_calendar_pool.create(cr, uid, super_calendar_values, context=context)
+		return super_calendar_values
+
+	# метод, который создает запись в SC
+	# отличие от предидущего метода - он создает запись только для того объекта,
+	# чей ид указан в параметре ids
+
+	def _generate_record_from_line_with_id(self, cr, uid, configurator, line, super_calendar_pool, _ids, context):
+		print "================================================"
+		print "DEBUG!!! _generate_record_from_line_with_id"
+		current_pool = self.pool.get(line.name.model)
+		print line.name.model
+		print _ids
+		current_record_ids = _ids
+
+		for current_record_id in current_record_ids:
+			print "current_record_id"
+			print current_record_id
+			record = current_pool.browse(cr, uid,
+										 current_record_id,
+										 context=context)
+			print "curent record:"
+			print record
+			print "record[user_id]"
+			print record.user_id
+			print "line.user_field_id.name"
+			print line.user_field_id.name
+			if (line.user_field_id and \
+			   record[line.user_field_id.name] and \
+			   record[line.user_field_id.name]._name != 'res.users'):
 				raise orm.except_orm(
 					_('Error'),
 					_("The 'User' field of record %s (%s) "
@@ -192,3 +276,173 @@ class super_calendar(orm.Model):
 								   size=128),
 		'model_id': fields.many2one('ir.model', 'Model'),
 	}
+
+# **********************************************
+# блок для обновления данных в моделях
+# **********************************************
+	_models = [
+		'crm.lead',
+		'calendar.event',
+		'crm.phonecall',
+		'crm.claim'
+		]
+
+	def write(self, cr, uid, ids, vals, context=None):
+		# цель следующая - изменить данные в исходном документе, если изменились данные в объекте SC
+		# перво наперво нужно определить, какие модели мы будем обслуживать
+		# crm.lead, calendar.event, crm.phonecall, crm.claim
+
+		# далее, нужно определить, какие параметры мы будем мониторить
+		# 	date_start
+		# 	duration
+		# записываем изменения
+		
+		res = super(super_calendar, self).write(cr, uid, ids, vals, context=context)
+		obj = self.pool.get('super.calendar')
+		res_obj = obj.browse(cr, uid, ids[0])
+		
+		if ("date_start" in vals or "duration" in vals):
+			# это название модели исходного объекта
+			base_obj_model = res_obj.res_id.__class__.__name__
+			if (base_obj_model in self._models):
+				# теперь нам нужно обработать это изменение
+				# это и есть исходный объект
+				base_obj = res_obj.res_id
+				# теперь ищем исходную строчку в super.calendar.configurator.line
+				# что бы посмотреть настройки полей
+				configurator_id = res_obj.configurator_id.id
+				configurator_line_pool = self.pool.get('super.calendar.configurator.line')
+				line_ids = configurator_line_pool.search(cr, uid, [('configurator_id', '=', configurator_id)])
+				line_obj = configurator_line_pool.browse(cr, uid, line_ids)
+				# теперь узнаем, какой именно объект строки конфигурации нам нужен
+				# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
+				for line in line_obj:
+					if (line.name.model == base_obj_model):
+						correct_line = line
+				# проверяем модель
+				if base_obj_model == "crm.lead":
+					date_start_field = correct_line.date_start_field_id.name
+					# теперь ищем исходный документ и меняем у него нужное поле :)
+					# т.к. он же у нас уже есть :)
+					new_val = {date_start_field : res_obj.date_start}
+					# получаем пул нужной нам модели
+					base_obj_pool = self.pool.get(base_obj_model)
+					# передаем в контексте специальный параметр, который обозначает, что 
+					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
+					context["SC_UPDATE"] = True
+					base_obj_pool.write(cr, uid, base_obj.id, new_val, context)
+				elif base_obj_model == "calendar.event":
+					date_start_field = correct_line.date_start_field_id.name
+					date_stop_field = correct_line.date_stop_field_id.name
+					# вычисляем дату окончания действия объекта
+					# алгоритм следующий - нужно поменять только дату у даты окончания, не меняя время
+					time_difference = datetime.strptime(res_obj.date_start, "%Y-%m-%d %H:%M:%S") - datetime.strptime(base_obj[date_start_field], "%Y-%m-%d %H:%M:%S")
+					new_time_stop = datetime.strptime(base_obj[date_stop_field], "%Y-%m-%d %H:%M:%S") + time_difference
+					# приводим datetime к строке, т.к. в базе она хранится именно в таком виде
+					new_time_stop_string = new_time_stop.strftime("%Y-%m-%d %H:%M:%S")
+					# формируем список значений, которые нужно обновить в объекте
+					new_val = {date_start_field : res_obj.date_start, date_stop_field : new_time_stop_string}
+					# нужно изменить исходный объект calendar.event
+					base_obj_pool = self.pool.get(base_obj_model)
+					context["SC_UPDATE"] = True
+					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context)
+		return vals
+# **********************************************
+# блок для обновления данных в super_calendar
+# **********************************************
+
+# объект 	event	встреча
+class calendar_event(osv.Model):
+	_inherit = 'calendar.event'
+
+	# перекрываем метод на запись
+	def write(self, cr, uid, ids, vals, context=None):
+		# если нужное нам значение есть в списке данных для обновления, то нужно обновить SC
+		# что бы получить нужный нам объект SU, нам потребуется id исходного объекта и его модель,
+		# т.к. id исходных объектов могут повторяться
+		obj_id = ids[0]
+		# но какая это модель, я уж точно знаю..
+		model_id = "calendar.event"
+
+		res = super(calendar_event, self).write(cr, uid, obj_id, vals, context=context) 
+		obj = self.pool.get('super.calendar')
+		ids = obj.search(cr, uid, [('res_id', '=', str(model_id) + "," + str(obj_id))])
+		res_obj = obj.browse(cr, uid, ids)
+		configurator_id = res_obj.configurator_id
+		if (not 'SC_UPDATE' in context):
+			configurator_pool = self.pool.get('super.calendar.configurator')
+			for configurator in configurator_pool.browse(cr, uid, configurator_id.id):
+				# пробегаем по строкам у текущей конфигурации
+				for line in configurator.line_ids:
+					# если модель в строке совпадает, то можем продолжить
+					if(line.name.model == model_id):
+						# теперь проверяем назначенные этой строке филды в качетве
+						# даты начала, завершения и продолжительности
+						start_datetime = line.date_start_field_id.name
+						stop_datetime = line.date_stop_field_id.name
+						duration = line.duration_field_id.name
+						if (start_datetime in vals or stop_datetime in vals or duration in vals):
+							# для начала нам нужно удалить старую запись из пула SC
+							super_calendar_pool = self.pool.get('super.calendar')
+							super_calendar_pool.unlink(cr, uid,
+													   ids,
+													   context=context)
+							# сгенерируем новую запись
+							values = configurator._generate_record_from_line_with_id(
+																	 configurator,
+																	 line,
+																	 super_calendar_pool,
+																	 [obj_id])
+		return vals
+
+
+# объект 	lead	заявка
+class crm_lead(format_address, osv.osv):
+	_inherit = 'crm.lead'
+
+	# перекрываем метод на запись
+	def write(self, cr, uid, ids, vals, context=None):
+		# если нужное нам значение есть в списке данных для обновления, то нужно обновить SC
+		# что бы получить нужный нам объект SU, нам потребуется id исходного объекта и его модель,
+		# т.к. id исходных объектов могут повторяться
+		obj_id = ids[0]
+		# но какая это модель, я уж точно знаю..
+		model_id = "crm.lead"
+
+		res = super(crm_lead, self).write(cr, uid, obj_id, vals, context=context) 
+		if ('date_action' in vals and 'SC_UPDATE' not in context):
+			obj = self.pool.get('super.calendar')
+			domain = "[ ('model_id.model', '=', '" + model_id +"')]"
+			ids = obj.search(cr, uid, [('res_id', '=', str(model_id) + "," + str(obj_id))])
+			#res = obj.read(cr, uid, ids, ['model_id', 'res_id', 'name'], context)
+			res_obj = obj.browse(cr, uid, ids)
+			# вычисляем новую продолжительность, а так же дату начала и конца
+			# хер там, вычислить её без исходных данных о настройке конфигуратора мы не сможем
+			# поэтому : нахер удаляем старую запись и генерим на её месте новую
+			# это будет универсальный механизм
+
+			configurator_id = res_obj.configurator_id
+			print "configurator_id : "
+			print configurator_id.id
+			# для начала нам нужно удалить старую запись из пула SC
+			super_calendar_pool = self.pool.get('super.calendar')
+			super_calendar_pool.unlink(cr, uid,
+									   ids,
+									   context=context)
+			# теперь нам нужно сгенерировать новую запись
+			configurator_pool = self.pool.get('super.calendar.configurator')
+			for configurator in configurator_pool.browse(cr, uid, configurator_id.id, context):
+				# пробегаем по строкам у текущей конфигурации
+				for line in configurator.line_ids:
+					# если модель в строке совпадает, то можем продолжить
+					if(line.name.model == model_id):
+						# добавим к этим параметрам еще одно условие:
+						# 	выбирать надо только тот объект из пула исходных, у которого ид совпадает с текущим!
+						# def _generate_record_from_line_with_id(self, cr, uid, configurator, line, super_calendar_pool, ids, context):
+						values = configurator._generate_record_from_line_with_id(
+																 configurator,
+																 line,
+																 super_calendar_pool,
+																 [obj_id])
+		
+		return vals
