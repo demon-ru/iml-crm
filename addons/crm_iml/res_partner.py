@@ -377,7 +377,7 @@ class res_partner(osv.osv):
 		if (patronymic) and (patronymic.strip() != ""):
 			vName = vName + " " + patronymic.strip()
 		if vName.strip() != "":
-			v["name"] = vName.strip().encode("utf-8")
+			v["name"] = vName.strip()
 		return {"value": v}
 
 	def iml_crm_export_id(self,cr, uid, ids, context=None):

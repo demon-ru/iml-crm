@@ -61,6 +61,9 @@ class crm_lead(format_address, osv.osv):
 			section_id = section_ids[0]
 		return {'value': {'section_id': section_id}}
 
+	def _resolve_section_id_from_context(self, cr, uid, context=None):
+		return None
+
 	def _get_default_section_id(self, cr, uid, context=None):
 		return None
 
@@ -137,16 +140,17 @@ class crm_lead(format_address, osv.osv):
 		if 'email' in aObj: 
 			vEmail = aObj['email'].replace(" ", "")
 		vName = aObj['name']
-		vals_obj = {'name': vName,
-					'phone': vPhone,
-					'email': vEmail}
-		if vName != '':	 
-			partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'email', vEmail, vals_obj)
+		#Решено не создавать КЛ, а размещать информацию о клиенте в заявке
+		#vals_obj = {'name': vName,
+		#			'phone': vPhone,
+		#			'email': vEmail}
+		#if vName != '':	 
+		#	partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'email', vEmail, vals_obj)
 		vType = ""
 		if 'type' in aObj:
 			vType = aObj['type'].replace(" ", "")
-		vUser = None
-		vSection = None
+		vUser = False
+		vSection = False
 		vTypeID = None
 		if (vType != ""):
 			vals_obj = {'name': vType}
@@ -162,12 +166,13 @@ class crm_lead(format_address, osv.osv):
 				'name':  msg.get('subject') or _("No Subject"),
 				'email_from': vEmail,
 				'email_cc': vEmail,
-				'partner_id': partner.id,
+				#'partner_id': partner.id,
 				'phone': vPhone or "",
 				'type': 'opportunity',
-				'user_id': vUser,
 				"section_id": vSection,
+				'user_id': vUser,
 				'type_of_opport_id': vTypeID, 
+				"contact_name": vName,
 			}     
 		if msg.get('priority') in dict(crm.AVAILABLE_PRIORITIES):
 			defaults['priority'] = msg.get('priority')
