@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="view_wizard_crm_claim" model="ir.ui.view">
+			<field name="name">Отчет по обращениям</field>
+			<field name="model">wizard.crm.claim.report</field>
+			<field name="arch" type="xml">
+				<form string="Выберите параметры отчета">
+					<group>
+						<field name="date_begin"/>
+						<field name="date_end"/>
+						<field name="section_id"/>
+						<field name="user_id"/>
+					</group>
+					<footer>
+						<button name="open_table" string="Сформировать" type="object"  class="oe_highlight"  />
+						или
+						<button string="Отмена" class="oe_link" special="cancel" />
+					</footer>
+				</form>
+			</field>
+		</record>
+		<record id="action_wizard_crm_claim_report" model="ir.actions.act_window">
+			<field name="name">Отчет по обращениям</field>
+			<field name="res_model">wizard.crm.claim.report</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="view_id" ref="view_wizard_crm_claim"/>
+			<field name="target">new</field>
+		</record>
+		<menuitem name="Отчет закрытые обращения за период" id="menu_action_wizard_crm_claim_report" action="action_wizard_crm_claim_report" parent="base.next_id_64" sequence="105"/>
+
+		<record id="view_report_crm_claim_graph" model="ir.ui.view">
+			<field name="name">crm.claim.report.graph</field>
+			<field name="model">crm.claim.report</field>
+			<field name="inherit_id" ref="crm_claim.view_report_crm_claim_graph"/>
+			<field name="arch" type="xml">
+				<xpath expr="//graph/field[@name='user_id']" position="replace"/> 
+			</field>
+		</record>
+
+	</data>
+</openerp>

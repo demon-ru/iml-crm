@@ -69,6 +69,7 @@
 		'crm_lead_view.xml',
 
 		'security/ir.model.access.csv',
+        'wizard/wizard_crm_claim_report_view.xml',
 
 		"res_config_view.xml",	
 
