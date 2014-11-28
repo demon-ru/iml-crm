@@ -276,6 +276,7 @@ class crm_lead(format_address, osv.osv):
 			"function": opport.function,
 			"mobile": opport.mobile,
 			"fax": opport.fax,
+			'active': False,
 		})
 		#Генерим хэш
 		m = hashlib.md5(opport.email_from + str(time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)))

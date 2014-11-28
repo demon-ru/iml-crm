@@ -736,7 +736,8 @@ class crm_iml_sqlserver(osv.osv):
 					if (opport):
 						opport.write({"creating_partner": partner.id})
 						if (opport.partner_id):
-							opport.partner_id.write({"parent_id":partner.id})
+							opport.partner_id.write({"parent_id":partner.id, 
+								"active": True,})
 				#Формируем команду GetUNC
 				com_vals = {
 					"Source": "CRM",
