@@ -140,10 +140,13 @@ class crm_lead(format_address, osv.osv):
 		if 'email' in aObj: 
 			vEmail = aObj['email'].replace(" ", "")
 		vName = aObj['name']
-		#Решено не создавать КЛ, а размещать информацию о клиенте в заявке
-		#vals_obj = {'name': vName,
-		#			'phone': vPhone,
-		#			'email': vEmail}
+		vals_obj = {'name': vName,
+					'phone': vPhone,
+					'email': vEmail,
+					'active': False,}
+		res_obj = self.pool.get("res.partner")
+		partner = self.pool.get("res.partner")
+		partner = res_obj.browse(cr, uid, partner.create(cr, uid, vals_obj, context=context))
 		#if vName != '':	 
 		#	partner = self.findOrCreateObject(cr, uid, context, 'res.partner', 'email', vEmail, vals_obj)
 		vType = ""
@@ -166,7 +169,7 @@ class crm_lead(format_address, osv.osv):
 				'name':  msg.get('subject') or _("No Subject"),
 				'email_from': vEmail,
 				'email_cc': vEmail,
-				#'partner_id': partner.id,
+				'partner_id': partner.id,
 				'phone': vPhone or "",
 				'type': 'opportunity',
 				"section_id": vSection,
@@ -270,13 +273,12 @@ class crm_lead(format_address, osv.osv):
 		else:
 			res_obj = self.pool.get("res.partner")
 			contact = self.pool.get("res.partner")
-			contact = res_obj.browse(cr, uid, contact.create(cr, uid, {"name": opport.contact_name  or _(opport.email_from)}, context=None))
+			contact = res_obj.browse(cr, uid, contact.create(cr, uid, {"name": opport.contact_name  or _(opport.email_from), 'active': False,}, context=None))
 		contact.write({"email": opport.email_from,
 			"phone": opport.phone,
 			"function": opport.function,
 			"mobile": opport.mobile,
 			"fax": opport.fax,
-			'active': False,
 		})
 		#Генерим хэш
 		m = hashlib.md5(opport.email_from + str(time.strftime(tools.DEFAULT_SERVER_DATETIME_FORMAT)))

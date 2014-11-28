@@ -78,6 +78,7 @@
         "crm_claim_view.xml",
         "crm_iml_exchange_settings_menu.xml",
         "sales_team_view.xml",
+        "crm_phonecall_view.xml",
 
     ],
     

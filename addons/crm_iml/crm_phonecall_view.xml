@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+		<record id="view_form_iml_crm_phone" model="ir.ui.view">
+			<field name="name">view.form.iml.crm.phone.inherited1</field>
+			<field name="model">crm.phonecall</field>
+			<field name="inherit_id" ref="crm.crm_case_inbound_phone_tree_view"/>
+			<field eval="21" name="priority"/>
+			<field name="arch" type="xml">
+				<field name="opportunity_id" position="after">
+					<button string="Подробнее" type="object" name="redirectToObject"/>
+				</field>
+				<button name="action_button_convert2opportunity" position="replace"/>
+			</field>
+		</record>
+
+		<record id="view_form_iml_crm_phone2" model="ir.ui.view">
+			<field name="name">view.form.iml.crm.phone.inherited2</field>
+			<field name="model">crm.phonecall</field>
+			<field eval="21" name="priority"/>
+			<field name="arch" type="xml">
+				<tree string="Звонки" editable="top">
+					<field name="date"/>
+					<field name="name"/>
+					<field name="partner_id"/>
+					<button string="Подробнее" type="object" name="redirectToObject"/>
+					<button string="Meeting"
+						states="open,pending"
+						name="action_make_meeting"
+						icon="gtk-redo"
+						type="object"/>
+					<field name="partner_phone"/>
+					<field name="user_id"/>
+					<field name="categ_id" invisible="1"/>
+					<field name="create_date" invisible="1"/>
+					<field name="opportunity_id" invisible="1"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window.view" id="crm.action_crm_tag_tree_phone_outgoing0">
+			<field name="sequence" eval="1"/>
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="view_form_iml_crm_phone2"/>
+			<field name="act_window_id" ref="crm.crm_case_categ_phone_outgoing0"/>
+		</record>
+
+	</data>
+</openerp>
