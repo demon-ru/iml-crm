@@ -101,8 +101,10 @@
             <field name="name">super_calendar</field>
             <field name="model">super.calendar</field>
             <field name="arch" type="xml">
-                <calendar string="Calendar" color="model_description" date_start="date_start" date_delay="duration">
-                    <field name="name"/>
+                <calendar string="Calendar" color="model_id" date_start="date_start" date_delay="duration">
+                        <field name="name"/>
+                        <field name="model_description"/>
+                        <field name="user_id"/>
                 </calendar>
             </field>
         </record>

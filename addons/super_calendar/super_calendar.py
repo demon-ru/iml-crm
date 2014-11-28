@@ -346,6 +346,30 @@ class super_calendar(orm.Model):
 					base_obj_pool = self.pool.get(base_obj_model)
 					context["SC_UPDATE"] = True
 					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context)
+				elif base_obj_model == 'crm.phonecall':
+					# у звонка нам необходимо изменить следующий параметры:
+					# дата звонка + его длительность
+					# понадобится нам только дата его начала, т.к. поле длительность просто не меняется
+					date_start_field = correct_line.date_start_field_id.name
+					new_val = {date_start_field : res_obj.date_start}
+					# получаем пул нужной нам модели
+					base_obj_pool = self.pool.get(base_obj_model)
+					# передаем в контексте специальный параметр, который обозначает, что 
+					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
+					context["SC_UPDATE"] = True
+					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context)
+				elif base_obj_model == 'crm.claim':
+					# у объекта обращение нам необходимо изменить только дату следующего действия
+					date_start_field = correct_line.date_start_field_id.name
+					new_val = {date_start_field : res_obj.date_start}
+					# получаем пул нужной нам модели
+					base_obj_pool = self.pool.get(base_obj_model)
+					# передаем в контексте специальный параметр, который обозначает, что 
+					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
+					context["SC_UPDATE"] = True
+					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context) 
+
+
 		return vals
 # **********************************************
 # блок для обновления данных в super_calendar
@@ -445,4 +469,103 @@ class crm_lead(format_address, osv.osv):
 																 super_calendar_pool,
 																 [obj_id])
 		
+		return vals
+
+
+# объект 	crm.phonecall 	звонок
+class crm_phonecall(osv.osv):
+	_inherit = 'crm.phonecall'
+
+	# перекрываем метод на запись
+	def write(self, cr, uid, ids, vals, context=None):
+		# если нужное нам значение есть в списке данных для обновления, то нужно обновить SC
+		# что бы получить нужный нам объект SU, нам потребуется id исходного объекта и его модель,
+		# т.к. id исходных объектов могут повторяться
+		obj_id = ids[0]
+		# но какая это модель, я уж точно знаю..
+		model_id = "crm.phonecall"
+
+		res = super(crm_phonecall, self).write(cr, uid, obj_id, vals, context=context) 
+		obj = self.pool.get('super.calendar')
+		ids = obj.search(cr, uid, [('res_id', '=', str(model_id) + "," + str(obj_id))])
+		res_obj = obj.browse(cr, uid, ids)
+		configurator_id = res_obj.configurator_id
+		if (not 'SC_UPDATE' in context):
+			configurator_pool = self.pool.get('super.calendar.configurator')
+			for configurator in configurator_pool.browse(cr, uid, configurator_id.id):
+				# пробегаем по строкам у текущей конфигурации
+				for line in configurator.line_ids:
+					# если модель в строке совпадает, то можем продолжить
+					# ололо, вот тебе и прикол. если будет несколько строчек с совпадающей моделью, 
+					# то тогда что???!
+					# на первый взгляд, он выполнит действие над одним и тем же объектом 
+					# столько раз, сколько line с моделью, совпадающей с текущей
+					# не смертельно, но 
+					# TODO: сделать проверку на несколько линий с одной и той же моделью
+					if(line.name.model == model_id):
+						# теперь проверяем назначенные этой строке филды в качетве
+						# даты начала, завершения и продолжительности
+						start_datetime = line.date_start_field_id.name
+						stop_datetime = line.date_stop_field_id.name
+						duration = line.duration_field_id.name
+						if (start_datetime in vals or stop_datetime in vals or duration in vals):
+							# для начала нам нужно удалить старую запись из пула SC
+							super_calendar_pool = self.pool.get('super.calendar')
+							super_calendar_pool.unlink(cr, uid,
+													   ids,
+													   context=context)
+							# сгенерируем новую запись
+							values = configurator._generate_record_from_line_with_id(
+																	 configurator,
+																	 line,
+																	 super_calendar_pool,
+																	 [obj_id])
+		return vals
+
+
+# объект 	crm.claim		обращение
+class crm_claim(osv.osv):
+	_inherit = 'crm.claim'
+
+	# перекрываем метод на запись
+	def write(self, cr, uid, ids, vals, context=None):
+		# если нужное нам значение есть в списке данных для обновления, то нужно обновить SC
+		# что бы получить нужный нам объект SU, нам потребуется id исходного объекта и его модель,
+		# т.к. id исходных объектов могут повторяться
+		obj_id = ids[0]
+		# но какая это модель, я уж точно знаю..
+		model_id = "crm.claim"
+
+		res = super(crm_claim, self).write(cr, uid, obj_id, vals, context=context) 
+		obj = self.pool.get('super.calendar')
+		ids = obj.search(cr, uid, [('res_id', '=', str(model_id) + "," + str(obj_id))])
+		res_obj = obj.browse(cr, uid, ids)
+		configurator_id = res_obj.configurator_id
+		if (not 'SC_UPDATE' in context):
+			configurator_pool = self.pool.get('super.calendar.configurator')
+			for configurator in configurator_pool.browse(cr, uid, configurator_id.id):
+				# пробегаем по строкам у текущей конфигурации
+				for line in configurator.line_ids:
+					# если модель в строке совпадает, то можем продолжить
+					# ололо, вот тебе и прикол. если будет несколько строчек с совпадающей моделью, 
+					# то тогда что???!
+					# 
+					if(line.name.model == model_id):
+						# теперь проверяем назначенные этой строке филды в качетве
+						# даты начала, завершения и продолжительности
+						start_datetime = line.date_start_field_id.name
+						stop_datetime = line.date_stop_field_id.name
+						duration = line.duration_field_id.name
+						if (start_datetime in vals or stop_datetime in vals or duration in vals):
+							# для начала нам нужно удалить старую запись из пула SC
+							super_calendar_pool = self.pool.get('super.calendar')
+							super_calendar_pool.unlink(cr, uid,
+													   ids,
+													   context=context)
+							# сгенерируем новую запись
+							values = configurator._generate_record_from_line_with_id(
+																	 configurator,
+																	 line,
+																	 super_calendar_pool,
+																	 [obj_id])
 		return vals
