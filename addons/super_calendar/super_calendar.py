@@ -409,6 +409,20 @@ def _regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context):
 																 super_calendar_pool,
 																 [obj_id])
 
+def _generate_SC_on_create(self, cr, uid, model_id, obj_id):
+		scc_line_pool = self.pool.get("super.calendar.configurator.line")
+		ids = scc_line_pool.search(cr, uid, [('name.model', '=', model_id)])
+		line_objs = scc_line_pool.browse(cr, uid, ids)
+
+		super_calendar_pool = self.pool.get("super.calendar")
+		for line in line_objs:
+			configurator = line.configurator_id
+			configurator._generate_record_from_line_with_id(
+													configurator,
+													line,
+													super_calendar_pool,
+													[obj_id])
+
 # объект 	event	встреча
 class calendar_event(osv.Model):
 	_inherit = 'calendar.event'
@@ -426,6 +440,15 @@ class calendar_event(osv.Model):
 		_regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context)
 		return vals
 
+	def create(self, cr, uid, vals, context=None):
+		# записываем изменения для самого объекта
+		res = super(calendar_event, self).create(cr, uid, vals, context=context)
+		obj_id = res
+		model_id = "calendar.event"
+		# cr, uid, model_id, obj_id
+		# теперь пошло создание объекта SC
+		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
+		return res
 
 
 # объект 	lead	заявка
@@ -446,6 +469,16 @@ class crm_lead(format_address, osv.osv):
 		_regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context)
 		return vals
 
+	def create(self, cr, uid, vals, context=None):
+		# записываем изменения для самого объекта
+		res = super(crm_lead, self).create(cr, uid, vals, context=context)
+		obj_id = res
+		model_id = "crm.lead"
+		# cr, uid, model_id, obj_id
+		# теперь пошло создание объекта SC
+		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
+		return res
+
 
 
 # объект 	crm.phonecall 	звонок
@@ -465,6 +498,15 @@ class crm_phonecall(osv.osv):
 		_regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context)
 		return vals
 
+	def create(self, cr, uid, vals, context=None):
+		# записываем изменения для самого объекта
+		res = super(crm_phonecall, self).create(cr, uid, vals, context=context)
+		obj_id = res
+		model_id = "crm.phonecall"
+		# cr, uid, model_id, obj_id
+		# теперь пошло создание объекта SC
+		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
+		return res
 
 # объект 	crm.claim		обращение
 class crm_claim(osv.osv):
@@ -482,3 +524,13 @@ class crm_claim(osv.osv):
 		res = super(crm_claim, self).write(cr, uid, obj_id, vals, context=context) 
 		_regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context)
 		return vals
+
+	def create(self, cr, uid, vals, context=None):
+		# записываем изменения для самого объекта
+		res = super(crm_claim, self).create(cr, uid, vals, context=context)
+		obj_id = res
+		model_id = "crm.claim"
+		# cr, uid, model_id, obj_id
+		# теперь пошло создание объекта SC
+		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
+		return res
