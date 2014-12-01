@@ -8,7 +8,7 @@
 			<field eval="21" name="priority"/>
 			<field name="arch" type="xml">
 				<field name="opportunity_id" position="after">
-					<button string="Подробнее" type="object" name="redirectToObject"/>
+					<button string="Подробнее" type="object" name="redirectToObject" icon="compfile"/>
 				</field>
 				<button name="action_button_convert2opportunity" position="replace"/>
 			</field>
@@ -23,7 +23,7 @@
 					<field name="date"/>
 					<field name="name"/>
 					<field name="partner_id"/>
-					<button string="Подробнее" type="object" name="redirectToObject"/>
+					<button string="Подробнее" type="object" name="redirectToObject" icon="compfile"/>
 					<button string="Meeting"
 						states="open,pending"
 						name="action_make_meeting"
