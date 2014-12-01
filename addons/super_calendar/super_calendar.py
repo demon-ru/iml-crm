@@ -23,7 +23,7 @@ from openerp.osv import fields, orm
 from openerp.tools.translate import _
 import logging
 from mako.template import Template
-from datetime import datetime
+from datetime import datetime, timedelta
 from openerp import tools
 from openerp.tools.safe_eval import safe_eval
 
@@ -322,6 +322,7 @@ class super_calendar(orm.Model):
 				# проверяем модель
 				if base_obj_model == "crm.lead":
 					date_start_field = correct_line.date_start_field_id.name
+
 					# теперь ищем исходный документ и меняем у него нужное поле :)
 					# т.к. он же у нас уже есть :)
 					new_val = {date_start_field : res_obj.date_start}
@@ -336,9 +337,9 @@ class super_calendar(orm.Model):
 					date_stop_field = correct_line.date_stop_field_id.name
 					# вычисляем дату окончания действия объекта
 					# алгоритм следующий - нужно поменять только дату у даты окончания, не меняя время
-					time_difference = datetime.strptime(res_obj.date_start, "%Y-%m-%d %H:%M:%S") - datetime.strptime(base_obj[date_start_field], "%Y-%m-%d %H:%M:%S")
-					new_time_stop = datetime.strptime(base_obj[date_stop_field], "%Y-%m-%d %H:%M:%S") + time_difference
 					# приводим datetime к строке, т.к. в базе она хранится именно в таком виде
+					# все неправильно, т.к. не учитывает продолжительность события
+					new_time_stop = datetime.strptime(res_obj.date_start, "%Y-%m-%d %H:%M:%S") + timedelta(hours=res_obj.duration)
 					new_time_stop_string = new_time_stop.strftime("%Y-%m-%d %H:%M:%S")
 					# формируем список значений, которые нужно обновить в объекте
 					new_val = {date_start_field : res_obj.date_start, date_stop_field : new_time_stop_string}
@@ -351,7 +352,8 @@ class super_calendar(orm.Model):
 					# дата звонка + его длительность
 					# понадобится нам только дата его начала, т.к. поле длительность просто не меняется
 					date_start_field = correct_line.date_start_field_id.name
-					new_val = {date_start_field : res_obj.date_start}
+					duration_field = correct_line.duration_field_id.name
+					new_val = {date_start_field : res_obj.date_start, duration_field : res_obj.duration}
 					# получаем пул нужной нам модели
 					base_obj_pool = self.pool.get(base_obj_model)
 					# передаем в контексте специальный параметр, который обозначает, что 
