@@ -30,6 +30,7 @@ class crm_claim(osv.osv):
 				select=True, help="Responsible sales team."\
 				" Define Responsible user and Email account for"\
 				" mail gateway."),
+		'user_id': fields.many2one('res.users', 'Responsible', track_visibility='onchange'),
 		'date_deadline': fields.date('Крайний срок'),
 		'color': fields.integer('Color Index'),
 	}
@@ -84,6 +85,16 @@ class crm_claim(osv.osv):
 		return result, fold
 
 	_group_by_full = { 'stage_id': _read_group_stage_ids}
+
+	def on_change_user(self, cr, uid, ids, user_id, context=None):
+		""" When changing the user, also set a section_id or restrict section id
+			to the ones user_id is member of. """
+		section_id = None
+		if user_id:
+			section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
+			if section_ids:
+				section_id = section_ids[0]
+		return {'value': {'section_id': section_id}}
 
 
 class crm_claim_stage(osv.osv):

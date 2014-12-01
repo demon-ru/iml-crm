@@ -16,7 +16,9 @@
 				<xpath expr="//page[@string='Claim Description']" position="replace"/>
 				<xpath expr="//group/field[@name='priority']" position="replace" />
 				<xpath expr="//group/field[@name='date_deadline']" position="replace" />
-				<xpath expr="//group/field[@name='user_id']" position="after">
+				<xpath expr="//group/field[@name='user_id']" position="replace"/>
+				<xpath expr="//group/field[@name='section_id']" position="before">
+					<field name="user_id" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_sale_salesman_all_leads']}" on_change="on_change_user(user_id, context)"/>
 					<field name="date_deadline"/>
 				</xpath>
 				<xpath expr="//group/field[@name='section_id']" position="after">

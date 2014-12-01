@@ -35,13 +35,18 @@ class wizard_crm_claim_report(osv.osv_memory):
 		"user_id": fields.many2one('res.users', "Ответственный"),
 	}
 
-	def define_delta(self, cr, uid, ids):
+	def define_delta(self, cr, uid, ids, check_tz=True):
 		user_pool = self.pool.get('res.users')
 		user = user_pool.browse(cr, SUPERUSER_ID, uid)
 		tz = pytz.timezone(user.partner_id.tz) or pytz.utc
 		d = datetime(2012, 1, 1, 0, 0, 0, tzinfo=pytz.utc)
 		d2 = d.astimezone(tz)
-		delta = d.hour - d2.hour
+		tz_moscov  = pytz.timezone("Europe/Moscow")
+		#Из перевода часов в России часовой пояс Москвы стал не +4, а +3, а здесь до сих пор +4
+		if (tz == tz_moscov) and (check_tz):
+			delta = -3
+		else:
+			delta = d.hour - d2.hour
 		return delta
 
 	def get_time(self, cr, uid, ids, isBegin):
