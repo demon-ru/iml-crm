@@ -423,6 +423,14 @@ def _generate_SC_on_create(self, cr, uid, model_id, obj_id):
 													super_calendar_pool,
 													[obj_id])
 
+def _unlink_SC_on_unlink(self, cr, uid, model_id, ids, context):
+		sc_pool = self.pool.get('super.calendar')
+		for obj_id in ids:
+			sc_ids = sc_pool.search(cr, uid, [('res_id', '=', str(model_id) + "," + str(obj_id))])
+			sc_objects = sc_pool.browse(cr, uid, sc_ids)
+			for sc in sc_objects:
+				sc_pool.unlink(cr, uid, sc.id, context)
+
 # объект 	event	встреча
 class calendar_event(osv.Model):
 	_inherit = 'calendar.event'
@@ -450,6 +458,14 @@ class calendar_event(osv.Model):
 		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
 		return res
 
+	def unlink(self, cr, uid, ids, context=None):
+		# при удалении объекта необходимо удалить объект :)
+		# и удалить связанную с ним запись SC
+		model_id = "calendar.event"
+		# self, cr, uid, model_id, ids
+		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
+
+		return super(calendar_event, self).unlink(cr, uid, ids, context=context)
 
 # объект 	lead	заявка
 class crm_lead(format_address, osv.osv):
@@ -478,6 +494,15 @@ class crm_lead(format_address, osv.osv):
 		# теперь пошло создание объекта SC
 		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
 		return res
+
+	def unlink(self, cr, uid, ids, context=None):
+		# при удалении объекта необходимо удалить объект :)
+		# и удалить связанную с ним запись SC
+		model_id = "crm.lead"
+		# self, cr, uid, model_id, ids
+		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
+
+		return super(crm_lead, self).unlink(cr, uid, ids, context=context)
 
 
 
@@ -508,6 +533,15 @@ class crm_phonecall(osv.osv):
 		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
 		return res
 
+	def unlink(self, cr, uid, ids, context=None):
+		# при удалении объекта необходимо удалить объект :)
+		# и удалить связанную с ним запись SC
+		model_id = "crm.phonecall"
+		# self, cr, uid, model_id, ids
+		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
+
+		return super(crm_phonecall, self).unlink(cr, uid, ids, context=context)
+
 # объект 	crm.claim		обращение
 class crm_claim(osv.osv):
 	_inherit = 'crm.claim'
@@ -534,3 +568,12 @@ class crm_claim(osv.osv):
 		# теперь пошло создание объекта SC
 		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
 		return res
+
+	def unlink(self, cr, uid, ids, context=None):
+		# при удалении объекта необходимо удалить объект :)
+		# и удалить связанную с ним запись SC
+		model_id = "crm.claim"
+		# self, cr, uid, model_id, ids
+		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
+
+		return super(crm_claim, self).unlink(cr, uid, ids, context=context)
