@@ -50,16 +50,18 @@ class wizard_crm_claim_report(osv.osv_memory):
 		return delta
 
 	def get_time(self, cr, uid, ids, isBegin):
+		now = datetime.now()
 		hour = 0
 		minute = 0
 		second = 0
+		month = now.month - 1
 		if not(isBegin):
 			hour = 23
 			minute = 59
 			second = 59
-		now = datetime.now()
+			month = now.month
 		res_date = datetime(year=now.year, 
-			month=now.month,
+			month= month,
 			day=now.day,
 			hour=hour,
 			minute=minute,

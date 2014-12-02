@@ -35,3 +35,4 @@ import crm_claim
 import sales_team
 import wizard
 import crm_phonecall
+import calendar_event
