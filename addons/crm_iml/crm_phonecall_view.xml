@@ -11,6 +11,10 @@
 					<button string="Подробнее" type="object" name="redirectToObject" icon="compfile"/>
 				</field>
 				<button name="action_button_convert2opportunity" position="replace"/>
+				<xpath expr="//field[@name='user_id']" position="replace"/>
+				<xpath expr="//field[@name='partner_phone']" position="after">
+					<field name="user_id" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_sale_salesman_all_leads']}" on_change="on_change_user(user_id, context)"/>
+				</xpath>
 			</field>
 		</record>
 
@@ -30,7 +34,7 @@
 						icon="gtk-redo"
 						type="object"/>
 					<field name="partner_phone"/>
-					<field name="user_id"/>
+					<field name="user_id" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_sale_salesman_all_leads']}" on_change="on_change_user(user_id, context)"/>
 					<field name="categ_id" invisible="1"/>
 					<field name="create_date" invisible="1"/>
 					<field name="opportunity_id" invisible="1"/>
@@ -38,6 +42,40 @@
 				</tree>
 			</field>
 		</record>
+
+		<record id="view_form_iml_crm_phone3" model="ir.ui.view">
+			<field name="name">view.form.iml.crm.phone.inherited3</field>
+			<field name="model">crm.phonecall</field>
+			<field name="inherit_id" ref="crm.crm_case_phone_form_view"/>
+			<field eval="21" name="priority"/>
+			<field name="arch" type="xml">
+				<xpath expr="//div[@class='oe_right oe_button_box']/button[@name=%(crm.phonecall_to_phonecall_act)d]/div" position="replace"/>
+				<xpath expr="//div[@class='oe_right oe_button_box']/button[@name=%(crm.phonecall_to_phonecall_act)d]" position="inside">
+					<div>Запланировать<br/>звонок</div>
+				</xpath>
+				<xpath expr="//div[@class='oe_right oe_button_box']/button[@name='action_make_meeting']/div" position="replace"/>
+				<xpath expr="//div[@class='oe_right oe_button_box']/button[@name='action_make_meeting']" position="inside">
+					<div>Запланировать<br/>встречу</div>
+				</xpath>
+				<xpath expr="//field[@name='user_id']" position="replace"/>
+				<xpath expr="//field[@name='date']" position="after" >
+					<field name="user_id" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_sale_salesman_all_leads']}" on_change="on_change_user(user_id, context)"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="phonecall_to_phonecall_view_inherit">
+			<field name="name">crm.phonecall2phonecall.form.inherit</field>
+			<field name="model">crm.phonecall2phonecall</field>
+			<field name="inherit_id" ref="crm.phonecall_to_phonecall_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='user_id']" position="replace"/>
+				<xpath expr="//field[@name='partner_id']" position="after">
+					<field name="user_id" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_sale_salesman_all_leads']}" on_change="on_change_user(user_id, context)"/>
+				</xpath>
+			</field>
+		</record>
+
 
 		<record model="ir.actions.act_window.view" id="crm.action_crm_tag_tree_phone_outgoing0">
 			<field name="sequence" eval="1"/>
