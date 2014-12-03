@@ -64,7 +64,7 @@ class super_calendar_configurator(orm.Model):
 		for configurator in self.browse(cr, uid, configurator_ids, context):
 			# пробегаем по строкам у текущей конфигурации
 			for line in configurator.line_ids:
-				values = self._generate_record_from_line(cr, uid,
+				self._generate_record_from_line(cr, uid,
 														 configurator,
 														 line,
 														 super_calendar_pool,
@@ -138,7 +138,6 @@ class super_calendar_configurator(orm.Model):
 					}
 				# грязный хак
 				super_calendar_pool.create(cr, uid, super_calendar_values, context=context)
-		return super_calendar_values
 
 	# метод, который создает запись в SC
 	# отличие от предидущего метода - он создает запись только для того объекта,
@@ -217,7 +216,6 @@ class super_calendar_configurator(orm.Model):
 					}
 				# грязный хак
 				super_calendar_pool.create(cr, uid, super_calendar_values, context=context)
-		return super_calendar_values
 
 
 class super_calendar_configurator_line(orm.Model):
@@ -403,7 +401,7 @@ def _regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context):
 												   ids,
 												   context=context)
 						# сгенерируем новую запись
-						values = configurator._generate_record_from_line_with_id(
+						configurator._generate_record_from_line_with_id(
 																 configurator,
 																 line,
 																 super_calendar_pool,
