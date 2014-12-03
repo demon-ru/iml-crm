@@ -139,10 +139,10 @@
             <field name="view_id" ref="super_calendar"/>
         </record>
     
-        <menuitem id="base.super_calendar_menu" name="Super Calendar" sequence="30"/>
-        <menuitem id="super_calendar_calendar" name="Calendar" parent="base.super_calendar_menu" />
+        <menuitem id="super_calendar.super_calendar_menu" name="Super Calendar" sequence="30"/>
+        <menuitem id="super_calendar_calendar" name="Calendar" parent="super_calendar.super_calendar_menu" />
         <menuitem id="super_calendar_calendar_calendar" name="Calendar" parent="super_calendar_calendar" action="super_calendar_action"/>
-        <menuitem id="super_calendar_configuration" name="Configuration" parent="base.super_calendar_menu" />
+        <menuitem id="super_calendar_configuration" name="Configuration" parent="super_calendar.super_calendar_menu" />
         <menuitem id="super_calendar_configurators" name="Configurators" parent="super_calendar_configuration" action="super_calendar_configurator"/>
     </data>
 </openerp>
