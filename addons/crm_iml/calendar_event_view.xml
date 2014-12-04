@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+
+		<record model="ir.ui.view" id="view_calendar_event_form_inh">
+			<field name="name">Calendar - Event Form</field>
+			<field name="model">calendar.event</field>
+			<field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+			<field name="priority" eval="1"/>
+			<field name="arch" type="xml">
+				<xpath expr="//page[@string='Invitations']" position="replace"/>
+			</field>
+		</record>
+	</data>
+</openerp>

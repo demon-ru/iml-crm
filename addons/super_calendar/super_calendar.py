@@ -33,6 +33,26 @@ import string
 # для crm.lead
 from openerp.addons.base.res.res_partner import format_address
 
+def calendar_id2real_id(calendar_id=None, with_date=False):
+	"""
+	Convert a "virtual/recurring event id" (type string) into a real event id (type int).
+	E.g. virtual/recurring event id is 4-20091201100000, so it will return 4.
+	@param calendar_id: id of calendar
+	@param with_date: if a value is passed to this param it will return dates based on value of withdate + calendar_id
+	@return: real event id
+	"""
+	if calendar_id and isinstance(calendar_id, (str, unicode)):
+		res = calendar_id.split('-')
+		if len(res) >= 2:
+			real_id = res[0]
+			if with_date:
+				real_date = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT, time.strptime(res[1], "%Y%m%d%H%M%S"))
+				start = datetime.strptime(real_date, DEFAULT_SERVER_DATETIME_FORMAT)
+				end = start + timedelta(hours=with_date)
+				return (int(real_id), real_date, end.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
+			return int(real_id)
+	return calendar_id and int(calendar_id) or calendar_id
+
 def _models_get(self, cr, uid, context=None):
 	obj = self.pool.get('ir.model')
 	ids = obj.search(cr, uid, [])
@@ -287,6 +307,51 @@ class super_calendar(orm.Model):
 		'crm.claim'
 		]
 
+
+	def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
+		if context is None:
+			context = {}
+		fields2 = fields and fields[:] or None
+		EXTRAFIELDS = ('user_id', 'duration', 'date_start')
+		for f in EXTRAFIELDS:
+			if fields and (f not in fields):
+				fields2.append(f)
+		if isinstance(ids, (str, int, long)):
+			select = [ids]
+		else:
+			select = ids
+
+		# FIXME: find a better way to not push virtual ids in the cache
+		# (leading to their prefetching and ultimately a type error when
+		# postgres tries to convert '14-3489274297' to an integer)
+		self.invalidate_cache(cr, uid, context=context)
+
+		select = map(lambda x: (x, calendar_id2real_id(x)), select)
+		result = []
+		real_data = super(super_calendar, self).read(cr, uid, [real_id for calendar_id, real_id in select], fields=fields2, context=context, load=load)
+		real_data = dict(zip([x['id'] for x in real_data], real_data))
+
+		for calendar_id, real_id in select:
+			res = real_data[real_id].copy()
+			ls = calendar_id2real_id(calendar_id, with_date=res and res.get('duration', 0) > 0 and res.get('duration') or 1)
+			res['id'] = calendar_id
+			result.append(res)
+
+		for r in result:
+			if r['user_id']:
+				user_id = type(r['user_id']) in (tuple, list) and r['user_id'][0] or r['user_id']
+				if user_id == uid:
+					continue
+
+		for r in result:
+			for k in EXTRAFIELDS:
+				if (k in r) and (fields and (k not in fields)):
+					del r[k]
+		if isinstance(ids, (str, int, long)):
+			return result and result[0] or False
+		return result
+
+		
 	def write(self, cr, uid, ids, vals, context=None):
 		# цель следующая - изменить данные в исходном документе, если изменились данные в объекте SC
 		# перво наперво нужно определить, какие модели мы будем обслуживать

@@ -41,8 +41,18 @@ class crm_phonecall(osv.osv):
 				 'If the callis not applicable anymore, the status can be set to Cancelled.'),
 	}
 
+	def _get_default_section_id(self, cr, uid, context=None):
+		section_ids = self.pool.get('crm.case.section').search(cr, uid, ['|', ('user_id', '=', uid), ('member_ids', '=', uid)], context=context)
+		if section_ids:
+			section_id = section_ids[0]
+		print "**************************"
+		print section_id
+		print "**************************"
+		return section_id
+
 	_defaults = {
-		"duration" : 15,
+		"duration" : 15.0/60.0,
+		"section_id": _get_default_section_id,
 	}
 
 	def redirectToObject(self,cr,uid,ids,context=None): 

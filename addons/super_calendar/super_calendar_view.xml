@@ -79,6 +79,25 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="view_calendar_form_popup">
+            <field name="name">Popup</field>
+            <field name="model">super.calendar</field>
+            <field name="priority" eval="2"/>
+            <field name="arch" type="xml">
+                <form string="Meetings">
+                    <field name="name"/>
+                    <group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="duration"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="res_id"/>
+                        </group>
+                    </group>       
+                </form>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="super_calendar_form">
             <field name="name">super_calendar_form</field>
             <field name="model">super.calendar</field>
@@ -86,7 +105,6 @@
                 <form string="Configurator">
                     <field name="name" readonly="1"/>
                     <field name="date_start" readonly="1"/>
-                    <!--<field name="date_stop" readonly="1"/>-->
                     <field name="duration" readonly="1"/>
                     <field name="user_id" readonly="1"/>
                     <field name="configurator_id" readonly="1"/>
@@ -101,7 +119,7 @@
             <field name="name">super_calendar</field>
             <field name="model">super.calendar</field>
             <field name="arch" type="xml">
-                <calendar string="Calendar" color="model_id" date_start="date_start" date_delay="duration">
+                <calendar string="Calendar" color="model_id" date_start="date_start" date_delay="duration" event_open_popup="%(super_calendar.view_calendar_form_popup)s">
                         <field name="name"/>
                         <field name="model_description"/>
                         <field name="user_id"/>
@@ -134,8 +152,14 @@
         <record model="ir.actions.act_window" id="super_calendar_action">
             <field name="name">Super Calendar</field>
             <field name="res_model">super.calendar</field>
-            <field name="view_type">form</field>
+            <field name="view_id" ref="super_calendar"/>
             <field name="view_mode">calendar,tree,form</field>
+        </record>
+
+        <record model="ir.actions.act_window.view" id="action_view_super_calendar_calendar">
+            <field name="act_window_id" ref="super_calendar_action"/>
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">calendar</field>
             <field name="view_id" ref="super_calendar"/>
         </record>
     

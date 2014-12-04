@@ -64,9 +64,13 @@
 						<field name="type" invisible="1"/>
 					</xpath>
 					<xpath expr="//page[@string='Lead']/group/group[@string='References']" position="replace"/>
-					<xpath expr="//button[@name='%(crm.crm_case_categ_phone_incoming0)d']/div" position="replace"/>
-					<xpath expr="//button[@name='%(crm.crm_case_categ_phone_incoming0)d']">
-						<div>Звонки</div>
+					<xpath expr="//button[@name='%(crm.crm_case_categ_phone_incoming0)d']" position="replace"/>
+					<xpath expr="//div[@class='oe_right oe_button_box']" position="inside">
+						<button class="oe_inline oe_stat_button" type="action" 
+                                name="%(crm.crm_case_categ_phone_incoming0)d" icon="fa-phone"
+                                context="{'default_opportunity_id': active_id, 'search_default_opportunity_id': active_id, 'default_partner_id': partner_id}">
+							<div>Звонки</div>
+						</button>
 					</xpath>
 					<xpath expr="//button[@name='action_schedule_meeting']/field[@name='meeting_count']" position="replace"/> 
 					<xpath  expr="//button[@name='action_schedule_meeting']">

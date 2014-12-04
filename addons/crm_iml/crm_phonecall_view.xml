@@ -57,6 +57,7 @@
 				<xpath expr="//div[@class='oe_right oe_button_box']/button[@name='action_make_meeting']" position="inside">
 					<div>Запланировать<br/>встречу</div>
 				</xpath>
+				<xpath expr="//div[@class='oe_right oe_button_box']/button[@name='action_button_convert2opportunity']" position="replace"/>
 				<xpath expr="//field[@name='user_id']" position="replace"/>
 				<xpath expr="//field[@name='date']" position="after" >
 					<field name="user_id" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_sale_salesman_all_leads']}" on_change="on_change_user(user_id, context)"/>
@@ -83,6 +84,15 @@
 			<field name="view_id" ref="view_form_iml_crm_phone2"/>
 			<field name="act_window_id" ref="crm.crm_case_categ_phone_outgoing0"/>
 		</record>
+
+        <act_window
+                id="crm.act_crm_opportunity_crm_phonecall_new"
+                name="Phone calls"
+                groups="base.group_sale_salesman"
+                res_model="crm.phonecall"
+                view_mode="tree,calendar,form"
+                context="{'default_opportunity_id': active_id}"
+                view_type="form"/>
 
 	</data>
 </openerp>

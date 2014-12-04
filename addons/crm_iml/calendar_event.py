@@ -44,6 +44,11 @@ class calendar_event(osv.Model):
 		return True
 
 	def message_subscribe(self, cr, uid, ids, partner_ids, subtype_ids=None, context=None):
+		print "**************************"
+		print context
+		print "**************************"
+		if not("not_send_followers" in context):
+			super(calendar_event, self). message_subscribe(cr, uid, ids, partner_ids, subtype_ids, context)
 		return True
 
 	def message_get_suggested_recipients(self, cr, uid, ids, context=None):
