@@ -8,8 +8,146 @@
 			<field name="inherit_id" ref="calendar.view_calendar_event_form"/>
 			<field name="priority" eval="1"/>
 			<field name="arch" type="xml">
-				<xpath expr="//page[@string='Invitations']" position="replace"/>
+				<xpath expr="//sheet" position="before">
+					<header>
+						<field name="state_metting" nolabel="1" widget="statusbar" clickable="True"/>
+					</header>
+				</xpath>
+				<xpath expr="//div[@class='oe_title']/label[@string='Attendees']" position="replace"/>
+				<xpath expr="//div[@class='oe_title']/h2" position="before">
+					<label for="partner_ids" class="oe_edit_only"/>
+				</xpath>
+				<xpath expr="//notebook" position="replace"/>
+				<xpath expr="//div[@class='oe_title']" position="after">
+					<notebook>
+						<page string="Основное">
+							<group attrs="{'invisible': [('recurrency','==',False)]}" class="oe_edit_only ">
+								<p class='alert alert-warning'> This event is linked to a recurrence...<br/>
+									<button type="object" name="open_after_detach_event"  string="Update only this instance"  help="Click here to update only this instance and not all recurrences. " class="oe_link"/>
+								</p>
+							</group>
+							<group>
+								<group>
+									<field name="start" attrs="{'invisible': True}"/>
+									<field name="stop" attrs="{'invisible': True}"/>
+
+									<field name="start_date" on_change="onchange_dates('start', start_date, stop_date, allday, True)" attrs="{'invisible': [('allday','=',False)]}"/>
+									<field name="stop_date" on_change="onchange_dates('stop', start_date, stop_date, allday, True)" attrs="{'invisible': [('allday','=',False)]}"/>
+
+									<field name="start_datetime" on_change="onchange_dates('start', start_datetime, stop_datetime, allday, False)" attrs="{'invisible': [('allday','=',True)]}"/>
+									<field name="stop_datetime" on_change="onchange_dates('stop', start_datetime, stop_datetime, allday, False)" attrs="{'invisible': [('allday','=',True)]}"/>
+									<label for="allday"/>
+									<div>
+										<field name="allday"  class="oe_inline" on_change="onchange_allday(start, stop, start_date, stop_date, start_datetime, stop_datetime, allday)"/>
+									</div>
+									<field name="user_id" />
+									<field name="duration" widget="float_time" class="oe_inline" attrs="{ 'invisible': True }"/>
+								</group>
+								<group>
+									<field name="categ_ids" widget="many2many_tags" />
+									<field name="alarm_ids" widget="many2many_tags" />
+									<field name="location" />
+								</group>
+
+							</group>
+							<label for="description"/>
+							<field name="description"/>
+						</page>
+						<page string="Настройки">
+							<group>
+								<group col="1">
+									<group>
+										<field name="recurrency"/>
+									</group>
+									<group attrs="{'invisible': [('recurrency','=',False)]}">
+										<label for="interval"/>
+										<div>
+											<field name="interval" attrs="{'required': [('recurrency','==',True)]}" class="oe_inline"/>
+											<field name="rrule_type" attrs="{'required': [('recurrency','==',True)]}" class="oe_inline"/>
+										</div>
+										<label for="end_type"/>
+										<div>
+											<field name="end_type" attrs="{'required': [('recurrency','==',True)]}" class="oe_inline"/>
+											<field name="count" attrs="{'invisible': [('end_type', '!=', 'count')], 'required': [('recurrency','==',True)]}" class="oe_inline"/>
+											<field name="final_date" attrs="{'invisible': [('end_type', '!=', 'end_date')], 'required': [('end_type', '=', 'end_date')]}" class="oe_inline"/>
+										</div>
+										<label string="Select Weekdays" attrs="{'invisible' :[('rrule_type','not in', ['weekly'])]}"/>
+										<group col="2" colspan="1" name="weekdays" attrs="{'invisible' :[('rrule_type','not in', ['weekly'])]}" >
+											<field name="mo" />
+											<field name="tu" />
+											<field name="we" />
+											<field name="th" />
+											<field name="fr" />
+											<field name="sa" />
+											<field name="su" />
+										</group>
+	
+										<label string="Day of Month"
+											attrs="{'invisible': [('rrule_type','!=','monthly')]}"/>
+	
+										<div attrs="{'invisible': [('rrule_type','!=','monthly')]}">
+											<field name="month_by"/>
+											<field name="day"
+												attrs="{'required': [('month_by','=','date'), ('rrule_type','=','monthly')],
+													'invisible': [('month_by','=','day')]}"/>
+											<field name="byday" string="The"
+												attrs="{'required': [('month_by','=','day'), ('rrule_type','=','monthly')], 'invisible': [('month_by','=','date')]}"/>
+											<field name="week_list" nolabel="1"
+												attrs="{'required': [('month_by','=','day'), ('rrule_type','=','monthly')], 'invisible': [('month_by','=','date')]}"/>
+										</div>
+									</group>
+								</group>
+								<group>
+									<field name="class"/>
+									<field name="show_as"/>
+									<field name="rrule" invisible="1" readonly="0" />                                    
+									<field name="recurrent_id" invisible="1" />
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</xpath>
 			</field>
 		</record>
+
+		<record model="ir.ui.view" id="view_calendar_event_form_popup_inherit">
+			<field name="name">Meetings Popup</field>
+			<field name="model">calendar.event</field>
+			<field name="inherit_id" ref="calendar.view_calendar_event_form_popup"/>
+			<field name="priority" eval="2"/>
+			<field name="arch" type="xml">
+				<xpath expr="//group/group/field[@name='start_date']" position="replace"/>
+				<xpath expr="//group/group/field[@name='duration']" position="replace"/>
+				<xpath expr="//group/group/field[@name='partner_ids']" position="replace"/>
+				<xpath expr="//group/group/field[@name='allday']" position="before">
+					<field name="start_date" attrs="{'invisible': [('allday','=',False)]}"/>
+					<field name="start_datetime" attrs="{'invisible': [('allday','=',True)]}"/>
+					<field name="duration" widget="float_time" attrs="{'invisible': [('allday','=',True)]}"/>
+				</xpath>
+				<xpath expr="//group/group/field[@name='allday']" position="after">
+					<field name="partner_ids" widget="many2manyattendee"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="action_calendar_event_inh" model="ir.actions.act_window">
+			<field name="name">Meetings</field>
+			<field name="res_model">calendar.event</field>
+			<field name="view_mode">calendar,tree,form</field>
+			<field name="view_id" ref="calendar.view_calendar_event_calendar"/>
+			<field name="search_view_id" ref="calendar.view_calendar_event_search"/>
+			<field name="help" type="html">
+			  <p class="oe_view_nocontent_create">
+				Click to schedule a new meeting.
+			  </p><p>
+				The calendar is shared between employees and fully integrated with
+				other applications such as the employee holidays or the business
+				opportunities.
+			  </p>
+			</field>
+		</record>
+
+		<menuitem name="Calendar" id="calendar.mail_menu_calendar" parent="mail.mail_my_stuff" sequence="10" action="action_calendar_event_inh"/>
+
 	</data>
 </openerp>

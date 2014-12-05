@@ -24,6 +24,33 @@ from openerp import api
 class calendar_event(osv.Model):
 	_inherit = 'calendar.event'
 
+	_columns = {
+		'name': fields.char('Описание', required=True, states={'done': [('readonly', True)]}),
+		'attendee_ids': fields.one2many('calendar.attendee', 'event_id', 'Участники', ondelete='cascade'),
+		'categ_ids': fields.many2many('calendar.event.type', 'meeting_category_rel', 'event_id', 'type_id', 'Тип'),
+		'alarm_ids': fields.many2many('calendar.alarm', 'calendar_alarm_calendar_event_rel', string='Напоминание', ondelete="restrict", copy=False),
+		'interval': fields.integer('Повторять каждые', help="Повторять каждые (День/Неделю/Месяц/Год)"),
+		'final_date': fields.date('Повторять до'),
+		'recurrency': fields.boolean('Повторять каждые'),
+		'start_date': fields.date('Начало', states={'done': [('readonly', True)]}, track_visibility='onchange'),
+		'stop_date': fields.date('Окончание', states={'done': [('readonly', True)]}, track_visibility='onchange'),
+		'duration': fields.float('Продолжительность', states={'done': [('readonly', True)]}),
+		'start_datetime': fields.datetime('Начало', states={'done': [('readonly', True)]}, track_visibility='onchange'),
+		'stop_datetime': fields.datetime('Окончание', states={'done': [('readonly', True)]}, track_visibility='onchange'), 
+		'end_type': fields.selection([('count', 'Number of repetitions'), ('end_date', 'End date')], 'Повторять до'),
+		'user_id': fields.many2one('res.users', 'Инициатор', states={'done': [('readonly', True)]}),
+		'state_metting':fields.selection(
+			[('open', 'Запланировано'),
+			 ('cancel', 'Отменено'),
+			 ('done', 'Состоялось')
+			 ], string='Status', readonly=True, track_visibility='onchange'),
+	}
+
+
+	_defaults = {
+		"state_metting": "open",
+	}
+
 	def create(self, cr, uid, vals, context=None):
 		if not(context):
 			context = {}
