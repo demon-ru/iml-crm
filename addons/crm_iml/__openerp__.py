@@ -33,27 +33,29 @@
 	'crm',
 	'analytic',
 	'account',
-	'crm_claim',
-	'sales_team',
-	],
-	'data': [
-
-		'crm_clientcategory_data.xml',
-		'crm_clientcategory_view.xml',
-		'crm_clientcategory_menu.xml',
-		
-		'crm_goodscategory_view.xml',
-		'crm_goodscategory_menu.xml',
-		
-		'crm_shipping_storages_view.xml',
-		'crm_shipping_storages_menu.xml',
-		
-		'crm_company_org_type_data.xml',
-		'crm_company_org_type_view.xml',
-		'crm_company_org_type_menu.xml',
-		
-		'crm_settlement_center_view.xml',
-		'crm_settlement_center_menu.xml',
+    'crm_claim',
+    'sales_team',
+    ],
+    'data': [
+        'security/crm_iml_security.xml',
+        'security/ir.model.access.csv',
+        
+        'crm_clientcategory_data.xml',
+        'crm_clientcategory_view.xml',
+        'crm_clientcategory_menu.xml',
+        
+        'crm_goodscategory_view.xml',
+        'crm_goodscategory_menu.xml',
+        
+        'crm_shipping_storages_view.xml',
+        'crm_shipping_storages_menu.xml',
+        
+        'crm_company_org_type_data.xml',
+        'crm_company_org_type_view.xml',
+        'crm_company_org_type_menu.xml',
+        
+        'crm_settlement_center_view.xml',
+        'crm_settlement_center_menu.xml',
 
 		'res_partner_view.xml',
 	
@@ -68,9 +70,8 @@
 
 		'crm_lead_view.xml',
 
-		'security/ir.model.access.csv',
-		'wizard/wizard_crm_claim_report_view.xml',
-
+        'wizard/wizard_crm_claim_report_view.xml',
+        
 		"res_config_view.xml",	
 
 		"account_analytic_account_view.xml",
