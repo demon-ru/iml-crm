@@ -44,6 +44,7 @@ class calendar_event(osv.Model):
 			 ('cancel', 'Отменено'),
 			 ('done', 'Состоялось')
 			 ], string='Status', readonly=True, track_visibility='onchange'),
+		'rrule_type': fields.selection([('daily', 'Дней'), ('weekly', 'Недель'), ('monthly', 'Месяцев'), ('yearly', 'Лет')], 'Recurrency', states={'done': [('readonly', True)]}, help="Let the event automatically repeat at that interval"),
 	}
 
 
