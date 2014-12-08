@@ -75,7 +75,7 @@ class crm_lead(format_address, osv.osv):
 		'creating_partner': fields.many2one('res.partner', 'Клиент'),
 		"data_arraved" : fields.boolean("Data arraved"),
 		"hash_for_url" : fields.char("Hash", size = 250),
-		'planned_revenue': fields.float('Ожидаемое количество заказов в месяц', track_visibility='always'),
+		'planned_revenue': fields.float('Ожидаемое количество заказов в месяц', digits=[0,0], track_visibility='always'),
 	}
 	_defaults = {
 		"data_arraved": False,
