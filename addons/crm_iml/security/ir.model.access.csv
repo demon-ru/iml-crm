@@ -4,7 +4,6 @@ iml_type_user,iml.type.user,model_crm_iml_opportunities_type,base.group_sale_sal
 iml_categ_manager,iml.categ.manager,model_crm_clientcategory,base.group_sale_manager,1,1,1,1
 iml_categ_user,iml.categ.user,model_crm_clientcategory,base.group_sale_salesman,1,0,0,0
 iml_crm_lead_user,iml.crm.lead.user,model_crm_lead,base.group_sale_salesman,1,1,1,1
-iml_res_partner,iml.crm.res.partner,base.model_res_partner,base.group_sale_salesman,1,1,1,1
 iml_goods_user,iml.crm.user.goods,model_crm_goodscategory,base.group_sale_salesman,1,0,0,0
 iml_goods_manager,iml.crm.manager.goods,model_crm_goodscategory,base.group_sale_manager,1,1,1,1
 iml_storage_user,iml.crm.user.storage,model_crm_shipping_storage,base.group_sale_salesman,1,0,0,0
@@ -18,3 +17,5 @@ iml_setting_sqlserver,iml.crm.sqlserver.manager,model_crm_iml_sqlserver,base.gro
 iml_setting_exserver,iml.crm.exserver.manager,model_crm_iml_exchange_server_settings,base.group_sale_manager,1,1,0,0
 iml_setting_sqlserve_settings,iml.crm.sqlserver.settings,model_crm_iml_sqlserver,base.group_system,1,1,1,1
 iml_setting_exserver_settings,iml.crm.exserver.settings,model_crm_iml_exchange_server_settings,base.group_system,1,1,1,1
+iml_test_group_client_department_settings,iml.crm.client.dept.test,base.model_res_partner,test_group_client_department,1,1,0,0
+iml_res_partner,iml.crm.res.partner,base.model_res_partner,base.group_sale_salesman,1,1,0,0

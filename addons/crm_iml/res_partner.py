@@ -147,6 +147,8 @@ class res_partner(osv.osv):
 
 
 	_columns = {
+		# переопределяем права доступа на это поле..
+		#'user_id': fields.many2one('res.users', 'Salesperson', help='The internal user that is in charge of communicating with this contact if any.', write=['test_group_client_department']),
 		'categoryClient_id': fields.many2one('crm.clientcategory', 'name'),
 		# расширение модели партнера в соответствии с требованиями "ВЕДЕНИЕ КЛИЕНТСКОЙ БАЗЫ / КАРТОЧКА КЛИЕНТА"
 		# 
