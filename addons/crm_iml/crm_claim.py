@@ -29,11 +29,21 @@ class crm_claim(osv.osv):
 		'section_id': fields.many2one('crm.case.section', 'Подразделение', \
 				select=True, help="Responsible sales team."\
 				" Define Responsible user and Email account for"\
-				" mail gateway."),
+				" mail gateway.", track_visibility='onchange'),
 		'user_id': fields.many2one('res.users', 'Responsible', track_visibility='onchange'),
 		'date_deadline': fields.date('Крайний срок'),
 		'color': fields.integer('Color Index'),
+		
 	}
+
+	def onchange_section_id(self, cr, uid, ids, section_id, categ_id, context=None):
+		vals = {}
+		categs_model = self.pool.get('crm.case.categ')
+		categs = categs_model.search(cr, uid, [('object_id.model', '=', 'crm.claim'),('section_id','in',[section_id, False])], context=None)
+		if categ_id not in categs:
+			vals['categ_id'] = None
+		return {'value': vals}
+
 
 	# переопределил метод из модуля crm для того, что бы значение date_closed
 	# очищалось при изменение стадии из терминальной стадии
@@ -95,7 +105,6 @@ class crm_claim(osv.osv):
 			if section_ids:
 				section_id = section_ids[0]
 		return {'value': {'section_id': section_id}}
-
 
 class crm_claim_stage(osv.osv):
 	_inherit = 'crm.claim.stage'
