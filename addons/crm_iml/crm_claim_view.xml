@@ -20,7 +20,7 @@
 				<xpath expr="//group/field[@name='priority']" position="before">
 					<field name="user_id" context="{'default_groups_ref': ['base.group_user', 'base.group_partner_manager', 'base.group_sale_salesman_all_leads']}" on_change="on_change_user(user_id, context)"/>
 					<field name="date_deadline"/>
-					<field name="section_id" groups="base.group_multi_salesteams" on_change="onchange_section_id(section_id,categ_id, context)"/>
+					<field name="section_id" groups="base.group_multi_salesteams" readonly="True" on_change="onchange_section_id(section_id,categ_id, context)"/>
 				</xpath>
 				<xpath expr="//group/field[@name='priority']" position="after">
 					<field name="categ_id" options="{'no_create': True, 'no_open': True}" domain="[('object_id.model', '=', 'crm.claim'),('section_id', 'in', [section_id, False])]"/>

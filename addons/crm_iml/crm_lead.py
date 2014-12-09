@@ -76,6 +76,7 @@ class crm_lead(format_address, osv.osv):
 		"data_arraved" : fields.boolean("Data arraved"),
 		"hash_for_url" : fields.char("Hash", size = 250),
 		'planned_revenue': fields.float('Ожидаемое количество заказов в месяц', digits=[0,0], track_visibility='always'),
+		"is_state_terminate" : fields.boolean("Indicates if lead in terminate state"),
 	}
 	_defaults = {
 		"data_arraved": False,
@@ -190,10 +191,13 @@ class crm_lead(format_address, osv.osv):
 		if not stage.on_change:
 			return {'value': {}}
 		vals = {'probability': stage.probability}
+
 		if stage.probability >= 100 or (stage.probability == 0 and stage.sequence > 1):
 			vals['date_closed'] = fields.datetime.now()
+			vals['is_state_terminate'] = True
 		else:
 			vals['date_closed'] = None
+			vals['is_state_terminate'] = False
 		return {'value': vals}
 
 	def apply_data(self,cr, uid, ids, context=None):
