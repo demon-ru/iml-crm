@@ -63,10 +63,11 @@
             <field name="groups" eval="[(4, ref('group_client_dept_manager'))]"/>
             <!-- Руководитель КО должен видеть всех клиентов, в которых он или любой из его подчиненных указан ответственным + всех клиентов, которые указаны в заявках, где он или любой из его подчиненных указан ответственным 
             в это условие так же надо добавить возможность просматривать своих сотрудников-->
-            <field name="domain_force">['|', '|', '|', '|', '|', '|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates]), ('opportunity_ids.user_id.id', '=', user.id), ('opportunity_ids.user_id.id', 'in', [g.id for g in user.subordinates]), ('id', '=', user.partner_id.id), ('user_id.id', '=', False), ('id', 'in', [g.id for g in user.subordinates])]</field>
+            <field name="domain_force">['|', '|', '|', '|', '|', '|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates]), ('opportunity_ids.user_id.id', '=', user.id), ('opportunity_ids.user_id.id', 'in', [g.id for g in user.subordinates]), ('id', '=', user.partner_id.id), ('user_id.id', '=', False), ('id', 'in', [g.partner_id.id for g in user.subordinates])]</field>
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
+
 
         <record id="client_department_manager_res_partner_company" model="ir.rule">
             <field name="name">Res.partner:Manager: unable to unlink and create if is_company is True</field>
