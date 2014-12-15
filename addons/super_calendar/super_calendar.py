@@ -240,12 +240,28 @@ class super_calendar_configurator(orm.Model):
 
 class super_calendar_configurator_line(orm.Model):
 	_name = 'super.calendar.configurator.line'
+
+	def _get_model_name(self, cr, uid, ids, field_name, arg, context=None):
+		res = dict(map(lambda x: (x,{"model_name": ''}), ids))
+		# the user may not have access rights for opportunities or meetings
+		try:
+			for config in self.browse(cr, uid, ids, context):
+				res[config.id] = {
+					"model_name": config.name.model
+				}
+		except:
+			pass
+		return res
+
+
 	_columns = {
 		'name': fields.many2one('ir.model', 'Model', required=True),
 		'description': fields.char('Description', size=128, required=True),
 		'domain': fields.char('Domain', size=512),
 		'configurator_id': fields.many2one('super.calendar.configurator',
 										   'Configurator'),
+		'view_id': fields.many2one('ir.ui.view', "View", 
+			domain="[('type', '=', 'form'), ('model', '=', model_name)]"),
 		'description_type': fields.selection([
 			('field', 'Field'),
 			('code', 'Code'),
@@ -274,6 +290,7 @@ class super_calendar_configurator_line(orm.Model):
 		'user_field_id': fields.many2one(
 			'ir.model.fields', 'User field',
 			domain="['&',('ttype', '=', 'many2one'),('model_id', '=', name)]"),
+		"model_name": fields.function(_get_model_name, string="Name Model", type='char', multi='name_model'),
 	}
 
 
@@ -349,7 +366,29 @@ class super_calendar(orm.Model):
 			return result and result[0] or False
 		return result
 
-		
+	def fields_view_get(self,cr,uid,view_id=None,view_type='form',context=None,toolbar=False,submenu=False):
+		if (view_type == 'form'):
+			id_obj = context.get('id_edit_obj_for_field')
+			id_real = calendar_id2real_id(id_obj)
+			cur_obj = self.browse(cr, uid, id_real)
+			config = None
+			res_obj = self.pool.get("super.calendar.configurator.line")
+			res_id = res_obj.search(cr, uid, [('configurator_id', '=', cur_obj.configurator_id.id),('name', '=', cur_obj.model_id.id)], context=None)
+			if len(res_id) > 0:
+				config = res_obj.browse(cr, uid, res_id[0])
+			if (config) and (config.view_id):
+				view_id = config.view_id.id
+				ed_obj_model= self.pool.get(cur_obj.res_id.__class__.__name__)
+				res = super(type(cur_obj.res_id), ed_obj_model).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
+				res.update({"model_real_edit": cur_obj.res_id.__class__.__name__,
+					"id_real_edit_obj": cur_obj.res_id.id,})
+			else:
+				res = super(super_calendar, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
+		else:
+			res = super(super_calendar, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
+		return res
+
+
 	def write(self, cr, uid, ids, vals, context=None):
 		# цель следующая - изменить данные в исходном документе, если изменились данные в объекте SC
 		# перво наперво нужно определить, какие модели мы будем обслуживать

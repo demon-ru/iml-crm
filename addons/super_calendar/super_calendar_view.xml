@@ -119,7 +119,7 @@
             <field name="name">super_calendar</field>
             <field name="model">super.calendar</field>
             <field name="arch" type="xml">
-                <calendar string="Calendar" color="model_id" date_start="date_start" date_delay="duration" event_open_popup="%(super_calendar.view_calendar_form_popup)s">
+                <calendar string="Calendar" color="model_id" date_start="date_start" date_delay="duration">
                         <field name="name"/>
                         <field name="model_description"/>
                         <field name="user_id"/>
