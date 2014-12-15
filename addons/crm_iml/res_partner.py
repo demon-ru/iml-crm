@@ -26,6 +26,7 @@ import datetime
 import sys
 from openerp import tools, api
 from openerp.tools.translate import _
+from openerp import SUPERUSER_ID
 
 class res_partner(osv.osv):
 	""" Inherits partner and adds CRM information in the partner form """
@@ -459,7 +460,7 @@ class res_partner(osv.osv):
 				name =  "%s%s" % (record.name, ", " + record.function if record.function else "" )
 				res.append((record.id, name))
 			else:
-				res = res + (super(res_partner, self).name_get(cr, uid, [record.id], context))
+				res = res + (super(res_partner, self).name_get(cr, SUPERUSER_ID, [record.id], context))
 		return res
 
 	def write(self, cr, uid, ids, vals, context=None):
@@ -524,7 +525,7 @@ class res_partner(osv.osv):
 				self.form_log_message(cr, uid, ids, vals)
 			res = super(res_partner, self).write(cr, uid, ids, vals, context=context) 
 			if needlog:
-				self.form_command_update_cl(cr, uid, ids)
+				self.form_command_update_cl(cr, SUPERUSER_ID, ids)
 		return res
 
 	def create(self, cr, uid, vals, context=None):

@@ -64,6 +64,7 @@ class crm_claim(osv.osv):
 			vals.update(onchange_stage_values)
 		return super(crm_claim, self).write(cr, uid, ids, vals, context=context)
 
+
 	def _resolve_section_id_from_context(self, cr, uid, context=None):
 		if context is None:
 			context = {}

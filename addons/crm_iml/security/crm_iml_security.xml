@@ -3,50 +3,234 @@
 <data >
         <!-- GROUPS -->
         <record id="test_group_client_department" model="res.groups">
-            <field name="name">Test group client dept</field>
+            <field name="name">Клиентский отдел:сотрудник</field>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
         </record>
 
         <record id="group_client_dept_manager" model="res.groups">
-            <field name="name">Test group client dept</field>
+            <field name="name">Клиентский одтел:руководитель</field>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+        </record>
+
+        <record id="group_sale_dept_employee" model="res.groups">
+            <field name="name">Отдел продаж:сотрудник</field>
+            <field name="users" eval="[(4, ref('base.user_root'))]"/>
+        </record>
+
+        <record id="group_sale_dept_manager" model="res.groups">
+            <field name="name">Клиентский одтел:руководитель</field>
             <field name="users" eval="[(4, ref('base.user_root'))]"/>
         </record>
         <!-- RULES -->
+        <!-- CLIENT DEPARTMENT -->
+        <!-- Client department employee group -->
         <record id="client_department_employee_res_partner" model="ir.rule">
-            <field name="name">Res.users: access only if responsible or responsoble in its opportunities</field>
+            <field name="name">Res.partner:client_dept:employee access only if responsible or responsoble in its opportunities</field>
             <field name="model_id" ref="model_res_partner"/>
-            <!-- This rule has to be improved for employee only groups -->
             <field name="groups" eval="[(4, ref('test_group_client_department'))]"/>
-            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('opportunity_ids.user_id.id', '=', user.id)]</field>
-            <field name="perm_create" eval="False"/>
-            <field name="perm_unlink" eval="False"/>
-        </record>
-<!-- 
-        <record id="mail_followers_read_write_own" model="ir.rule">
-            <field name="name">mail.followers: read and write its own entries</field>
-            <field name="model_id" ref="model_mail_followers"/>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
-            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+            <field name="domain_force">['|', '|', '|', ('user_id.id', '=', user.id), ('opportunity_ids.user_id.id', '=', user.id), ('id', '=', user.partner_id.id), ('user_id.id', '=', False)]</field>
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <record id="mail_followers_read_write_others" model="ir.rule">
-            <field name="name">mail.followers: read and write others entries</field>
-            <field name="model_id" ref="model_mail_followers"/>
-            <field name="groups" eval="[(4, ref('base.group_no_one'))]"/>
-            <field name="domain_force">[]</field>
+
+        <record id="client_department_employee_res_partner_company" model="ir.rule">
+            <field name="name">Res.partner:client_dept:employee: unable to unlink and create if is_company is True</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="groups" eval="[(4, ref('test_group_client_department'))]"/>
+            <field name="domain_force">[('is_company', '=', False)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+        </record>
+
+        <record id="client_department_employee_crm_lead" model="ir.rule">
+            <field name="name">CRM.lead:client_dept:employee: access only if responsible or responsoble is not set</field>
+            <field name="model_id" ref="model_crm_lead"/>
+            <field name="groups" eval="[(4, ref('test_group_client_department'))]"/>
+            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('user_id', '=', False)]</field>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="client_department_employee_crm_claim" model="ir.rule">
+            <field name="name">CRM.claim:client_dept:employee: access only if responsible or responsible in its partner</field>
+            <field name="model_id" ref="model_crm_claim"/>
+            <field name="groups" eval="[(4, ref('test_group_client_department'))]"/>
+            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('partner_id.user_id.id', '=', user.id)]</field>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="client_department_employee_crm_event" model="ir.rule">
+            <field name="name">CRM.event:client_dept:employee: access only if responsible</field>
+            <field name="model_id" ref="model_calendar_event"/>
+            <field name="groups" eval="[(4, ref('test_group_client_department'))]"/>
+            <field name="domain_force">[('user_id.id', '=', user.id)]</field>
+        </record>
+        <!-- Group client dept manager -->
+
+
+        <record id="client_department_manager_res_partner" model="ir.rule">
+            <field name="name">Res.partner:client_dept:Manager: access only if responsible or responsoble in its opportunities plus the same responsibility of his subordinates</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="groups" eval="[(4, ref('group_client_dept_manager'))]"/>
+            <!-- Руководитель КО должен видеть всех клиентов, в которых он или любой из его подчиненных указан ответственным + всех клиентов, которые указаны в заявках, где он или любой из его подчиненных указан ответственным 
+            в это условие так же надо добавить возможность просматривать своих сотрудников-->
+            <field name="domain_force">['|', '|', '|', '|', '|', '|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates]), ('opportunity_ids.user_id.id', '=', user.id), ('opportunity_ids.user_id.id', 'in', [g.id for g in user.subordinates]), ('id', '=', user.partner_id.id), ('user_id.id', '=', False), ('id', 'in', [g.partner_id.id for g in user.subordinates])]</field>
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <record id="mail_notification_read_write_own" model="ir.rule">
-            <field name="name">mail.notification: read and write its own entries</field>
-            <field name="model_id" ref="model_mail_notification"/>
-            <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+
+        <record id="client_department_manager_res_partner_company" model="ir.rule">
+            <field name="name">Res.partner:client_dept:Manager: unable to unlink and create if is_company is True</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="groups" eval="[(4, ref('group_client_dept_manager'))]"/>
+            <field name="domain_force">[('is_company', '=', False)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+        </record>
+
+        <record id="client_department_manager_crm_lead" model="ir.rule">
+            <field name="name">CRM.lead:client_dept:Manager: access only if responsible or responsoble is not set or subordinates is responsible</field>
+            <field name="model_id" ref="model_crm_lead"/>
+            <field name="groups" eval="[(4, ref('group_client_dept_manager'))]"/>
+            <field name="domain_force">['|', '|', ('user_id.id', '=', user.id), ('user_id', '=', False), ('user_id.id', 'in', [g.id for g in user.subordinates])]</field>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="client_department_manager_crm_claim" model="ir.rule">
+            <!-- Руководитель КО должен видеть все обращения, в которых он или любой из его подчиненных указан ответственным + все обращения по клиентам, в которых он или любой из его подчиненных указан ответственным -->
+            <field name="name">CRM.claim:client_dept:Manager: access only if responsible or responsible in its partner</field>
+            <field name="model_id" ref="model_crm_claim"/>
+            <field name="groups" eval="[(4, ref('group_client_dept_manager'))]"/>
+            <field name="domain_force">['|', '|', '|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates]), ('partner_id.user_id.id', '=', user.id), ('partner_id.user_id.id', 'in', [g.id for g in user.subordinates])]</field>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="client_department_manager_crm_phonecal" model="ir.rule">
+            <field name="name">CRM.phonecall:client_dept:manager: access only if responsible or one of subordinates is responsible</field>
+            <field name="model_id" ref="model_crm_phonecall"/>
+            <field name="groups" eval="[(4, ref('group_client_dept_manager'))]"/>
+            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates])]</field>
+        </record>
+
+        <record id="client_department_manager_crm_event" model="ir.rule">
+            <field name="name">CRM.event:client_dept:manager: access only if responsible or one of subordinates is responsible</field>
+            <field name="model_id" ref="model_calendar_event"/>
+            <field name="groups" eval="[(4, ref('group_client_dept_manager'))]"/>
+            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates])]</field>
+        </record>
+
+        <record id="client_department_manager_crm_case_section" model="ir.rule">
+            <field name="name">CRM.case_section:client_dept:manager: access only if leader</field>
+            <field name="model_id" ref="model_crm_case_section"/>
+            <field name="groups" eval="[(4, ref('group_client_dept_manager'))]"/>
+            <field name="domain_force">[('user_id.id', '=', user.id)]</field>
+        </record>
+
+        <!-- SALE DEPARTMENT -->
+        <!-- Sale department employee group -->
+        <record id="sale_department_employee_res_partner" model="ir.rule">
+            <field name="name">Res.partner:sale_dept:employee access only if responsible or responsoble in its opportunities</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_employee'))]"/>
+            <field name="domain_force">['|', '|', '|', ('user_id.id', '=', user.id), ('opportunity_ids.user_id.id', '=', user.id), ('id', '=', user.partner_id.id), ('user_id.id', '=', False)]</field>
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
-        </record> -->
+        </record>
+
+
+        <record id="sale_department_employee_res_partner_company" model="ir.rule">
+            <field name="name">Res.partner:sale_dept:employee: unable to unlink and create if is_company is True</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_employee'))]"/>
+            <field name="domain_force">[('is_company', '=', False)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+        </record>
+
+        <record id="sale_department_employee_crm_lead" model="ir.rule">
+            <field name="name">CRM.lead:sale_dept:employee: access only if responsible or responsoble is not set</field>
+            <field name="model_id" ref="model_crm_lead"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_employee'))]"/>
+            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('user_id', '=', False)]</field>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="sale_department_employee_crm_claim" model="ir.rule">
+            <field name="name">CRM.claim:sale_dept:employee: access only if responsible or responsible in its partner</field>
+            <field name="model_id" ref="model_crm_claim"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_employee'))]"/>
+            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('partner_id.user_id.id', '=', user.id)]</field>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="sale_department_employee_crm_event" model="ir.rule">
+            <field name="name">CRM.event:sale_dept:employee: access only if responsible</field>
+            <field name="model_id" ref="model_calendar_event"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_employee'))]"/>
+            <field name="domain_force">[('user_id.id', '=', user.id)]</field>
+        </record>
+        <!-- Group sale dept manager -->
+
+
+        <record id="sale_department_manager_res_partner" model="ir.rule">
+            <field name="name">Res.partner:sale_dept:Manager: access only if responsible or responsoble in its opportunities plus the same responsibility of his subordinates</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_manager'))]"/>
+            <!-- Руководитель КО должен видеть всех клиентов, в которых он или любой из его подчиненных указан ответственным + всех клиентов, которые указаны в заявках, где он или любой из его подчиненных указан ответственным 
+            в это условие так же надо добавить возможность просматривать своих сотрудников-->
+            <field name="domain_force">['|', '|', '|', '|', '|', '|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates]), ('opportunity_ids.user_id.id', '=', user.id), ('opportunity_ids.user_id.id', 'in', [g.id for g in user.subordinates]), ('id', '=', user.partner_id.id), ('user_id.id', '=', False), ('id', 'in', [g.partner_id.id for g in user.subordinates])]</field>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+
+        <record id="sale_department_manager_res_partner_company" model="ir.rule">
+            <field name="name">Res.partner:sale_dept:Manager: unable to unlink and create if is_company is True</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_manager'))]"/>
+            <field name="domain_force">[('is_company', '=', False)]</field>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+        </record>
+
+        <record id="sale_department_manager_crm_lead" model="ir.rule">
+            <field name="name">CRM.lead:sale_dept:Manager: access only if responsible or responsoble is not set or subordinates is responsible</field>
+            <field name="model_id" ref="model_crm_lead"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_manager'))]"/>
+            <field name="domain_force">['|', '|', ('user_id.id', '=', user.id), ('user_id', '=', False), ('user_id.id', 'in', [g.id for g in user.subordinates])]</field>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="sale_department_manager_crm_claim" model="ir.rule">
+            <!-- Руководитель КО должен видеть все обращения, в которых он или любой из его подчиненных указан ответственным + все обращения по клиентам, в которых он или любой из его подчиненных указан ответственным -->
+            <field name="name">CRM.claim:sale_dept:Manager: access only if responsible or responsible in its partner</field>
+            <field name="model_id" ref="model_crm_claim"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_manager'))]"/>
+            <field name="domain_force">['|', '|', '|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates]), ('partner_id.user_id.id', '=', user.id), ('partner_id.user_id.id', 'in', [g.id for g in user.subordinates])]</field>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <record id="sale_department_manager_crm_phonecal" model="ir.rule">
+            <field name="name">CRM.phonecall:sale_dept:manager: access only if responsible or one of subordinates is responsible</field>
+            <field name="model_id" ref="model_crm_phonecall"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_manager'))]"/>
+            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates])]</field>
+        </record>
+
+        <record id="sale_department_manager_crm_event" model="ir.rule">
+            <field name="name">CRM.event:sale_dept:manager: access only if responsible or one of subordinates is responsible</field>
+            <field name="model_id" ref="model_calendar_event"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_manager'))]"/>
+            <field name="domain_force">['|', ('user_id.id', '=', user.id), ('user_id.id', 'in', [g.id for g in user.subordinates])]</field>
+        </record>
+
+        <record id="sale_department_manager_crm_case_section" model="ir.rule">
+            <field name="name">CRM.case_section:sale_dept:manager: access only if leader</field>
+            <field name="model_id" ref="model_crm_case_section"/>
+            <field name="groups" eval="[(4, ref('group_sale_dept_manager'))]"/>
+            <field name="domain_force">[('user_id.id', '=', user.id)]</field>
+        </record>
 
 </data>
 </openerp>

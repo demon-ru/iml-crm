@@ -35,6 +35,7 @@
 	'account',
     'crm_claim',
     'sales_team',
+    'super_calendar',
     ],
     'data': [
         'security/crm_iml_security.xml',

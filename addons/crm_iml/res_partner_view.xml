@@ -26,7 +26,7 @@
 					<xpath expr="//div[@name='buttons']/button[@name='%(account.action_account_moves_all_tree)d']" position="replace"/>
 					<xpath expr="//div[@name='buttons']/button[@name='%(account.action_open_partner_analytic_accounts)d']" position="replace"/>
 					<xpath expr="//div[@name='buttons']" position="inside">
-						<button class="oe_inline oe_stat_button" type="action" name="%(account.action_open_partner_analytic_accounts)d" icon="fa-book" groups="analytic.group_analytic_accounting" attrs="{'invisible': [('is_company','=', False)]}">
+						<button class="oe_inline oe_stat_button" type="action" name="%(account.action_open_partner_analytic_accounts)d" icon="fa-book" attrs="{'invisible': [('is_company','=', False)]}">
 							<field string="Контракты" name="contracts_count" widget="statinfo"/>
 						</button>
 					</xpath>
