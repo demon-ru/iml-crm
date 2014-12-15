@@ -40,3 +40,8 @@ iml_group_sale_dept_lead_manager,iml.crm.sale.dept.lead.manager,crm.model_crm_le
 iml_group_access_model_super_calendar_sd,crm.iml.sale_dept.access_model_super_calendar,super_calendar.model_super_calendar,group_sale_dept_manager,1,1,1,1
 
 iml_group_access_model_super_calendar_line,crm.iml.access_model_super_calendar_line,super_calendar.model_super_calendar_configurator_line,base.group_user,1,1,1,1
+
+iml_call_center_employee_res_partner,iml.crm.call.center.partner,base.model_res_partner,group_call_center_employee,1,1,1,1
+iml_group_call_center_account,iml.crm.call.center.account,analytic.model_account_analytic_account,group_call_center_employee,1,1,0,0
+iml_group_call_center_lead,iml.crm.call.center.lead,crm.model_crm_lead,group_call_center_employee,1,1,1,0
+iml_group_call_center_claim,iml.crm.call.center.claim,crm_claim.model_crm_claim,group_call_center_employee,1,1,1,0
