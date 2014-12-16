@@ -1355,13 +1355,6 @@ instance.web.View = instance.web.Widget.extend({
         } else {
             if (! this.view_type)
                 console.warn("view_type is not defined", this);
-            if ((this.view_type == 'form')&&(this.dataset._model.name == 'super.calendar'))
-            {
-                this.dataset.get_context().__contexts[0]["id_edit_obj_for_field"] = this.dataset.ids[this.dataset.index];
-                this.dataset.get_context().__contexts[0]["is_form"] = true;
-                this.dataset.get_context().__contexts[1]["id_edit_obj_for_field"] = this.dataset.ids[this.dataset.index];
-                this.dataset.get_context().__contexts[1]["is_form"] = true;
-            }
             console.log(this.dataset.get_context());
             view_loaded_def = instance.web.fields_view_get({
                 "model": this.dataset._model,
@@ -1373,21 +1366,6 @@ instance.web.View = instance.web.Widget.extend({
         }
         return this.alive(view_loaded_def).then(function(r) {
             self.fields_view = r;
-            if ((self.dataset._model.name == 'super.calendar')&&(self.view_type == 'form'))
-            {
-                if ((r.id_real_edit_obj != undefined) && (r.model_real_edit))
-                {
-                    self.dataset.ids = [r.id_real_edit_obj];
-                    self.dataset._model.name = r.model_real_edit;
-                    self.dataset.context.model = r.model_real_edit;
-                    self.dataset.context.active_model = r.model_real_edit;
-                    self.dataset.model = r.model_real_edit;
-                    self.model = r.model_real_edit;
-                    self.session.active_id = r.id_real_edit_obj;
-                    self.dataset.index = 0;
-                    self.ViewManager.ActionManager.breadcrumbs[0].hide_breadcrumb = true
-                }
-            }
             // add css classes that reflect the (absence of) access rights
             self.$el.addClass('oe_view')
                 .toggleClass('oe_cannot_create', !self.is_action_enabled('create'))
