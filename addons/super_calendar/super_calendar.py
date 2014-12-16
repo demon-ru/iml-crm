@@ -388,6 +388,25 @@ class super_calendar(orm.Model):
 			res = super(super_calendar, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
 		return res
 
+	# 	# переделака старого метода - теперь все намного проще и автоматично :)
+	# def write(self, cr, uid, ids, vals, context=None):
+	# 	# записываем изменения
+	# 	res = super(super_calendar, self).write(cr, uid, ids, vals, context=context)
+	# 	sc_pool = self.pool.get('super.calendar')
+	# 	sc_obj = sc_pool.browse(cr, uid, ids[0])
+	# 	if ("date_start" in vals or "duration" in vals):
+	# 		# пробегаем все модели из перечисления _models
+	# 		# зачем? нужно всего то и проверить, что у нас есть super.calendar.configurator.line
+	# 		# для текущей модели.. и из неё мы и возмем параметры
+	# 		base_obj_model = res_obj.res_id.__class__.__name__
+	# 		# проверим, что у нас есть такой объект super.calendar.configurator.line, что
+	# 		# его значение name.model == base_obj_model
+			
+
+
+
+
+
 
 	def write(self, cr, uid, ids, vals, context=None):
 		# цель следующая - изменить данные в исходном документе, если изменились данные в объекте SC
