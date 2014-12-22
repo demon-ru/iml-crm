@@ -90,92 +90,32 @@ class super_calendar_configurator(orm.Model):
 		for configurator in self.browse(cr, uid, configurator_ids, context):
 			# пробегаем по строкам у текущей конфигурации
 			for line in configurator.line_ids:
-				self._generate_record_from_line(cr, uid,
+				self._generate_record_from_line_with_id(cr, uid,
 														 configurator,
 														 line,
 														 super_calendar_pool,
+														 False,
 														 context)
 				#super_calendar_pool.create(cr, uid, values, context=context)
 		self._logger.info('Calendar generated')
 		return True
-
-	def _generate_record_from_line(self, cr, uid, configurator, line, super_calendar_pool, context):
-		current_pool = self.pool.get(line.name.model)
-		current_record_ids = current_pool.search(
-			cr,
-			uid,
-			line.domain and safe_eval(line.domain) or [],
-			context=context)
-
-		for current_record_id in current_record_ids:
-			record = current_pool.browse(cr, uid,
-										 current_record_id,
-										 context=context)
-			if line.user_field_id and \
-			   record[line.user_field_id.name] and \
-			   record[line.user_field_id.name]._name != 'res.users':
-				raise orm.except_orm(
-					_('Error'),
-					_("The 'User' field of record %s (%s) "
-					  "does not refer to res.users")
-					% (record[line.description_field_id.name],
-					   line.name.model))
-
-			if (((line.description_field_id and
-				  record[line.description_field_id.name]) or
-					line.description_code) and
-					record[line.date_start_field_id.name]):
-				duration = False
-				if (not line.duration_field_id and
-						line.date_stop_field_id and
-						record[line.date_start_field_id.name] and
-						record[line.date_stop_field_id.name]):
-					date_start = datetime.strptime(
-						record[line.date_start_field_id.name],
-						tools.DEFAULT_SERVER_DATETIME_FORMAT
-					)
-					date_stop = datetime.strptime(
-						record[line.date_stop_field_id.name],
-						tools.DEFAULT_SERVER_DATETIME_FORMAT
-					)
-					duration = (date_stop - date_start).total_seconds() / 3600
-				elif line.duration_field_id:
-					duration = record[line.duration_field_id.name]
-				if line.description_type != 'code':
-					name = record[line.description_field_id.name]
-				else:
-					parse_dict = {'o': record}
-					mytemplate = Template(line.description_code)
-					name = mytemplate.render(**parse_dict)
-				super_calendar_values = {
-					'name': name,
-					'model_description': line.description,
-					'date_start': record[line.date_start_field_id.name],
-					'duration': duration,
-					'user_id': (
-						line.user_field_id and
-						record[line.user_field_id.name] and
-						record[line.user_field_id.name].id or
-						False
-					),
-					'configurator_id': configurator.id,
-					'res_id': line.name.model+','+str(record['id']),
-					'model_id': line.name.id,
-					}
-				# грязный хак
-				super_calendar_pool.create(cr, uid, super_calendar_values, context=context)
 
 	# метод, который создает запись в SC
 	# отличие от предидущего метода - он создает запись только для того объекта,
 	# чей ид указан в параметре ids
 
 	def _generate_record_from_line_with_id(self, cr, uid, configurator, line, super_calendar_pool, _ids, context):
+		current_pool = self.pool.get(line.name.model)
 		print "================================================"
 		print "DEBUG!!! _generate_record_from_line_with_id"
-		current_pool = self.pool.get(line.name.model)
-		print line.name.model
-		print _ids
-		current_record_ids = _ids
+		if _ids:
+			current_record_ids = _ids
+		else:
+			current_record_ids = current_pool.search(
+				cr,
+				uid,
+				line.domain and safe_eval(line.domain) or [],
+				context=context)
 
 		for current_record_id in current_record_ids:
 			print "current_record_id"
