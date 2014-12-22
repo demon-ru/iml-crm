@@ -99,15 +99,12 @@ class super_calendar_configurator(orm.Model):
 				#super_calendar_pool.create(cr, uid, values, context=context)
 		self._logger.info('Calendar generated')
 		return True
-
 	# метод, который создает запись в SC
 	# отличие от предидущего метода - он создает запись только для того объекта,
 	# чей ид указан в параметре ids
 
 	def _generate_record_from_line_with_id(self, cr, uid, configurator, line, super_calendar_pool, _ids, context):
 		current_pool = self.pool.get(line.name.model)
-		print "================================================"
-		print "DEBUG!!! _generate_record_from_line_with_id"
 		if _ids:
 			current_record_ids = _ids
 		else:
@@ -118,17 +115,9 @@ class super_calendar_configurator(orm.Model):
 				context=context)
 
 		for current_record_id in current_record_ids:
-			print "current_record_id"
-			print current_record_id
 			record = current_pool.browse(cr, uid,
 										 current_record_id,
 										 context=context)
-			print "curent record:"
-			print record
-			print "record[user_id]"
-			print record.user_id
-			print "line.user_field_id.name"
-			print line.user_field_id.name
 			if (line.user_field_id and \
 			   record[line.user_field_id.name] and \
 			   record[line.user_field_id.name]._name != 'res.users'):
@@ -349,9 +338,6 @@ class super_calendar(orm.Model):
 				if (line.name.model == base_obj_model):
 					sc_configurator_line_obj = line
 
-			#sc_configurator_line_id = sc_configurator_line_pool.search(cr, uid, ['|', ('model_name', '=', base_obj_model), ('configurator_id', '=', sc_obj.configurator_id.id)])
-			#print "sc_configurator_line_id = "
-			#print sc_configurator_line_id
 			# ограничение: среди исходных моделей не должно быть дублей в рамках одной настройки супер календаря
 			#sc_configurator_line_obj = sc_configurator_line_pool.browse(cr, uid, sc_configurator_line_id[0])
 			# теперь по параметрам объекта конфирурации нам необходимо принять решение, как изменить исходный объект
@@ -464,9 +450,6 @@ def _unlink_SC_on_unlink(self, cr, uid, model_id, ids, context):
 # переопределяем базовые методы
 def my_write(self, cr, uid, ids, vals, context=None):
 	res = BaseModel.write(self, cr, uid, ids, vals, context=context)
-	print "********* DEBUG **************"
-	print "my_write"
-	# теперь поехали 
 	# если пришедшая к нам модель содержится в super.calendar.configurator.line.name.model, то это наш клиент
 	model_id =  self.__class__.__name__
 	sc_configurator_line_obj = False
@@ -483,18 +466,12 @@ def my_write(self, cr, uid, ids, vals, context=None):
 	if sc_configurator_line_obj:
 		for id in ids:
 			_regenerate_SC_on_write(self, cr, uid, vals, model_id, id, context)
-	print vals
-
-	print "********* DEBUG **************"
 	return res
 
 
 def my_create(self, cr, uid, vals, context=None):
 	res = BaseModel.create(self, cr, uid, vals, context=context)
-	print "********* DEBUG **************"
-	print "my_create"
 	model_id = self.__class__.__name__
-	print model_id
 	sc_configurator_line_obj = False
 
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
@@ -508,15 +485,10 @@ def my_create(self, cr, uid, vals, context=None):
 
 	if sc_configurator_line_obj:
 		_generate_SC_on_create(self, cr, uid, model_id, res)
-	print vals
-	print "********* DEBUG **************"
 	return res
 
 def my_unlink(self, cr, uid, ids, context=None):
-	print "********* DEBUG **************"
-	print "my_unlink"
 	model_id = self.__class__.__name__
-	print model_id
 	sc_configurator_line_obj = False
 
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
@@ -530,8 +502,7 @@ def my_unlink(self, cr, uid, ids, context=None):
 
 	if sc_configurator_line_obj:
 		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
-	print "********* DEBUG **************"
-
+		
 	res = BaseModel.unlink(self, cr, uid, ids, context=context)
 	return res
 
