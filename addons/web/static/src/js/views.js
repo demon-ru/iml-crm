@@ -1355,7 +1355,6 @@ instance.web.View = instance.web.Widget.extend({
         } else {
             if (! this.view_type)
                 console.warn("view_type is not defined", this);
-            console.log(this.dataset.get_context());
             view_loaded_def = instance.web.fields_view_get({
                 "model": this.dataset._model,
                 "view_id": this.view_id,

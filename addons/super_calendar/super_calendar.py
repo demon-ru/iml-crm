@@ -25,9 +25,15 @@ import logging
 from mako.template import Template
 from datetime import datetime, timedelta
 from openerp import tools
+from openerp import models
 from openerp.tools.safe_eval import safe_eval
 
+
 # для переназначаемых моделей
+import inspect
+from openerp.models import BaseModel, Model
+from openerp import api
+
 from openerp.osv import fields,osv
 import string
 # для crm.lead
@@ -315,13 +321,6 @@ class super_calendar(orm.Model):
 # **********************************************
 # блок для обновления данных в моделях
 # **********************************************
-	_models = [
-		'crm.lead',
-		'calendar.event',
-		'crm.phonecall',
-		'crm.claim'
-		]
-
 
 	def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
 		if context is None:
@@ -388,112 +387,81 @@ class super_calendar(orm.Model):
 			res = super(super_calendar, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
 		return res
 
-	# 	# переделака старого метода - теперь все намного проще и автоматично :)
-	# def write(self, cr, uid, ids, vals, context=None):
-	# 	# записываем изменения
-	# 	res = super(super_calendar, self).write(cr, uid, ids, vals, context=context)
-	# 	sc_pool = self.pool.get('super.calendar')
-	# 	sc_obj = sc_pool.browse(cr, uid, ids[0])
-	# 	if ("date_start" in vals or "duration" in vals):
-	# 		# пробегаем все модели из перечисления _models
-	# 		# зачем? нужно всего то и проверить, что у нас есть super.calendar.configurator.line
-	# 		# для текущей модели.. и из неё мы и возмем параметры
-	# 		base_obj_model = res_obj.res_id.__class__.__name__
-	# 		# проверим, что у нас есть такой объект super.calendar.configurator.line, что
-	# 		# его значение name.model == base_obj_model
-			
-
-
-
-
-
-
+		# переделака старого метода - теперь все намного проще и автоматично :)
 	def write(self, cr, uid, ids, vals, context=None):
-		# цель следующая - изменить данные в исходном документе, если изменились данные в объекте SC
-		# перво наперво нужно определить, какие модели мы будем обслуживать
-		# crm.lead, calendar.event, crm.phonecall, crm.claim
-
-		# далее, нужно определить, какие параметры мы будем мониторить
-		# 	date_start
-		# 	duration
 		# записываем изменения
-		
 		res = super(super_calendar, self).write(cr, uid, ids, vals, context=context)
-		obj = self.pool.get('super.calendar')
-		res_obj = obj.browse(cr, uid, ids[0])
-		
+		sc_pool = self.pool.get('super.calendar')
+		sc_obj = sc_pool.browse(cr, uid, ids[0])
 		if ("date_start" in vals or "duration" in vals):
-			# это название модели исходного объекта
-			base_obj_model = res_obj.res_id.__class__.__name__
-			if (base_obj_model in self._models):
-				# теперь нам нужно обработать это изменение
-				# это и есть исходный объект
-				base_obj = res_obj.res_id
-				# теперь ищем исходную строчку в super.calendar.configurator.line
-				# что бы посмотреть настройки полей
-				configurator_id = res_obj.configurator_id.id
-				configurator_line_pool = self.pool.get('super.calendar.configurator.line')
-				line_ids = configurator_line_pool.search(cr, uid, [('configurator_id', '=', configurator_id)])
-				line_obj = configurator_line_pool.browse(cr, uid, line_ids)
-				# теперь узнаем, какой именно объект строки конфигурации нам нужен
-				# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
-				for line in line_obj:
-					if (line.name.model == base_obj_model):
-						correct_line = line
-				# проверяем модель
-				if base_obj_model == "crm.lead":
-					date_start_field = correct_line.date_start_field_id.name
+			base_obj_model = sc_obj.res_id.__class__.__name__
+			# проверим, что у нас есть такой объект super.calendar.configurator.line, что
+			# его значение name.model == base_obj_model
+			sc_configurator_line_pool = self.pool.get('super.calendar.configurator.line')
 
-					# теперь ищем исходный документ и меняем у него нужное поле :)
-					# т.к. он же у нас уже есть :)
-					new_val = {date_start_field : res_obj.date_start}
+			configurator_id = sc_obj.configurator_id.id
+			configurator_line_pool = self.pool.get('super.calendar.configurator.line')
+			line_ids = configurator_line_pool.search(cr, uid, [('configurator_id', '=', configurator_id)])
+			line_obj = configurator_line_pool.browse(cr, uid, line_ids)
+			# теперь узнаем, какой именно объект строки конфигурации нам нужен
+			# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
+			for line in line_obj:
+				if (line.name.model == base_obj_model):
+					sc_configurator_line_obj = line
+
+			#sc_configurator_line_id = sc_configurator_line_pool.search(cr, uid, ['|', ('model_name', '=', base_obj_model), ('configurator_id', '=', sc_obj.configurator_id.id)])
+			#print "sc_configurator_line_id = "
+			#print sc_configurator_line_id
+			# ограничение: среди исходных моделей не должно быть дублей в рамках одной настройки супер календаря
+			#sc_configurator_line_obj = sc_configurator_line_pool.browse(cr, uid, sc_configurator_line_id[0])
+			# теперь по параметрам объекта конфирурации нам необходимо принять решение, как изменить исходный объект
+			# возможны три случая:
+			# 	1) задана дата начала, дата окончания и продолжительность не задана - в этом случае изменим только дату начала 
+			# 	2) задана дата начала и задана дата окончания, продолжительность не задана - в этом случае изменим дату начала и окончания
+			# 	3) задана дата начала и продолжительность, дата окончания не задана - в этом случае изменим продолжительность и дату начала
+			if sc_configurator_line_obj.date_start_field_id.name is False:
+				print "Error!"
+			elif sc_configurator_line_obj.date_start_field_id.name is not False:
+				base_obj = sc_obj.res_id
+				# вариант #1
+				if sc_configurator_line_obj.date_stop_field_id.name is False and sc_configurator_line_obj.duration_field_id.name is False:
+					date_start_field = sc_configurator_line_obj.date_start_field_id.name
+					# заполняем только дату начала
+					new_val = {date_start_field : sc_obj.date_start}
 					# получаем пул нужной нам модели
 					base_obj_pool = self.pool.get(base_obj_model)
 					# передаем в контексте специальный параметр, который обозначает, что 
 					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
 					context["SC_UPDATE"] = True
-					base_obj_pool.write(cr, uid, base_obj.id, new_val, context)
-				elif base_obj_model == "calendar.event":
-					date_start_field = correct_line.date_start_field_id.name
-					date_stop_field = correct_line.date_stop_field_id.name
-					# вычисляем дату окончания действия объекта
-					# алгоритм следующий - нужно поменять только дату у даты окончания, не меняя время
-					# приводим datetime к строке, т.к. в базе она хранится именно в таком виде
-					# все неправильно, т.к. не учитывает продолжительность события
-					new_time_stop = datetime.strptime(res_obj.date_start, "%Y-%m-%d %H:%M:%S") + timedelta(hours=res_obj.duration)
+					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context)
+				# вариант #2
+				elif sc_configurator_line_obj.date_stop_field_id.name and sc_configurator_line_obj.duration_field_id.name is False:
+					date_start_field = sc_configurator_line_obj.date_start_field_id.name
+					date_stop_field  = sc_configurator_line_obj.date_stop_field_id.name
+					# используем поле duration, что бы вычислить новую дату окончания
+					new_time_stop = datetime.strptime(sc_obj.date_start, "%Y-%m-%d %H:%M:%S") + timedelta(hours=sc_obj.duration)
 					new_time_stop_string = new_time_stop.strftime("%Y-%m-%d %H:%M:%S")
 					# формируем список значений, которые нужно обновить в объекте
-					new_val = {date_start_field : res_obj.date_start, date_stop_field : new_time_stop_string}
-					# нужно изменить исходный объект calendar.event
-					base_obj_pool = self.pool.get(base_obj_model)
-					context["SC_UPDATE"] = True
-					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context)
-				elif base_obj_model == 'crm.phonecall':
-					# у звонка нам необходимо изменить следующий параметры:
-					# дата звонка + его длительность
-					# понадобится нам только дата его начала, т.к. поле длительность просто не меняется
-					date_start_field = correct_line.date_start_field_id.name
-					duration_field = correct_line.duration_field_id.name
-					new_val = {date_start_field : res_obj.date_start, duration_field : res_obj.duration}
+					new_val = {date_start_field : sc_obj.date_start, date_stop_field : new_time_stop_string}
 					# получаем пул нужной нам модели
 					base_obj_pool = self.pool.get(base_obj_model)
 					# передаем в контексте специальный параметр, который обозначает, что 
 					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
 					context["SC_UPDATE"] = True
 					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context)
-				elif base_obj_model == 'crm.claim':
-					# у объекта обращение нам необходимо изменить только дату следующего действия
-					date_start_field = correct_line.date_start_field_id.name
-					new_val = {date_start_field : res_obj.date_start}
+				# вариант #3
+				elif sc_configurator_line_obj.date_stop_field_id.name is False and sc_configurator_line_obj.duration_field_id.name:
+					date_start_field = sc_configurator_line_obj.date_start_field_id.name
+					duration_field = sc_configurator_line_obj.duration_field_id.name
+					new_val = {date_start_field : sc_obj.date_start, duration_field : sc_obj.duration}
 					# получаем пул нужной нам модели
 					base_obj_pool = self.pool.get(base_obj_model)
 					# передаем в контексте специальный параметр, который обозначает, что 
 					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
 					context["SC_UPDATE"] = True
-					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context) 
-
-
+					base_obj_pool.write(cr, uid, [base_obj.id], new_val, context)
 		return vals
+
 # **********************************************
 # блок для обновления данных в super_calendar
 # **********************************************
@@ -552,149 +520,81 @@ def _unlink_SC_on_unlink(self, cr, uid, model_id, ids, context):
 			for sc in sc_objects:
 				sc_pool.unlink(cr, uid, sc.id, context)
 
-# объект 	event	встреча
-class calendar_event(osv.Model):
-	_inherit = 'calendar.event'
 
-	# перекрываем метод на запись
-	def write(self, cr, uid, ids, vals, context=None):
-		# если нужное нам значение есть в списке данных для обновления, то нужно обновить SC
-		# что бы получить нужный нам объект SU, нам потребуется id исходного объекта и его модель,
-		# т.к. id исходных объектов могут повторяться
-		obj_id = ids[0]
-		# но какая это модель, я уж точно знаю..
-		model_id = "calendar.event"
+# переопределяем базовые методы
+def my_write(self, cr, uid, ids, vals, context=None):
+	res = BaseModel.write(self, cr, uid, ids, vals, context=context)
+	print "********* DEBUG **************"
+	print "my_write"
+	# теперь поехали 
+	# если пришедшая к нам модель содержится в super.calendar.configurator.line.name.model, то это наш клиент
+	model_id =  self.__class__.__name__
+	sc_configurator_line_obj = False
 
-		res = super(calendar_event, self).write(cr, uid, obj_id, vals, context=context) 
-		_regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context)
-		return vals
+	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
+	line_ids = configurator_line_pool.search(cr, uid, [])
+	line_obj = configurator_line_pool.browse(cr, uid, line_ids)
+	# теперь узнаем, какой именно объект строки конфигурации нам нужен
+	# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
+	for line in line_obj:
+		if (line.name.model == model_id):
+			sc_configurator_line_obj = line
 
-	def create(self, cr, uid, vals, context=None):
-		# записываем изменения для самого объекта
-		res = super(calendar_event, self).create(cr, uid, vals, context=context)
-		obj_id = res
-		model_id = "calendar.event"
-		# cr, uid, model_id, obj_id
-		# теперь пошло создание объекта SC
-		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
-		return res
+	if sc_configurator_line_obj:
+		for id in ids:
+			_regenerate_SC_on_write(self, cr, uid, vals, model_id, id, context)
+	print vals
 
-	def unlink(self, cr, uid, ids, context=None):
-		# при удалении объекта необходимо удалить объект :)
-		# и удалить связанную с ним запись SC
-		model_id = "calendar.event"
-		# self, cr, uid, model_id, ids
+	print "********* DEBUG **************"
+	return res
+
+
+def my_create(self, cr, uid, vals, context=None):
+	res = BaseModel.create(self, cr, uid, vals, context=context)
+	print "********* DEBUG **************"
+	print "my_create"
+	model_id = self.__class__.__name__
+	print model_id
+	sc_configurator_line_obj = False
+
+	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
+	line_ids = configurator_line_pool.search(cr, uid, [])
+	line_obj = configurator_line_pool.browse(cr, uid, line_ids)
+	# теперь узнаем, какой именно объект строки конфигурации нам нужен
+	# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
+	for line in line_obj:
+		if (line.name.model == model_id):
+			sc_configurator_line_obj = line
+
+	if sc_configurator_line_obj:
+		_generate_SC_on_create(self, cr, uid, model_id, res)
+	print vals
+	print "********* DEBUG **************"
+	return res
+
+def my_unlink(self, cr, uid, ids, context=None):
+	print "********* DEBUG **************"
+	print "my_unlink"
+	model_id = self.__class__.__name__
+	print model_id
+	sc_configurator_line_obj = False
+
+	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
+	line_ids = configurator_line_pool.search(cr, uid, [])
+	line_obj = configurator_line_pool.browse(cr, uid, line_ids)
+	# теперь узнаем, какой именно объект строки конфигурации нам нужен
+	# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
+	for line in line_obj:
+		if (line.name.model == model_id):
+			sc_configurator_line_obj = line
+
+	if sc_configurator_line_obj:
 		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
+	print "********* DEBUG **************"
 
-		return super(calendar_event, self).unlink(cr, uid, ids, context=context)
+	res = BaseModel.unlink(self, cr, uid, ids, context=context)
+	return res
 
-# объект 	lead	заявка
-class crm_lead(format_address, osv.osv):
-	_inherit = 'crm.lead'
-
-	# перекрываем метод на запись
-	def write(self, cr, uid, ids, vals, context=None):
-		# если нужное нам значение есть в списке данных для обновления, то нужно обновить SC
-		# что бы получить нужный нам объект SU, нам потребуется id исходного объекта и его модель,
-		# т.к. id исходных объектов могут повторяться
-		obj_id = ids[0]
-		# но какая это модель, я уж точно знаю..
-		model_id = "crm.lead"
-
-
-		res = super(crm_lead, self).write(cr, uid, obj_id, vals, context=context) 
-		_regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context)
-		return vals
-
-	def create(self, cr, uid, vals, context=None):
-		# записываем изменения для самого объекта
-		res = super(crm_lead, self).create(cr, uid, vals, context=context)
-		obj_id = res
-		model_id = "crm.lead"
-		# cr, uid, model_id, obj_id
-		# теперь пошло создание объекта SC
-		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
-		return res
-
-	def unlink(self, cr, uid, ids, context=None):
-		# при удалении объекта необходимо удалить объект :)
-		# и удалить связанную с ним запись SC
-		model_id = "crm.lead"
-		# self, cr, uid, model_id, ids
-		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
-
-		return super(crm_lead, self).unlink(cr, uid, ids, context=context)
-
-
-
-# объект 	crm.phonecall 	звонок
-class crm_phonecall(osv.osv):
-	_inherit = 'crm.phonecall'
-
-	# перекрываем метод на запись
-	def write(self, cr, uid, ids, vals, context=None):
-		# если нужное нам значение есть в списке данных для обновления, то нужно обновить SC
-		# что бы получить нужный нам объект SU, нам потребуется id исходного объекта и его модель,
-		# т.к. id исходных объектов могут повторяться
-		obj_id = ids[0]
-		# но какая это модель, я уж точно знаю..
-		model_id = "crm.phonecall"
-
-		res = super(crm_phonecall, self).write(cr, uid, obj_id, vals, context=context) 
-		_regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context)
-		return vals
-
-	def create(self, cr, uid, vals, context=None):
-		# записываем изменения для самого объекта
-		res = super(crm_phonecall, self).create(cr, uid, vals, context=context)
-		obj_id = res
-		model_id = "crm.phonecall"
-		# cr, uid, model_id, obj_id
-		# теперь пошло создание объекта SC
-		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
-		return res
-
-	def unlink(self, cr, uid, ids, context=None):
-		# при удалении объекта необходимо удалить объект :)
-		# и удалить связанную с ним запись SC
-		model_id = "crm.phonecall"
-		# self, cr, uid, model_id, ids
-		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
-
-		return super(crm_phonecall, self).unlink(cr, uid, ids, context=context)
-
-# объект 	crm.claim		обращение
-class crm_claim(osv.osv):
-	_inherit = 'crm.claim'
-
-	# перекрываем метод на запись
-	def write(self, cr, uid, ids, vals, context=None):
-		# если нужное нам значение есть в списке данных для обновления, то нужно обновить SC
-		# что бы получить нужный нам объект SU, нам потребуется id исходного объекта и его модель,
-		# т.к. id исходных объектов могут повторяться
-		obj_id = ids[0]
-		# но какая это модель, я уж точно знаю..
-		model_id = "crm.claim"
-
-		res = super(crm_claim, self).write(cr, uid, obj_id, vals, context=context) 
-		_regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context)
-		return vals
-
-	def create(self, cr, uid, vals, context=None):
-		# записываем изменения для самого объекта
-		res = super(crm_claim, self).create(cr, uid, vals, context=context)
-		obj_id = res
-		model_id = "crm.claim"
-		# cr, uid, model_id, obj_id
-		# теперь пошло создание объекта SC
-		_generate_SC_on_create(self, cr, uid, model_id, obj_id)
-		return res
-
-	def unlink(self, cr, uid, ids, context=None):
-		# при удалении объекта необходимо удалить объект :)
-		# и удалить связанную с ним запись SC
-		model_id = "crm.claim"
-		# self, cr, uid, model_id, ids
-		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
-
-		return super(crm_claim, self).unlink(cr, uid, ids, context=context)
+Model.write = my_write
+Model.create = my_create
+Model.unlink = my_unlink
