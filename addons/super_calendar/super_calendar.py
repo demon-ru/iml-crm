@@ -32,7 +32,6 @@ from openerp.tools.safe_eval import safe_eval
 # для переназначаемых моделей
 import inspect
 from openerp.models import BaseModel, Model
-from openerp import api
 
 from openerp.osv import fields,osv
 import string
@@ -78,17 +77,12 @@ class super_calendar_configurator(orm.Model):
 	def generate_calendar_records(self, cr, uid, ids, context=None):
 		configurator_ids = self.search(cr, uid, [])
 		super_calendar_pool = self.pool.get('super.calendar')
-
-		# removing old records
 		super_calendar_ids = super_calendar_pool.search(cr, uid, [],
 														context=context)
-
 		super_calendar_pool.unlink(cr, uid,
 								   super_calendar_ids,
 								   context=context)
-		# пробегаем по всем объектам календаря, сохраненным у данного
 		for configurator in self.browse(cr, uid, configurator_ids, context):
-			# пробегаем по строкам у текущей конфигурации
 			for line in configurator.line_ids:
 				self._generate_record_from_line_with_id(cr, uid,
 														 configurator,
@@ -96,12 +90,9 @@ class super_calendar_configurator(orm.Model):
 														 super_calendar_pool,
 														 False,
 														 context)
-				#super_calendar_pool.create(cr, uid, values, context=context)
 		self._logger.info('Calendar generated')
 		return True
-	# метод, который создает запись в SC
-	# отличие от предидущего метода - он создает запись только для того объекта,
-	# чей ид указан в параметре ids
+
 
 	def _generate_record_from_line_with_id(self, cr, uid, configurator, line, super_calendar_pool, _ids, context):
 		current_pool = self.pool.get(line.name.model)
@@ -169,7 +160,6 @@ class super_calendar_configurator(orm.Model):
 					'res_id': line.name.model+','+str(record['id']),
 					'model_id': line.name.id,
 					}
-				# грязный хак
 				super_calendar_pool.create(cr, uid, super_calendar_values, context=context)
 
 
@@ -316,9 +306,7 @@ class super_calendar(orm.Model):
 			res = super(super_calendar, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
 		return res
 
-		# переделака старого метода - теперь все намного проще и автоматично :)
 	def write(self, cr, uid, ids, vals, context=None):
-		# записываем изменения
 		res = super(super_calendar, self).write(cr, uid, ids, vals, context=context)
 		sc_pool = self.pool.get('super.calendar')
 		sc_obj = sc_pool.browse(cr, uid, ids[0])
@@ -352,9 +340,7 @@ class super_calendar(orm.Model):
 				# вариант #1
 				if sc_configurator_line_obj.date_stop_field_id.name is False and sc_configurator_line_obj.duration_field_id.name is False:
 					date_start_field = sc_configurator_line_obj.date_start_field_id.name
-					# заполняем только дату начала
 					new_val = {date_start_field : sc_obj.date_start}
-					# получаем пул нужной нам модели
 					base_obj_pool = self.pool.get(base_obj_model)
 					# передаем в контексте специальный параметр, который обозначает, что 
 					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
@@ -364,12 +350,9 @@ class super_calendar(orm.Model):
 				elif sc_configurator_line_obj.date_stop_field_id.name and sc_configurator_line_obj.duration_field_id.name is False:
 					date_start_field = sc_configurator_line_obj.date_start_field_id.name
 					date_stop_field  = sc_configurator_line_obj.date_stop_field_id.name
-					# используем поле duration, что бы вычислить новую дату окончания
 					new_time_stop = datetime.strptime(sc_obj.date_start, "%Y-%m-%d %H:%M:%S") + timedelta(hours=sc_obj.duration)
 					new_time_stop_string = new_time_stop.strftime("%Y-%m-%d %H:%M:%S")
-					# формируем список значений, которые нужно обновить в объекте
 					new_val = {date_start_field : sc_obj.date_start, date_stop_field : new_time_stop_string}
-					# получаем пул нужной нам модели
 					base_obj_pool = self.pool.get(base_obj_model)
 					# передаем в контексте специальный параметр, который обозначает, что 
 					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
@@ -380,7 +363,6 @@ class super_calendar(orm.Model):
 					date_start_field = sc_configurator_line_obj.date_start_field_id.name
 					duration_field = sc_configurator_line_obj.duration_field_id.name
 					new_val = {date_start_field : sc_obj.date_start, duration_field : sc_obj.duration}
-					# получаем пул нужной нам модели
 					base_obj_pool = self.pool.get(base_obj_model)
 					# передаем в контексте специальный параметр, который обозначает, что 
 					# метод сохранения был вызван из метода SuperCalendar и сохранения SC не требуется
@@ -394,7 +376,6 @@ class super_calendar(orm.Model):
 
 
 def _regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context):
-	# model_id, obj_id
 	obj = self.pool.get('super.calendar')
 	ids = obj.search(cr, uid, [('res_id', '=', str(model_id) + "," + str(obj_id))])
 	res_obj = obj.browse(cr, uid, ids)
@@ -402,7 +383,6 @@ def _regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context):
 	if (not 'SC_UPDATE' in context):
 		configurator_pool = self.pool.get('super.calendar.configurator')
 		for configurator in configurator_pool.browse(cr, uid, configurator_id.id):
-			# пробегаем по строкам у текущей конфигурации
 			for line in configurator.line_ids:
 				# если модель в строке совпадает, то можем продолжить
 				if(line.name.model == model_id):
@@ -417,7 +397,6 @@ def _regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context):
 						super_calendar_pool.unlink(cr, uid,
 												   ids,
 												   context=context)
-						# сгенерируем новую запись
 						configurator._generate_record_from_line_with_id(
 																 configurator,
 																 line,
@@ -447,7 +426,6 @@ def _unlink_SC_on_unlink(self, cr, uid, model_id, ids, context):
 				sc_pool.unlink(cr, uid, sc.id, context)
 
 
-# переопределяем базовые методы
 def my_write(self, cr, uid, ids, vals, context=None):
 	res = BaseModel.write(self, cr, uid, ids, vals, context=context)
 	# если пришедшая к нам модель содержится в super.calendar.configurator.line.name.model, то это наш клиент
@@ -477,8 +455,6 @@ def my_create(self, cr, uid, vals, context=None):
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
 	line_ids = configurator_line_pool.search(cr, uid, [])
 	line_obj = configurator_line_pool.browse(cr, uid, line_ids)
-	# теперь узнаем, какой именно объект строки конфигурации нам нужен
-	# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
 	for line in line_obj:
 		if (line.name.model == model_id):
 			sc_configurator_line_obj = line
@@ -494,15 +470,13 @@ def my_unlink(self, cr, uid, ids, context=None):
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
 	line_ids = configurator_line_pool.search(cr, uid, [])
 	line_obj = configurator_line_pool.browse(cr, uid, line_ids)
-	# теперь узнаем, какой именно объект строки конфигурации нам нужен
-	# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
 	for line in line_obj:
 		if (line.name.model == model_id):
 			sc_configurator_line_obj = line
 
 	if sc_configurator_line_obj:
 		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
-		
+
 	res = BaseModel.unlink(self, cr, uid, ids, context=context)
 	return res
 
