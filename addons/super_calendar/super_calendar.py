@@ -30,6 +30,7 @@ from openerp.tools.safe_eval import safe_eval
 
 
 # для переназначаемых моделей
+from openerp import api
 import inspect
 from openerp.models import BaseModel, Model
 
@@ -425,9 +426,10 @@ def _unlink_SC_on_unlink(self, cr, uid, model_id, ids, context):
 			for sc in sc_objects:
 				sc_pool.unlink(cr, uid, sc.id, context)
 
-
-def my_write(self, cr, uid, ids, vals, context=None):
-	res = BaseModel.write(self, cr, uid, ids, vals, context=context)
+@api.multi
+def my_write(self, vals):
+	res = BaseModel.write(self, vals)
+	cr, uid, context = self.env.args
 	# если пришедшая к нам модель содержится в super.calendar.configurator.line.name.model, то это наш клиент
 	model_id =  self.__class__.__name__
 	sc_configurator_line_obj = False
@@ -441,14 +443,19 @@ def my_write(self, cr, uid, ids, vals, context=None):
 		if (line.name.model == model_id):
 			sc_configurator_line_obj = line
 
-	if sc_configurator_line_obj:
-		for id in ids:
-			_regenerate_SC_on_write(self, cr, uid, vals, model_id, id, context)
+	if '_ids' in self.__dict__:
+
+		if sc_configurator_line_obj:
+			for id in self.__dict__['_ids']:
+				_regenerate_SC_on_write(self, cr, uid, vals, model_id, id, context)
 	return res
 
-
-def my_create(self, cr, uid, vals, context=None):
-	res = BaseModel.create(self, cr, uid, vals, context=context)
+@api.model
+@api.returns('self', lambda value: value.id)
+def my_create(self, vals):
+	cr, uid, context = self.env.args
+	res = BaseModel.create(self, vals)
+	cr, uid, context = self.env.args
 	model_id = self.__class__.__name__
 	sc_configurator_line_obj = False
 
@@ -460,7 +467,7 @@ def my_create(self, cr, uid, vals, context=None):
 			sc_configurator_line_obj = line
 
 	if sc_configurator_line_obj:
-		_generate_SC_on_create(self, cr, uid, model_id, res)
+		_generate_SC_on_create(self, cr, uid, model_id, res.id)
 	return res
 
 def my_unlink(self, cr, uid, ids, context=None):

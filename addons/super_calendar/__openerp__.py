@@ -75,7 +75,7 @@ add it to a dashboard.
     'author': 'Agile Business Group',
     'website': 'http://www.agilebg.com',
     'license': 'AGPL-3',
-    'depends': ['base', 'calendar', 'crm'],
+    'depends': ['base'],
     "data": [
         'super_calendar_view.xml',
         'cron_data.xml',
