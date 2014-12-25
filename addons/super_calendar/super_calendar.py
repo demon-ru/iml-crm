@@ -30,6 +30,7 @@ from openerp.tools.safe_eval import safe_eval
 
 
 # для переназначаемых моделей
+from openerp import SUPERUSER_ID
 from openerp import api
 import inspect
 from openerp.models import BaseModel, Model
@@ -95,7 +96,7 @@ class super_calendar_configurator(orm.Model):
 		return True
 
 
-	def _generate_record_from_line_with_id(self, cr, uid, configurator, line, super_calendar_pool, _ids, context):
+	def _generate_record_from_line_with_id(self, cr, uid, configurator, line, super_calendar_pool, _ids, context=None):
 		current_pool = self.pool.get(line.name.model)
 		if _ids:
 			current_record_ids = _ids
@@ -162,6 +163,7 @@ class super_calendar_configurator(orm.Model):
 					'model_id': line.name.id,
 					}
 				super_calendar_pool.create(cr, uid, super_calendar_values, context=context)
+				return super_calendar_values
 
 
 class super_calendar_configurator_line(orm.Model):
@@ -202,8 +204,7 @@ class super_calendar_configurator_line(orm.Model):
 			),
 		'date_start_field_id': fields.many2one(
 			'ir.model.fields', 'Start date field',
-			domain="['&','|',('ttype', '=', 'datetime'),"
-				   "('ttype', '=', 'date'),"
+			domain="['&','|',('ttype', '=', 'datetime'),""('ttype', '=', 'date'),"
 				   "('model_id', '=', name)]",
 			required=True),
 		'date_stop_field_id': fields.many2one(
@@ -308,7 +309,7 @@ class super_calendar(orm.Model):
 		return res
 
 	def write(self, cr, uid, ids, vals, context=None):
-		res = super(super_calendar, self).write(cr, uid, ids, vals, context=context)
+		res = super(super_calendar, self).write(cr, SUPERUSER_ID, ids, vals, context=context)
 		sc_pool = self.pool.get('super.calendar')
 		sc_obj = sc_pool.browse(cr, uid, ids[0])
 		if ("date_start" in vals or "duration" in vals):
@@ -350,7 +351,7 @@ class super_calendar(orm.Model):
 				# вариант #2
 				elif sc_configurator_line_obj.date_stop_field_id.name and sc_configurator_line_obj.duration_field_id.name is False:
 					date_start_field = sc_configurator_line_obj.date_start_field_id.name
-					date_stop_field  = sc_configurator_line_obj.date_stop_field_id.name
+					date_stop_field  = sc_configurator_line_obj.date_stop_field_id.name_model
 					new_time_stop = datetime.strptime(sc_obj.date_start, "%Y-%m-%d %H:%M:%S") + timedelta(hours=sc_obj.duration)
 					new_time_stop_string = new_time_stop.strftime("%Y-%m-%d %H:%M:%S")
 					new_val = {date_start_field : sc_obj.date_start, date_stop_field : new_time_stop_string}
@@ -402,7 +403,8 @@ def _regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context):
 																 configurator,
 																 line,
 																 super_calendar_pool,
-																 [obj_id])
+																 [obj_id],
+																 context)
 
 def _generate_SC_on_create(self, cr, uid, model_id, obj_id):
 		scc_line_pool = self.pool.get("super.calendar.configurator.line")
@@ -435,8 +437,8 @@ def my_write(self, vals):
 	sc_configurator_line_obj = False
 
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
-	line_ids = configurator_line_pool.search(cr, uid, [])
-	line_obj = configurator_line_pool.browse(cr, uid, line_ids)
+	line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [])
+	line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
 	# теперь узнаем, какой именно объект строки конфигурации нам нужен
 	# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
 	for line in line_obj:
@@ -447,7 +449,7 @@ def my_write(self, vals):
 
 		if sc_configurator_line_obj:
 			for id in self.__dict__['_ids']:
-				_regenerate_SC_on_write(self, cr, uid, vals, model_id, id, context)
+				_regenerate_SC_on_write(self, cr, SUPERUSER_ID, vals, model_id, id, context)
 	return res
 
 @api.model
@@ -460,14 +462,13 @@ def my_create(self, vals):
 	sc_configurator_line_obj = False
 
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
-	line_ids = configurator_line_pool.search(cr, uid, [])
-	line_obj = configurator_line_pool.browse(cr, uid, line_ids)
+	line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [('name.model', '=', model_id)])
+	line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
 	for line in line_obj:
 		if (line.name.model == model_id):
 			sc_configurator_line_obj = line
-
 	if sc_configurator_line_obj:
-		_generate_SC_on_create(self, cr, uid, model_id, res.id)
+		_generate_SC_on_create(self, cr, SUPERUSER_ID, model_id, res.id)
 	return res
 
 def my_unlink(self, cr, uid, ids, context=None):
@@ -475,16 +476,16 @@ def my_unlink(self, cr, uid, ids, context=None):
 	sc_configurator_line_obj = False
 
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
-	line_ids = configurator_line_pool.search(cr, uid, [])
-	line_obj = configurator_line_pool.browse(cr, uid, line_ids)
+	line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [])
+	line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
 	for line in line_obj:
 		if (line.name.model == model_id):
 			sc_configurator_line_obj = line
 
 	if sc_configurator_line_obj:
-		_unlink_SC_on_unlink(self, cr, uid, model_id, ids, context)
+		_unlink_SC_on_unlink(self, cr, SUPERUSER_ID, model_id, ids, context)
 
-	res = BaseModel.unlink(self, cr, uid, ids, context=context)
+	res = BaseModel.unlink(self, cr, SUPERUSER_ID, ids, context=context)
 	return res
 
 Model.write = my_write
