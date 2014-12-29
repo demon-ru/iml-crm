@@ -437,19 +437,20 @@ def my_write(self, vals):
 	sc_configurator_line_obj = False
 
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
-	line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [])
-	line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
-	# теперь узнаем, какой именно объект строки конфигурации нам нужен
-	# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
-	for line in line_obj:
-		if (line.name.model == model_id):
-			sc_configurator_line_obj = line
+	if configurator_line_pool:
+		line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [])
+		line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
+		# теперь узнаем, какой именно объект строки конфигурации нам нужен
+		# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
+		for line in line_obj:
+			if (line.name.model == model_id):
+				sc_configurator_line_obj = line
 
-	if '_ids' in self.__dict__:
+		if '_ids' in self.__dict__:
 
-		if sc_configurator_line_obj:
-			for id in self.__dict__['_ids']:
-				_regenerate_SC_on_write(self, cr, SUPERUSER_ID, vals, model_id, id, context)
+			if sc_configurator_line_obj:
+				for id in self.__dict__['_ids']:
+					_regenerate_SC_on_write(self, cr, SUPERUSER_ID, vals, model_id, id, context)
 	return res
 
 @api.model
@@ -462,13 +463,14 @@ def my_create(self, vals):
 	sc_configurator_line_obj = False
 
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
-	line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [('name.model', '=', model_id)])
-	line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
-	for line in line_obj:
-		if (line.name.model == model_id):
-			sc_configurator_line_obj = line
-	if sc_configurator_line_obj:
-		_generate_SC_on_create(self, cr, SUPERUSER_ID, model_id, res.id)
+	if configurator_line_pool:
+		line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [('name.model', '=', model_id)])
+		line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
+		for line in line_obj:
+			if (line.name.model == model_id):
+				sc_configurator_line_obj = line
+		if sc_configurator_line_obj:
+			_generate_SC_on_create(self, cr, SUPERUSER_ID, model_id, res.id)
 	return res
 
 def my_unlink(self, cr, uid, ids, context=None):
@@ -476,14 +478,15 @@ def my_unlink(self, cr, uid, ids, context=None):
 	sc_configurator_line_obj = False
 
 	configurator_line_pool = self.pool.get('super.calendar.configurator.line')
-	line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [])
-	line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
-	for line in line_obj:
-		if (line.name.model == model_id):
-			sc_configurator_line_obj = line
+	if configurator_line_pool:
+		line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [])
+		line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
+		for line in line_obj:
+			if (line.name.model == model_id):
+				sc_configurator_line_obj = line
 
-	if sc_configurator_line_obj:
-		_unlink_SC_on_unlink(self, cr, SUPERUSER_ID, model_id, ids, context)
+		if sc_configurator_line_obj:
+			_unlink_SC_on_unlink(self, cr, SUPERUSER_ID, model_id, ids, context)
 
 	res = BaseModel.unlink(self, cr, SUPERUSER_ID, ids, context=context)
 	return res
