@@ -4,6 +4,8 @@
 #    Copyright (C) 2012 Agile Business Group sagl (<http://www.agilebg.com>)
 #    Copyright (C) 2012 Domsense srl (<http://www.domsense.com>)
 #
+#    Modified by 
+#
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
 #    by the Free Software Foundation, either version 3 of the License, or
@@ -95,6 +97,16 @@ class super_calendar_configurator(orm.Model):
 		self._logger.info('Calendar generated')
 		return True
 
+	def on_change_model(self, cr, uid, ids, context=None):
+		values = {}
+		values = {
+			'view_id': "fuck",
+		}
+		print "DEBUG!"
+		print "on_change_model"
+
+		return {'value': values}
+
 
 	def _generate_record_from_line_with_id(self, cr, uid, configurator, line, super_calendar_pool, _ids, context=None):
 		current_pool = self.pool.get(line.name.model)
@@ -171,16 +183,31 @@ class super_calendar_configurator_line(orm.Model):
 
 	def _get_model_name(self, cr, uid, ids, field_name, arg, context=None):
 		res = dict(map(lambda x: (x,{"model_name": ''}), ids))
-		# the user may not have access rights for opportunities or meetings
+		# the user may not have access rights for some objects
 		try:
 			for config in self.browse(cr, uid, ids, context):
 				res[config.id] = {
 					"model_name": config.name.model
 				}
+			print "_get_model_name debug"
+			print res
 		except:
 			pass
 		return res
 
+	def on_change_model(self, cr, uid, ids, model, context=None):
+		# model - ид модели, нам же нужно название
+		values = {}
+		if model:
+			ir_model_pool = self.pool.get("ir.model")
+			model_id = model
+			line_obj = ir_model_pool.browse(cr, uid, [model_id])
+			for line in line_obj:
+				model_name = line.model
+			values = {
+				'domain': {'view_id' : [("type", '=', 'form'), ('model', '=', model_name)]},
+			}
+		return values
 
 	_columns = {
 		'name': fields.many2one('ir.model', 'Model', required=True),
@@ -189,7 +216,7 @@ class super_calendar_configurator_line(orm.Model):
 		'configurator_id': fields.many2one('super.calendar.configurator',
 										   'Configurator'),
 		'view_id': fields.many2one('ir.ui.view', "View", 
-			domain="[('type', '=', 'form'), ('model', '=', model_name)]"),
+			domain="[('type', '=', 'form')]"),
 		'description_type': fields.selection([
 			('field', 'Field'),
 			('code', 'Code'),
@@ -244,6 +271,10 @@ class super_calendar(orm.Model):
 # **********************************************
 
 	def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
+		print "----------------------------------"
+		print "OKEY. DEBUG ARE HERE"
+		print "super_calendar - > READ"
+		print "----------------------------------"
 		if context is None:
 			context = {}
 		fields2 = fields and fields[:] or None
@@ -287,6 +318,10 @@ class super_calendar(orm.Model):
 		return result
 
 	def fields_view_get(self,cr,uid,view_id=None,view_type='form',context=None,toolbar=False,submenu=False):
+		print "----------------------------------"
+		print "OKEY. DEBUG ARE HERE"
+		print "super_calendar - > fields_view_get"
+		print "----------------------------------"
 		if (view_type == 'form'):
 			id_obj = context.get('id_edit_obj_for_field')
 			id_real = calendar_id2real_id(id_obj)
@@ -322,8 +357,7 @@ class super_calendar(orm.Model):
 			configurator_line_pool = self.pool.get('super.calendar.configurator.line')
 			line_ids = configurator_line_pool.search(cr, uid, [('configurator_id', '=', configurator_id)])
 			line_obj = configurator_line_pool.browse(cr, uid, line_ids)
-			# теперь узнаем, какой именно объект строки конфигурации нам нужен
-			# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
+
 			for line in line_obj:
 				if (line.name.model == base_obj_model):
 					sc_configurator_line_obj = line
@@ -351,7 +385,7 @@ class super_calendar(orm.Model):
 				# вариант #2
 				elif sc_configurator_line_obj.date_stop_field_id.name and sc_configurator_line_obj.duration_field_id.name is False:
 					date_start_field = sc_configurator_line_obj.date_start_field_id.name
-					date_stop_field  = sc_configurator_line_obj.date_stop_field_id.name_model
+					date_stop_field  = sc_configurator_line_obj.date_stop_field_id.name
 					new_time_stop = datetime.strptime(sc_obj.date_start, "%Y-%m-%d %H:%M:%S") + timedelta(hours=sc_obj.duration)
 					new_time_stop_string = new_time_stop.strftime("%Y-%m-%d %H:%M:%S")
 					new_val = {date_start_field : sc_obj.date_start, date_stop_field : new_time_stop_string}
@@ -403,8 +437,7 @@ def _regenerate_SC_on_write(self, cr, uid, vals, model_id, obj_id, context):
 																 configurator,
 																 line,
 																 super_calendar_pool,
-																 [obj_id],
-																 context)
+																 [obj_id])
 
 def _generate_SC_on_create(self, cr, uid, model_id, obj_id):
 		scc_line_pool = self.pool.get("super.calendar.configurator.line")
@@ -443,11 +476,11 @@ def my_write(self, vals):
 		# теперь узнаем, какой именно объект строки конфигурации нам нужен
 		# почему то простое условие вроде [('name.model', '=', base_obj_model)] не сработало :(
 		for line in line_obj:
-			if (line.name.model == model_id):
-				sc_configurator_line_obj = line
+			if hasattr(line, "name"):
+				if (line.name.model == model_id):
+					sc_configurator_line_obj = line
 
 		if '_ids' in self.__dict__:
-
 			if sc_configurator_line_obj:
 				for id in self.__dict__['_ids']:
 					_regenerate_SC_on_write(self, cr, SUPERUSER_ID, vals, model_id, id, context)
@@ -482,15 +515,67 @@ def my_unlink(self, cr, uid, ids, context=None):
 		line_ids = configurator_line_pool.search(cr, SUPERUSER_ID, [])
 		line_obj = configurator_line_pool.browse(cr, SUPERUSER_ID, line_ids)
 		for line in line_obj:
-			if (line.name.model == model_id):
-				sc_configurator_line_obj = line
+			print "------------------------- debug ---------------------------"
+			print "my_unlink"
+			print line
+			print "context is :"
+			print context
+			if hasattr(line, "name"):
+				print "line.name exists!"
+				if (line.name.model == model_id):
+					sc_configurator_line_obj = line
 
 		if sc_configurator_line_obj:
 			_unlink_SC_on_unlink(self, cr, SUPERUSER_ID, model_id, ids, context)
 
 	res = BaseModel.unlink(self, cr, SUPERUSER_ID, ids, context=context)
-	return res
+	print "result of unlink operation is :"
+	print res
+	# if ("is_form" in context ):
+	# 	print "is form is here!"
+	# 	if context["is_form"]:
+	# 		print "is form is True!"
+	# 		print context["is_form"]
+
+	# model_data = self.pool.get('ir.model.data')
+	# # Select the view
+	# calendar_view = model_data.get_object_reference(cr, uid, 'super_calendar', 'super_calendar')
+	# #form_view = model_data.get_object_reference(cr, uid, 'crm', 'crm_case_phone_form_view')
+	# search_view = model_data.get_object_reference(cr, uid, 'super_calendar', 'super_calendar_search')
+	# value = {
+	# 		'name': _('Phone Call'),
+	# 		'view_type': 'form',
+	# 		'view_mode': 'tree,form',
+	# 		'res_model': 'crm.phonecall',
+	# 		'res_id' : 0,
+	# 		'views': [(calendar_view and calendar_view[1] or False, 'calendar')],
+	# 		'type': 'ir.actions.act_window',
+	# 		'search_view_id': search_view and search_view[1] or False,
+	# }
+	partn_ids = self.pool.get("res.partner").search(cr, uid, [])
+	partn = self.browse(cr, uid, partn_ids[0], context=context)
+	model_data = self.pool.get("ir.model.data")
+	# Get res_partner views
+	dummy, form_view = model_data.get_object_reference(cr, uid, 'base', 'view_partner_form')
+
+	return {
+		'return':True,
+		'view_mode': 'form',
+		'view_id': "base.view_partner_form",
+		'views': [(form_view or False,'form')],
+		'view_type': 'form',
+		'res_id' : partn.id,
+		'res_model': 'res.partner',
+		'target': 'current',
+		'type': 'ir.actions.act_window',
+	}
+	if res:
+		print "just before redirect...."
+		return value
+	else:
+		return res
 
 Model.write = my_write
 Model.create = my_create
 Model.unlink = my_unlink
+

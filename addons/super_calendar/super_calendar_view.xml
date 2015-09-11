@@ -1,6 +1,40 @@
 <?xml version="1.0"?>
 <openerp>
     <data>
+
+
+        <!-- test form configurator.line -->
+        <record model="ir.ui.view" id="super_calendar_configurator_line_form">
+            <field name="name">super_calendar_configurator_line_form</field>
+            <field name="model">super.calendar.configurator.line</field>
+            <field name="arch" type="xml">
+                <form string="Configurator line">
+                    <group>
+                        <group>
+                            <field name="name" on_change="on_change_model(name)"/>
+                            <field name="description"/>
+                            <field name="domain"/>
+                            <field name="date_start_field_id"/>
+                            <field name="duration_field_id"/>
+                            <field name="date_stop_field_id" attrs="{'readonly':[('duration_field_id','!=',False)]}"/>
+                        </group>
+                        <group>
+                            <field name="user_field_id"/>
+                            <field name="configurator_id"/>
+                            <field name="view_id" />
+                            <separator string="Description" colspan="4" />
+                            <field name="description_type"/>
+                            <newline/>
+                            <field name="description_field_id" attrs="{'required':[('description_type','!=','code')], 'invisible':[('description_type','==','code')]}"/>
+                            <group colspan="4" col="1" attrs="{'invisible':[('description_type','!=','code')]}">
+                                <label  string="Use '${o}' to refer to the involved object. E.g.: '${o.project_id.name}'" />
+                                <field name="description_code" nolabel="1" attrs="{'required':[('description_type','==','code')]}"/>
+                            </group>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
         
         <!-- configurator -->
         
@@ -21,31 +55,14 @@
                 <form string="Configurator">
                     <field name="name" select="1" colspan="2"/>
                     <newline/>
-                    <group >
+                    <tree >
                         <field name="line_ids" nolabel="1" colspan="4">
                             <tree string="Lines">
                                 <field name="name"/>
                                 <field name="domain"/>
                             </tree>
-                            <group string="Line">
-                                <field name="name"/>
-                                <field name="description"/>
-                                <field name="domain"/>
-                                <field name="date_start_field_id"/>
-                                <field name="duration_field_id"/>
-                                <field name="date_stop_field_id" attrs="{'readonly':[('duration_field_id','!=',False)]}"/>
-                                <field name="user_field_id"/>
-                                <separator string="Description" colspan="4" />
-                                <field name="description_type"/>
-                                <newline/>
-                                <field name="description_field_id" attrs="{'required':[('description_type','!=','code')], 'invisible':[('description_type','==','code')]}"/>
-                                <group colspan="4" col="1" attrs="{'invisible':[('description_type','!=','code')]}">
-                                    <label  string="Use '${o}' to refer to the involved object. E.g.: '${o.project_id.name}'" />
-                                    <field name="description_code" nolabel="1" attrs="{'required':[('description_type','==','code')]}"/>
-                                </group>
-                            </group>>
                         </field>
-                    </group>
+                    </tree>
                     <newline/>
                     <button name="generate_calendar_records" string="Generate Calendar" type="object" icon="gtk-go-forward" colspan="2"/>
                 </form>
