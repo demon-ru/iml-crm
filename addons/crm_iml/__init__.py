@@ -19,7 +19,6 @@
 #
 ##############################################################################
 import res_config
-import res_partner
 import crm_clientcategory
 import crm_lead
 import crm_iml_opportunities_type
@@ -36,3 +35,4 @@ import sales_team
 import wizard
 import crm_phonecall
 import calendar_event
+import res_partner
